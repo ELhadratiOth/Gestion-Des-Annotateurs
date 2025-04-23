@@ -1,4 +1,4 @@
-package com.gestiondesannotateurs.gestiondesannotateurs;
+package com.gestiondesannotateurs;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
