@@ -1,37 +1,25 @@
 package com.gestiondesannotateurs.entities;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
-@Table(name = "text_couples")
+@Table(name = "users")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "user_type")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class TextCouple {
-
+@AllArgsConstructor
+public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column()
-    private String text1;
-    @Column()
-    private String text2;
-
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id" , nullable = false)
-    private List<Task> tasks;
-
-
-
-
+    private String firstName;
+    private String lastName;
+    private String login;
+    private String password="1234";
 }

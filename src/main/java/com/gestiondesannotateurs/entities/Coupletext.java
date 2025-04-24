@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,16 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "labels")
+@Table(name = "couple_of_texts")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Label {
+public class Coupletext {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    @OneToMany(mappedBy = "label", fetch = FetchType.LAZY)
-    private List<Dataset> datasets = new ArrayList<>();
+    private String textA;
+    private String textB;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
+    private TaskToDo task;
+    @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
+    private List<AnnotationClass> annotations = new ArrayList<>();
 }

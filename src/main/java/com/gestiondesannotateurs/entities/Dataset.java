@@ -6,38 +6,33 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "datasets")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Dataset {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String name;
-
     private String description;
 
-    @Column(nullable = false )
-    private LocalDate creationDate;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "label_id", nullable = false)
+    @JoinColumn(name = "label_id")
     private Label label;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "author_id")
-//    private Admin admin;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public Long getLabel() {
-        return label.getId();
-    }
+    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
+    private List<TaskToDo> tasks = new ArrayList<>();
 }

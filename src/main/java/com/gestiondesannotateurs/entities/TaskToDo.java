@@ -9,17 +9,26 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
-@Table(name = "labels")
+@Table(name = "tasks")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Label {
+public class TaskToDo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    @OneToMany(mappedBy = "label", fetch = FetchType.LAZY)
-    private List<Dataset> datasets = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "annotator_id")
+    private Annotator annotator;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dataset_id")
+    private Dataset dataset;
+
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    private List<Coupletext> coupletexts = new ArrayList<>();
 }
