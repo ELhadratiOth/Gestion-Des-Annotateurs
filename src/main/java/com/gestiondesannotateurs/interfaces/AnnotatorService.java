@@ -1,8 +1,10 @@
-package com.gestiondesannotateurs.services;
+package com.gestiondesannotateurs.interfaces;
 
 import com.gestiondesannotateurs.entities.Annotator;
-import java.util.List;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+@Service
 public interface AnnotatorService {
     Annotator getAnnotator(Long annotatorId);
     List<Annotator> getAllAnnotators();

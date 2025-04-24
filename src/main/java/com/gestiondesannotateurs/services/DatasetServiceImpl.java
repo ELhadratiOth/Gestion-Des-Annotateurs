@@ -3,7 +3,7 @@ package com.gestiondesannotateurs.services;
 import com.gestiondesannotateurs.dtos.DatasetCreate;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.intefaces.DatasetService;
+import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.LabelRepo;
 import org.springframework.beans.factory.annotation.Autowired;

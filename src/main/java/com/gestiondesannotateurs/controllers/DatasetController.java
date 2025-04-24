@@ -3,7 +3,7 @@ package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.DatasetCreate;
 import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.intefaces.DatasetService;
+import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

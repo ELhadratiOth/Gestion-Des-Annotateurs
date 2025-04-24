@@ -2,7 +2,7 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.LabelCreate;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.intefaces.LabelService;
+import com.gestiondesannotateurs.interfaces.LabelService;
 import com.gestiondesannotateurs.repositories.LabelRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

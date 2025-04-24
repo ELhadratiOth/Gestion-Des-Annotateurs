@@ -1,10 +1,9 @@
 package com.gestiondesannotateurs.controllers;
 
 
-import com.gestiondesannotateurs.dtos.DatasetCreate;
 import com.gestiondesannotateurs.dtos.LabelCreate;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.intefaces.LabelService;
+import com.gestiondesannotateurs.interfaces.LabelService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
