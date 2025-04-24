@@ -11,7 +11,5 @@ import lombok.Setter;
 @DiscriminatorValue("ADMIN")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Admin extends Person {
 }

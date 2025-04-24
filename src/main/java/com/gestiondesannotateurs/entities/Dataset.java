@@ -37,6 +37,6 @@ public class Dataset {
     private List<TaskToDo> tasks = new ArrayList<>();
 
     public Long getLabel() {
-        return label.getId();
+        return label.id;
     }
 }

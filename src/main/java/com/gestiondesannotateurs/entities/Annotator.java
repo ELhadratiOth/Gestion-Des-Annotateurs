@@ -17,9 +17,6 @@ import java.util.List;
 @DiscriminatorValue("ANNOTATOR")
 @Getter
 @Setter
-
-@NoArgsConstructor
-@AllArgsConstructor
 public class Annotator extends Person {
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
