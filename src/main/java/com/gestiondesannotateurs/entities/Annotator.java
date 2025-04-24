@@ -17,6 +17,7 @@ import java.util.List;
 @DiscriminatorValue("ANNOTATOR")
 @Getter
 @Setter
+
 @NoArgsConstructor
 @AllArgsConstructor
 public class Annotator extends Person {

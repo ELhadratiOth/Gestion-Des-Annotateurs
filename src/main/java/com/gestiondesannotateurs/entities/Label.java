@@ -20,6 +20,7 @@ public class Label {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+
     @OneToMany(mappedBy = "label", fetch = FetchType.LAZY)
     private List<Dataset> datasets = new ArrayList<>();
 }

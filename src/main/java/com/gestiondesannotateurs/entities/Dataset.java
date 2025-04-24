@@ -35,4 +35,8 @@ public class Dataset {
 
     @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
+
+    public Long getLabel() {
+        return label.getId();
+    }
 }
