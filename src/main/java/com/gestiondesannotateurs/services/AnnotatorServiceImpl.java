@@ -38,21 +38,22 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 		newAnnotator.setFirstName(annotator.getFirstName());
 		newAnnotator.setLastName(annotator.getLastName());
 		newAnnotator.setEmail(annotator.getEmail());
-		newAnnotator.SetLogin(annotator.getLogin());
+		newAnnotator.setLogin(annotator.getLogin());
         newAnnotator.setSpammer(false);
         newAnnotator.setActive(true);
     	if (annotatorRepository.existsByEmail(newAnnotator.getEmail())) {
-			throw new AnnotatorNotFoundException("Un annotateur avec cet email existe déjà: " + annotator.getEmail());
+			throw new AnnotatorNotFoundException(newAnnotator.getId());
 		}
-        return annotatorRepository.save(annotator);
+
+        return annotatorRepository.save(newAnnotator);
     }
 
     @Override
     public Annotator updateAnnotator(Long annotatorId, AnnotatorDto annotator) {
     	Annotator existingAnnotator = annotatorRepository.findById(annotatorId)
-				.orElseThrow(() -> new AnnotatorNotFoundException("Annotateur non trouvé avec l'ID: " + annotatorId));
-    	
-    	Annotator currentAnnotator=existingAnnotator.get();
+				.orElseThrow(() -> new AnnotatorNotFoundException(annotatorId));
+
+    	Annotator currentAnnotator= annotatorRepository.findById(existingAnnotator.getId()).get();
     	String firstName = annotator.getFirstName();
     	if (firstName != null) {
 			currentAnnotator.setFirstName(firstName);

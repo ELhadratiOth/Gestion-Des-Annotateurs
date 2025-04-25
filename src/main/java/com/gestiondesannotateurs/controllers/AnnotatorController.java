@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.ClientInfoStatus;
 import java.util.List;
 
 @RestController
@@ -49,5 +50,9 @@ public class AnnotatorController {
     public ResponseEntity<Void> deleteAnnotatorDetails(@PathVariable Long annotatorId) {
         annotatorService.deleteAnnotator(annotatorId);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping()
+    public ResponseEntity<List<Annotator>> AnnotatorSpamer(@PathVariable Long dataId){
+        annotatorService
     }
 }
