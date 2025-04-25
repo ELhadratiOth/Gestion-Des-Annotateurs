@@ -25,6 +25,9 @@ public class Coupletext {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private TaskToDo task;
+
     @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
+
+
 }

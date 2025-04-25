@@ -24,10 +24,13 @@ public class Dataset {
     private Long id;
     private String name;
     private String description;
+    private Long size;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "label_id")
     private Label label;
+
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -35,6 +38,10 @@ public class Dataset {
 
     @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Dataset dataset;
+
 
     public Long getLabel() {
         return label.id;

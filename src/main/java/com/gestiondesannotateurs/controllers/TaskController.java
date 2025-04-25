@@ -3,8 +3,9 @@ package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.LabelCreate;
 import com.gestiondesannotateurs.dtos.LabelResponse;
+import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.interfaces.LabelService;
+import com.gestiondesannotateurs.intefaces.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,19 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/labels")
-public class LabelController {
+@RequestMapping("/api/tasks")
+public class TaskController {
     @Autowired
-    private LabelService labelService;
-
+    private TaskService taskService;
 
     @PostMapping
-    public ResponseEntity<?> createLabel(@RequestBody @Valid LabelCreate labelCreate){
-        Label label =  labelService.createLabel(labelCreate);
-        LabelResponse labelResponse = new LabelResponse(label.getId() , label.getName());
+    public ResponseEntity<?> createLabel(@RequestBody @Valid TaskCreate taskCreate) {
+        taskService.createTask(taskCreate);
 
 
 
-        return new ResponseEntity<>( labelResponse , HttpStatus.CREATED);
+        return new ResponseEntity<>( "sf 9diti  gharad" , HttpStatus.CREATED);
     }
 }
