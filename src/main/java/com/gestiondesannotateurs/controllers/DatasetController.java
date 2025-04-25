@@ -3,8 +3,8 @@ package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.intefaces.CoupleOfTextService;
-import com.gestiondesannotateurs.intefaces.DatasetService;
+import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
+import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,11 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
+
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.intefaces.CoupleOfTextService;
-import com.gestiondesannotateurs.intefaces.DatasetService;
+import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
+import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.LabelRepo;
 import com.opencsv.exceptions.CsvValidationException;

@@ -1,4 +1,5 @@
-package com.gestiondesannotateurs.intefaces;
+package com.gestiondesannotateurs.interfaces;
+
 
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;

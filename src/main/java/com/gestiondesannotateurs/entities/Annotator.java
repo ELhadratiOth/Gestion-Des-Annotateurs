@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,4 +23,8 @@ public class Annotator extends Person {
     private List<TaskToDo> tasks = new ArrayList<>();
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
+    
+    @Column(nullable = false)
+    private boolean active = true;
+    private boolean isSpammer = false;
 }
