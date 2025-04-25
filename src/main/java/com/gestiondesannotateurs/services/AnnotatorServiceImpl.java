@@ -22,7 +22,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Override
     public Annotator getAnnotator(Long annotatorId) {
         return annotatorRepository.findById(annotatorId)
-                .orElseThrow(() -> new AnnotatorNotFoundException("Annotateur non trouvé avec l'ID: " + annotatorId));
+                .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Override
     public Annotator updateAnnotator(Long annotatorId, Annotator annotator) {
         if (!annotatorRepository.existsById(annotatorId)) {
-            throw new AnnotatorNotFoundException("Annotateur non trouvé avec l'ID: " + annotatorId);
+            throw new AnnotatorNotFoundException(annotatorId);
         }
         annotator.setId(annotatorId);
         return annotatorRepository.save(annotator);
@@ -47,7 +47,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Override
     public void deleteAnnotator(Long annotatorId) {
         if (!annotatorRepository.existsById(annotatorId)) {
-            throw new AnnotatorNotFoundException("Annotateur non trouvé avec l'ID: " + annotatorId);
+            throw new AnnotatorNotFoundException(annotatorId);
         }
         annotatorRepository.deleteById(annotatorId);
     }
