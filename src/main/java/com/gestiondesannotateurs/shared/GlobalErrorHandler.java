@@ -7,6 +7,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class GlobalErrorHandler {
 
@@ -14,17 +17,16 @@ public class GlobalErrorHandler {
     public ResponseEntity<GlobalResponse<?>> handleAnnotatorNotFound(AnnotatorNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(GlobalResponse.error(ex.getMessage(), "ANNOTATOR_NOT_FOUND"));
+                .body(GlobalResponse.error(List.of(ex.getMessage())));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<GlobalResponse<?>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        String errorMsg = ex.getFieldErrors().stream()
-                .findFirst()
-                .map(err -> "Champ '" + err.getField() + "' " + err.getDefaultMessage())
-                .orElse("Validation failed");
+        List<String> errorMessages = ex.getFieldErrors().stream()
+                .map(err -> "Field '" + err.getField() + "': " + err.getDefaultMessage())
+                .collect(Collectors.toList());
 
         return ResponseEntity.badRequest()
-                .body(GlobalResponse.error(errorMsg, "VALIDATION_ERROR"));
+                .body(GlobalResponse.error(errorMessages));
     }
 }

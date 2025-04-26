@@ -2,7 +2,7 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.intefaces.CoupleOfTextService;
+import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
 import com.gestiondesannotateurs.utils.ProcessFile;
 import com.opencsv.exceptions.CsvValidationException;

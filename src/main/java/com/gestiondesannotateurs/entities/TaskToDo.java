@@ -29,6 +29,6 @@ public class TaskToDo {
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY )
     private List<Coupletext> coupletexts = new ArrayList<>();
 }

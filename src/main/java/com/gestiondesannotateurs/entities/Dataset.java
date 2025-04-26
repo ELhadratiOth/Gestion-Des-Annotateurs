@@ -36,12 +36,8 @@ public class Dataset {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskToDo> tasks = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Dataset dataset;
-
 
     public Long getLabel() {
         return label.id;

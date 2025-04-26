@@ -1,16 +1,17 @@
 package com.gestiondesannotateurs.shared;
+
+import java.util.List;
+
 public record GlobalResponse<T>(
-        Status status,
+        String status,
         T data,
-        Erreur erreur
-)   {
+        List<String> erreurs
+) {
     public static <T> GlobalResponse<T> success(T data) {
-        return new GlobalResponse<>(new Status("success"), data, null);
+        return new GlobalResponse<>("success", data, null);
     }
-    public static GlobalResponse<?> error(String message, String code) {
-        return new GlobalResponse<>(new Status("error"), null, new Erreur(message, code));
+
+    public static GlobalResponse<?> error(List<String> messages) {
+        return new GlobalResponse<>("error", null, messages);
     }
-    // Records imbriqués
-    public record Status(String type) {}
-    public record Erreur(String message, String code) {}
 }

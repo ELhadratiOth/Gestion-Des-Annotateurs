@@ -1,4 +1,4 @@
-package com.gestiondesannotateurs.intefaces;
+package com.gestiondesannotateurs.interfaces;
 
 import com.gestiondesannotateurs.entities.Dataset;
 import com.opencsv.exceptions.CsvValidationException;

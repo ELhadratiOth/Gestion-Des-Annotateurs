@@ -6,6 +6,8 @@ import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
+import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
+import com.gestiondesannotateurs.shared.GlobalResponse;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,15 +38,23 @@ public class DatasetController {
 
 
         Map<String, Object> response = new HashMap<>();
-
-
-
         Dataset createdDataset = datasetService.createDataset(dataset);
-
         response.put("message", "Dataset created successfully");
         response.put("datasetId", createdDataset.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
+    @DeleteMapping("/{idDataset}")
+    public ResponseEntity<?> deleteDataset(@PathVariable Long idDataset){
+        datasetService.deleteDataset(idDataset);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllDatasets(){
+        List<Dataset> datasets =  datasetService.getAll();
+        return new ResponseEntity<>(GlobalResponse.success(datasets), HttpStatus.OK);
     }
 
 
