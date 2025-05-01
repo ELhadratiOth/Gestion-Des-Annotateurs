@@ -52,14 +52,10 @@ public class DatasetServiceImpl implements DatasetService {
 
         return createdDataset;
     }
-
     @Override
-    public void deleteDataset(Long idDataset) {
-        Optional<Dataset> dataset = datasetRepo.findById(idDataset);
-        if(dataset.isEmpty()) {
-            throw new CustomResponseException(400,"Dataset with ID " + idDataset + " not found");
-        }
-        datasetRepo.deleteById(idDataset);
+    public Dataset findDatasetById(Long idDataset) {
+        return datasetRepo.findById(idDataset)
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
     }
 
     @Override
@@ -135,4 +131,5 @@ public class DatasetServiceImpl implements DatasetService {
 
         return datasetInfo;
     }
+    /// getDataset by Id
 }

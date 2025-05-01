@@ -51,8 +51,9 @@ public class AnnotatorController {
         annotatorService.deleteAnnotator(annotatorId);
         return ResponseEntity.noContent().build();
     }
-//    @GetMapping()
-//    public ResponseEntity<List<Annotator>> AnnotatorSpamer(@PathVariable Long dataId){
-//        annotatorService
-//    }
+    @GetMapping()
+    public ResponseEntity<List<Annotator>> AnnotatorSpamer(@PathVariable Long dataId) {
+
+    }
+
 }

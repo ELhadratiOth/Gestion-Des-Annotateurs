@@ -1,6 +1,10 @@
 package com.gestiondesannotateurs.services;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.gestiondesannotateurs.entities.Dataset;
+import com.gestiondesannotateurs.entities.TaskToDo;
+import com.gestiondesannotateurs.repositories.DatasetRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,10 +18,12 @@ import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 
 @Service
 public class AnnotatorServiceImpl implements AnnotatorService {
-	
     @Autowired
     private AnnotatorRepo annotatorRepository;
-    
+
+    @Autowired
+    private DatasetRepo datasetRepo; // Ajoutez cette ligne
+
     @Autowired
     private  BCryptPasswordEncoder passwordEncoder;
 
@@ -95,7 +101,16 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
 		annotator.setActive(false);
 		annotatorRepository.save(annotator);
-    
-    
 	}
+
+    public List<Annotator> getAnnotatorSpamers(Long datasetId) {
+        Dataset dataset = datasetRepo.findById(datasetId)
+                .orElseThrow(() -> new RuntimeException("Dataset with ID " + datasetId + " not found"));
+
+        return dataset.getTasks().stream()
+                .map(TaskToDo::getAnnotator)
+                .filter(Annotator::isSpammer)
+                .distinct()
+                .collect(Collectors.toList());
+    }
 }
