@@ -20,7 +20,9 @@ public class Coupletext {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true, nullable = false)
     private String textA;
+    @Column(unique = true, nullable = false)
     private String textB;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")

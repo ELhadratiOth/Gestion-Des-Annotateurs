@@ -4,6 +4,7 @@ import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.gestiondesannotateurs.utils.ProcessFile;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,11 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     public Long createRows(Dataset dataset , MultipartFile file) throws CsvValidationException, IOException {
 
 
-        List<Coupletext> storageDatas =  processFile.processFile(file );
+        if(file == null || file.isEmpty() ){
+            throw  new CustomResponseException(401 , "File is null or empty");
+        }
+
+        List<Coupletext> storageDatas =  processFile.processFile(file);
 
         coupleOfTextRepo.saveAll(storageDatas);
 

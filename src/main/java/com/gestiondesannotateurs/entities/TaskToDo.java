@@ -31,4 +31,9 @@ public class TaskToDo {
 
     @OneToMany(mappedBy = "task", fetch = FetchType.LAZY )
     private List<Coupletext> coupletexts = new ArrayList<>();
+
+    public Long  getDataset(){
+        return dataset.getId();
+    }
+
 }

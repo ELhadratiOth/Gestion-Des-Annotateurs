@@ -6,9 +6,12 @@ import java.util.Optional;
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.entities.Dataset;
+import com.gestiondesannotateurs.entities.Label;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.repositories.AnnotatorRepo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
+import com.gestiondesannotateurs.repositories.LabelRepo;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
@@ -28,20 +31,17 @@ public class TaskToDoServiceImpl implements TaskService {
     @Autowired
     private TaskToDoRepo taskToDoRepo ;
 
+    @Autowired
+    private LabelRepo labelRepo;
+
 
     @Override
     public void createTask(TaskCreate tasks) {
-        System.out.println("hahiya dataset");
-
-        System.out.println(tasks.dataset_id());
-
-        Optional<Dataset> dataset =  datasetRepo.findById(tasks.dataset_id());
+        Optional<Dataset> dataset =  datasetRepo.findById(tasks.datasetId());
         if (dataset.isEmpty()){
             throw new RuntimeException("No such dataset");
         }
-
-
-        for (Long annotator_id : tasks.annotator_id()){
+        for (Long annotator_id : tasks.annotatorId()){
             Optional<Annotator> annotator = annotatorRepo.findById(annotator_id) ;
             if (annotator.isEmpty()){
                 throw new RuntimeException("No such annotator");
@@ -58,6 +58,8 @@ public class TaskToDoServiceImpl implements TaskService {
         List<TaskToDo> tasks = taskToDoRepo.findAll();
         return tasks;
     }
+
+
 
 
 //    public List<TaskToDo> getTasksByAnnotator(Long annotatorId) {

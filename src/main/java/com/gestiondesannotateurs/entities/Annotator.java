@@ -25,9 +25,7 @@ public class Annotator extends Person {
     private List<TaskToDo> tasks = new ArrayList<>();
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
-    
-    @Column(nullable = false)
-    private boolean active = true;
+
     private boolean isSpammer = false;
 
 

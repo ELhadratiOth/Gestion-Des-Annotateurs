@@ -1,9 +1,12 @@
 package com.gestiondesannotateurs.services;
 
+import com.gestiondesannotateurs.dtos.DatasetInfo;
+import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.Label;
+import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DatasetServiceImpl implements DatasetService {
@@ -59,9 +63,76 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public List<Dataset> getAll() {
-        List<Dataset> datasets = datasetRepo.findAll();
+    public List<DatasetInfo> getAll() {
+        return datasetRepo.findAll().stream()
+                .map(dataset -> {
+                    System.out.println("test");
+                    System.out.println(dataset.getLabel());
 
-        return datasets;
+
+                    Optional<Label> label = labelRepo.findById(dataset.getLabel());
+                    if(label.isEmpty()) {
+                        throw new CustomResponseException(400,"Label with ID " + dataset.getLabel() + " not found");
+                    }
+                    return new DatasetInfo(
+                            dataset.getId(),
+                            dataset.getSize(),
+                            dataset.getName(),
+                            90.5,
+                            dataset.getDescription(),
+                            label.get().getName(),
+                            dataset.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Dataset updateDataset(DatasetUpdata datasetUpdata , Long idDataset) {
+
+        Optional<Dataset> dataset =   datasetRepo.findById(idDataset);
+        if(dataset.isEmpty()) {
+            throw new CustomResponseException(400,"Dataset with ID " + idDataset + " not found");
+        }
+        Optional<Label> label = labelRepo.findById(datasetUpdata.labelId());
+        if(label.isEmpty()) {
+            throw new CustomResponseException(400,"Label with ID " + datasetUpdata.labelId() + " not found");
+        }
+
+
+
+        dataset.get().setName(datasetUpdata.name());
+        dataset.get().setDescription(datasetUpdata.description());
+        dataset.get().setLabel(label.get());
+
+
+        return datasetRepo.save(dataset.get());
+    }
+
+    @Override
+    public DatasetInfo taskInfo(Long idDataset) {
+
+
+        Optional<Dataset> dataset = datasetRepo.findById(idDataset);
+        if(dataset.isEmpty()){
+            throw  new CustomResponseException(404,"Dataset doesnt exist with this id");
+        }
+
+        Optional<Label> label = labelRepo.findById(dataset.get().getLabel());
+        if(label.isEmpty()){
+            throw  new CustomResponseException(404,"Label doesnt exist");
+        }
+
+
+        DatasetInfo datasetInfo = new DatasetInfo(
+                dataset.get().getId(),
+                dataset.get().getSize(),
+                dataset.get().getName(),
+                90.0,
+                dataset.get().getDescription(),
+                label.get().getName(),
+                dataset.get().getCreatedAt()                );
+
+        return datasetInfo;
     }
 }

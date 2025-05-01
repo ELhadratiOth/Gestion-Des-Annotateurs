@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.interfaces;
 
+import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;

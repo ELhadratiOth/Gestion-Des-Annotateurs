@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "login")
+})
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type")
 @Getter
@@ -23,4 +26,6 @@ public abstract class Person {
     private String email;
     private String login;
     private String password="1234";
+    @Column(nullable = false)
+    private boolean active = true;
 }

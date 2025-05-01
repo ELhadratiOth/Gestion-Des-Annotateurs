@@ -40,6 +40,6 @@ public class Dataset {
     private List<TaskToDo> tasks = new ArrayList<>();
 
     public Long getLabel() {
-        return label.id;
+        return label.getId();
     }
 }

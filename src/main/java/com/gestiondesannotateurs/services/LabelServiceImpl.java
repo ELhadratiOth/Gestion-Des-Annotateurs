@@ -20,9 +20,8 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public Label createLabel(LabelCreate label) {
-
         Label newLabel = new Label() ;
-        newLabel.setName(label.name());
+        newLabel.setName(label.name().trim());
 
         return labelRepo.save(newLabel);
     }

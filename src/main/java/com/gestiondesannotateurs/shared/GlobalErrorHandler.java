@@ -1,12 +1,16 @@
 package com.gestiondesannotateurs.shared;
 
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,5 +32,50 @@ public class GlobalErrorHandler {
 
         return ResponseEntity.badRequest()
                 .body(GlobalResponse.error(errorMessages));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<GlobalResponse<?>> handleIllegalArgument(IllegalArgumentException ex) {
+        List<String> errorMessages = Collections.singletonList(ex.getMessage() != null ? ex.getMessage() : "Invalid argument provided");
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(errorMessages));
+    }
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<GlobalResponse<?>> handleNullPointer(NullPointerException ex) {
+        List<String> errorMessages = Collections.singletonList(ex.getMessage() != null ? ex.getMessage() : "Invalid argument provided");
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(errorMessages));
+
+    }
+
+    @ExceptionHandler(CustomResponseException.class)
+    public ResponseEntity<GlobalResponse<?>> handleCustomResponse(CustomResponseException ex) {
+        System.out.println("error message : " + ex.getMessage());
+
+        List<String> errorMessages = Collections.singletonList(ex.getMsg() != null ? ex.getMsg() : "Invalid response provideddddd");
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(errorMessages));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<GlobalResponse<?>> badUsedKeysInBodyRequest(HttpMessageNotReadableException ex) {
+
+        List<String> errorMessages = List.of("bad Used Keys in Body Request");
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(errorMessages));
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<GlobalResponse<?>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String paramName = ex.getName();
+        String value = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+
+        String errorMessage = String.format(
+                "Invalid value '%s' for parameter '%s'. Expected type: %s.",
+                value, paramName, requiredType
+        );
+
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(List.of(errorMessage)));
     }
 }

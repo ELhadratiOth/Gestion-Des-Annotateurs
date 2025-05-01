@@ -19,6 +19,7 @@ public class TaskController {
     private TaskService taskService;
 
 
+
     @GetMapping
     public ResponseEntity<?> allTasks() {
         return new ResponseEntity<>(taskService.getAll(), HttpStatus.OK);

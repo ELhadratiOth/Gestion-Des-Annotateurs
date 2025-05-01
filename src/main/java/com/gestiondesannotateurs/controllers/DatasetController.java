@@ -1,6 +1,8 @@
 package com.gestiondesannotateurs.controllers;
 
 
+import com.gestiondesannotateurs.dtos.DatasetInfo;
+import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
@@ -33,6 +35,13 @@ public class DatasetController {
     @Autowired
     private TaskToDoRepo taskToDoRepo;
 
+
+    @GetMapping("/{idDataset}")
+    public ResponseEntity<?> infoDataset(@PathVariable Long idDataset) {
+
+        return new ResponseEntity<>(datasetService.taskInfo(idDataset), HttpStatus.OK);
+    }
+
     @PostMapping()
     public ResponseEntity<?> createDataset(@ModelAttribute  DatasetUploadRequest dataset) throws CsvValidationException, IOException {
 
@@ -53,8 +62,16 @@ public class DatasetController {
 
     @GetMapping
     public ResponseEntity<?> getAllDatasets(){
-        List<Dataset> datasets =  datasetService.getAll();
+        System.out.println("get all ");
+        List<DatasetInfo> datasets =  datasetService.getAll();
         return new ResponseEntity<>(GlobalResponse.success(datasets), HttpStatus.OK);
+    }
+    @PutMapping("/{idDataset}")
+    public ResponseEntity<?> updateDataset(@RequestBody DatasetUpdata updataDataset , @PathVariable Long idDataset)  {
+
+        Dataset updatedDataset = datasetService.updateDataset(updataDataset , idDataset);
+        return new ResponseEntity<>(GlobalResponse.success(updatedDataset), HttpStatus.OK);
+
     }
 
 
