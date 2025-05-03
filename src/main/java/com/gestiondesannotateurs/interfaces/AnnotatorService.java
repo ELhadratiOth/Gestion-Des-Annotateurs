@@ -1,13 +1,11 @@
- package com.gestiondesannotateurs.interfaces;
+package com.gestiondesannotateurs.interfaces;
 
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
 import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Annotator;
-import com.gestiondesannotateurs.entities.TaskToDo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
  @Service
 public interface AnnotatorService {

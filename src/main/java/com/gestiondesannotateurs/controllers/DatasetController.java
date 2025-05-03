@@ -1,25 +1,18 @@
 package com.gestiondesannotateurs.controllers;
-
-
-import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
-import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +60,7 @@ public class DatasetController {
         List<DatasetInfo> datasets = datasetService.getAll();
         return GlobalSuccessHandler.success("Liste des datasets récupérée avec succès", datasets);
     }
+
     @PutMapping("/{idDataset}")
     public ResponseEntity<GlobalResponse<Dataset>> updateDataset(
             @RequestBody DatasetUpdata updataDataset,
@@ -74,6 +68,4 @@ public class DatasetController {
         Dataset updatedDataset = datasetService.updateDataset(updataDataset, idDataset);
         return GlobalSuccessHandler.success("Dataset mis à jour avec succès", updatedDataset);
     }
-
-
 }

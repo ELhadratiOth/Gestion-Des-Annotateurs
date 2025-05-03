@@ -23,11 +23,11 @@ import java.util.List;
 public class Annotator extends Person {
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
+
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
 
     private boolean isSpammer = false;
-
 
 
 

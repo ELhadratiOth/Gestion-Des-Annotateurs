@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/annotator")
+@RequestMapping("/api/annotators")
 public class AnnotatorController {
     @Autowired
     private AnnotatorService annotatorService;
@@ -55,6 +55,21 @@ public class AnnotatorController {
         annotatorService.deleteAnnotator(annotatorId);
         return GlobalSuccessHandler.deleted("Annotateur supprimé avec succès");
     }
+
+    @PatchMapping("/{id}/spam")
+    public ResponseEntity<GlobalResponse<Annotator>> markAsSpammer(@PathVariable Long id) {
+            annotatorService.markAsSpammer(id);
+            Annotator annotator = annotatorService.getAnnotatorById(id);
+            return GlobalSuccessHandler.success("Annotateur marqué comme spammeur", annotator);
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<GlobalResponse<Annotator>> deactivateAnnotator(@PathVariable Long id) {
+            annotatorService.deactivateAnnotator(id);
+            Annotator annotator = annotatorService.getAnnotatorById(id);
+            return GlobalSuccessHandler.success("Annotateur désactivé", annotator);
+        }
+
 
     @GetMapping("/spammers/{datasetId}")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {

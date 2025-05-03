@@ -1,9 +1,6 @@
 package com.gestiondesannotateurs.dtos;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record DatasetUpdata(
         @NotBlank(message = "Name is required")
@@ -16,5 +13,5 @@ public record DatasetUpdata(
         @NotNull(message = "Label ID is required")
         @Positive(message = "Label ID must be a positive number")
         Long labelId
-        ) {
+) {
 }
