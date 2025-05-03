@@ -61,7 +61,7 @@ public class AnnotatorController {
         List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);
         return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
     }
-    @GetMapping("/{datasetId}")
+    @GetMapping("/dataset/{datasetId}")
     public ResponseEntity<GlobalResponse<List<AnnotatorWithTaskId>>> getAnnotatorsByDataset(
             @PathVariable Long datasetId
     ) {
