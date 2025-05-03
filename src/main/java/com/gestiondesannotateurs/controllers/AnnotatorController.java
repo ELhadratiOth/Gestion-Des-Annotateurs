@@ -56,7 +56,7 @@ public class AnnotatorController {
         return GlobalSuccessHandler.deleted("Annotateur supprimé avec succès");
     }
 
-    @GetMapping("/{datasetId}")
+    @GetMapping("/spammers/{datasetId}")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {
         List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);
         return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
