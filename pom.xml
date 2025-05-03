@@ -86,13 +86,6 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- Remove this if not needed -->
-		<dependency>
-			<groupId>com.hrsecu.webapp</groupId>
-			<artifactId>hrappsecu</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>

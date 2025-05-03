@@ -16,4 +16,6 @@ public interface DatasetService {
     List<DatasetInfo> getAll();
     Dataset updateDataset(DatasetUpdata  datasetUpdata , Long idDataset);
     DatasetInfo taskInfo(Long idTask);
+
+    Dataset findDatasetById(Long idDataset);
 }

@@ -3,10 +3,8 @@ package com.gestiondesannotateurs.services;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
-
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.Label;
-import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
@@ -34,6 +32,7 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private CoupleOfTextService coupleOfTextService;
 
+    @Override
     @Transactional
     public Dataset createDataset(DatasetUploadRequest dataset) throws CsvValidationException, IOException {
         Label label = labelRepo.findById(dataset.labelId())
@@ -45,27 +44,25 @@ public class DatasetServiceImpl implements DatasetService {
         datasetEntity.setLabel(label);
         Dataset createdDataset = datasetRepo.save(datasetEntity);
 
-        Long rowNumber =  coupleOfTextService.createRows(createdDataset, dataset.file());
+        Long rowNumber = coupleOfTextService.createRows(createdDataset, dataset.file());
         createdDataset.setSize(rowNumber);
         datasetRepo.save(createdDataset);
 
-
         return createdDataset;
     }
+
     @Override
-    public Dataset findDatasetById(Long idDataset) {
-        return datasetRepo.findById(idDataset)
+    @Transactional
+    public void deleteDataset(Long idDataset) {
+        Dataset dataset = datasetRepo.findById(idDataset)
                 .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
+        datasetRepo.delete(dataset);
     }
 
     @Override
     public List<DatasetInfo> getAll() {
         return datasetRepo.findAll().stream()
                 .map(dataset -> {
-                    System.out.println("test");
-                    System.out.println(dataset.getLabel());
-
-
                     Optional<Label> label = labelRepo.findById(dataset.getLabel());
                     if(label.isEmpty()) {
                         throw new CustomResponseException(400,"Label with ID " + dataset.getLabel() + " not found");
@@ -84,9 +81,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public Dataset updateDataset(DatasetUpdata datasetUpdata , Long idDataset) {
-
-        Optional<Dataset> dataset =   datasetRepo.findById(idDataset);
+    @Transactional
+    public Dataset updateDataset(DatasetUpdata datasetUpdata, Long idDataset) {
+        Optional<Dataset> dataset = datasetRepo.findById(idDataset);
         if(dataset.isEmpty()) {
             throw new CustomResponseException(400,"Dataset with ID " + idDataset + " not found");
         }
@@ -95,41 +92,39 @@ public class DatasetServiceImpl implements DatasetService {
             throw new CustomResponseException(400,"Label with ID " + datasetUpdata.labelId() + " not found");
         }
 
-
-
         dataset.get().setName(datasetUpdata.name());
         dataset.get().setDescription(datasetUpdata.description());
         dataset.get().setLabel(label.get());
-
 
         return datasetRepo.save(dataset.get());
     }
 
     @Override
     public DatasetInfo taskInfo(Long idDataset) {
-
-
         Optional<Dataset> dataset = datasetRepo.findById(idDataset);
         if(dataset.isEmpty()){
-            throw  new CustomResponseException(404,"Dataset doesnt exist with this id");
+            throw new CustomResponseException(404,"Dataset doesnt exist with this id");
         }
 
         Optional<Label> label = labelRepo.findById(dataset.get().getLabel());
         if(label.isEmpty()){
-            throw  new CustomResponseException(404,"Label doesnt exist");
+            throw new CustomResponseException(404,"Label doesnt exist");
         }
 
-
-        DatasetInfo datasetInfo = new DatasetInfo(
+        return new DatasetInfo(
                 dataset.get().getId(),
                 dataset.get().getSize(),
                 dataset.get().getName(),
                 90.0,
                 dataset.get().getDescription(),
                 label.get().getName(),
-                dataset.get().getCreatedAt()                );
-
-        return datasetInfo;
+                dataset.get().getCreatedAt()
+        );
     }
-    /// getDataset by Id
+
+    @Override
+    public Dataset findDatasetById(Long idDataset) {
+        return datasetRepo.findById(idDataset)
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
+    }
 }
