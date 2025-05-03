@@ -25,7 +25,7 @@ public abstract class Person {
     private String lastName;
     private String email;
     private String login;
-    private String password="1234";
+    private String password = "1234";
     @Column(nullable = false)
     private boolean active = true;
 }

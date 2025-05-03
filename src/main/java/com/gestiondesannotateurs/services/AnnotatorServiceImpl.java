@@ -1,7 +1,9 @@
 package com.gestiondesannotateurs.services;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
@@ -105,12 +107,22 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
     public List<Annotator> getAnnotatorSpamers(Long datasetId) {
         Dataset dataset = datasetRepo.findById(datasetId)
-                .orElseThrow(() -> new RuntimeException("Dataset with ID " + datasetId + " not found"));
-
-        return dataset.getTasks().stream()
+                .orElseThrow(() -> new AnnotatorNotFoundException(datasetId));
+        List<Annotator> spamers = dataset.getTasks().stream()
                 .map(TaskToDo::getAnnotator)
                 .filter(Annotator::isSpammer)
                 .distinct()
                 .collect(Collectors.toList());
+        return spamers;
     }
+    @Override
+    public List<AnnotatorWithTaskId> getAnnotatorsByDataset(Long datasetId) {
+        Dataset dataset = datasetRepo.findById(datasetId)
+                .orElseThrow(() -> new AnnotatorNotFoundException(datasetId));
+
+        return dataset.getTasks().stream()
+                .map(task -> new AnnotatorWithTaskId(task.getId(), task.getAnnotator()))
+                .collect(Collectors.toList());
+    }
+
 }

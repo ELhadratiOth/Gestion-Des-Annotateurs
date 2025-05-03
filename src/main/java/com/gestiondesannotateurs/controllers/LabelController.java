@@ -5,6 +5,8 @@ import com.gestiondesannotateurs.dtos.LabelCreate;
 import com.gestiondesannotateurs.dtos.LabelResponse;
 import com.gestiondesannotateurs.entities.Label;
 import com.gestiondesannotateurs.interfaces.LabelService;
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
+import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,19 +23,20 @@ public class LabelController {
 
 
     @GetMapping
-    public ResponseEntity<List<LabelResponse>> getAllLabels() {
-        return new ResponseEntity<>(labelService.getAll() , HttpStatus.OK);
+    public ResponseEntity<GlobalResponse<List<LabelResponse>>> getAllLabels() {
+        List<LabelResponse> labels = labelService.getAll();
+        return GlobalSuccessHandler.success("Liste des labels récupérée avec succès", labels);
     }
 
 
     @PostMapping
-    public ResponseEntity<?> createLabel(@RequestBody @Valid LabelCreate labelCreate){
-        Label label =  labelService.createLabel(labelCreate);
-        LabelResponse labelResponse = new LabelResponse(label.getId() , label.getName());
+    public ResponseEntity<GlobalResponse<LabelResponse>> createLabel(
+            @RequestBody @Valid LabelCreate labelCreate) {
 
+        Label label = labelService.createLabel(labelCreate);
+        LabelResponse response = new LabelResponse(label.getId(), label.getName());
 
-
-        return new ResponseEntity<>( labelResponse , HttpStatus.CREATED);
+        return GlobalSuccessHandler.created("Label créé avec succès", response);
     }
 
 

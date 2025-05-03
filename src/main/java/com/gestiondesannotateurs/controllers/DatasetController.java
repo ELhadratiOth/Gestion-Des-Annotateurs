@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.controllers;
 
 
+import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
@@ -9,6 +10,7 @@ import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,41 +39,40 @@ public class DatasetController {
 
 
     @GetMapping("/{idDataset}")
-    public ResponseEntity<?> infoDataset(@PathVariable Long idDataset) {
-
-        return new ResponseEntity<>(datasetService.taskInfo(idDataset), HttpStatus.OK);
+    public ResponseEntity<GlobalResponse<DatasetInfo>> infoDataset(@PathVariable Long idDataset) {
+        DatasetInfo datasetInfo = datasetService.taskInfo(idDataset);
+        return GlobalSuccessHandler.success(datasetInfo);
     }
 
     @PostMapping()
-    public ResponseEntity<?> createDataset(@ModelAttribute  DatasetUploadRequest dataset) throws CsvValidationException, IOException {
+    public ResponseEntity<GlobalResponse<Map<String, Object>>> createDataset(
+            @ModelAttribute DatasetUploadRequest dataset) throws CsvValidationException, IOException {
 
-
-        Map<String, Object> response = new HashMap<>();
         Dataset createdDataset = datasetService.createDataset(dataset);
-        response.put("message", "Dataset created successfully");
-        response.put("datasetId", createdDataset.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return GlobalSuccessHandler.createdWithId(
+                "Dataset created successfully",
+                createdDataset.getId(),
+                createdDataset
+        );
     }
 
     @DeleteMapping("/{idDataset}")
-    public ResponseEntity<?> deleteDataset(@PathVariable Long idDataset){
+    public ResponseEntity<GlobalResponse<String>> deleteDataset(@PathVariable Long idDataset) {
         datasetService.deleteDataset(idDataset);
-
-        return ResponseEntity.noContent().build();
+        return GlobalSuccessHandler.deleted("Dataset supprimé avec succès");
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllDatasets(){
-        System.out.println("get all ");
-        List<DatasetInfo> datasets =  datasetService.getAll();
-        return new ResponseEntity<>(GlobalResponse.success(datasets), HttpStatus.OK);
+    public ResponseEntity<GlobalResponse<List<DatasetInfo>>> getAllDatasets() {
+        List<DatasetInfo> datasets = datasetService.getAll();
+        return GlobalSuccessHandler.success("Liste des datasets récupérée avec succès", datasets);
     }
     @PutMapping("/{idDataset}")
-    public ResponseEntity<?> updateDataset(@RequestBody DatasetUpdata updataDataset , @PathVariable Long idDataset)  {
-
-        Dataset updatedDataset = datasetService.updateDataset(updataDataset , idDataset);
-        return new ResponseEntity<>(GlobalResponse.success(updatedDataset), HttpStatus.OK);
-
+    public ResponseEntity<GlobalResponse<Dataset>> updateDataset(
+            @RequestBody DatasetUpdata updataDataset,
+            @PathVariable Long idDataset) {
+        Dataset updatedDataset = datasetService.updateDataset(updataDataset, idDataset);
+        return GlobalSuccessHandler.success("Dataset mis à jour avec succès", updatedDataset);
     }
 
 

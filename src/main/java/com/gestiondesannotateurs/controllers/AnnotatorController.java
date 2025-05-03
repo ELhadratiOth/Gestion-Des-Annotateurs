@@ -1,59 +1,71 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
+import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Annotator;
+import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
 
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
+import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.ClientInfoStatus;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/annotator")
 public class AnnotatorController {
-	@Autowired
-    private  AnnotatorService annotatorService;
-
+    @Autowired
+    private AnnotatorService annotatorService;
 
     @GetMapping("/{annotatorId}")
-    public ResponseEntity<Annotator> getAnnotatorDetails(@PathVariable Long annotatorId) {
-        return ResponseEntity.ok(annotatorService.getAnnotatorById(annotatorId));
+    public ResponseEntity<GlobalResponse<Annotator>> getAnnotatorDetails(@PathVariable Long annotatorId) {
+        Annotator annotator = annotatorService.getAnnotatorById(annotatorId);
+        return GlobalSuccessHandler.success("Annotator details retrieved successfully", annotator);
     }
 
     @GetMapping
-    public ResponseEntity<List<Annotator>> getAllAnnotatorDetails() {
-        return ResponseEntity.ok(annotatorService.getAllAnnotators());
+    public ResponseEntity<GlobalResponse<List<Annotator>>> getAllAnnotatorDetails() {
+        List<Annotator> annotators = annotatorService.getAllAnnotators();
+        return GlobalSuccessHandler.success("All annotators retrieved successfully", annotators);
     }
 
     @PostMapping
-    public ResponseEntity<Annotator> createAnnotatorDetails(@Valid @RequestBody AnnotatorDto annotator) {
-    	
-    	
+    public ResponseEntity<GlobalResponse<Annotator>> createAnnotatorDetails(@Valid @RequestBody AnnotatorDto annotator) {
         Annotator createdAnnotator = annotatorService.createAnnotator(annotator);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAnnotator);
+        return GlobalSuccessHandler.created("Annotator created successfully", createdAnnotator);
     }
 
     @PutMapping("/{annotatorId}")
-    public ResponseEntity<Annotator> updateAnnotatorDetails(
+    public ResponseEntity<GlobalResponse<Annotator>> updateAnnotatorDetails(
             @PathVariable Long annotatorId,
             @RequestBody AnnotatorDto annotator) {
-            Annotator updatedAnnotator = annotatorService.updateAnnotator(annotatorId, annotator);
-           return ResponseEntity.ok(updatedAnnotator);
+        Annotator updatedAnnotator = annotatorService.updateAnnotator(annotatorId, annotator);
+        return GlobalSuccessHandler.success("Annotator updated successfully", updatedAnnotator);
     }
 
     @DeleteMapping("/{annotatorId}")
-    public ResponseEntity<Void> deleteAnnotatorDetails(@PathVariable Long annotatorId) {
+    public ResponseEntity<GlobalResponse<String>> deleteAnnotatorDetails(@PathVariable Long annotatorId) {
         annotatorService.deleteAnnotator(annotatorId);
-        return ResponseEntity.noContent().build();
-    }
-    @GetMapping()
-    public ResponseEntity<List<Annotator>> AnnotatorSpamer(@PathVariable Long dataId) {
-
+        return GlobalSuccessHandler.deleted("Annotateur supprimé avec succès");
     }
 
+    @GetMapping("/{datasetId}")
+    public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {
+        List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);
+        return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
+    }
+    @GetMapping("/{datasetId}")
+    public ResponseEntity<GlobalResponse<List<AnnotatorWithTaskId>>> getAnnotatorsByDataset(
+            @PathVariable Long datasetId
+    ) {
+        List<AnnotatorWithTaskId> result = annotatorService.getAnnotatorsByDataset(datasetId);
+        return GlobalSuccessHandler.success("Annotateurs et tâches récupérés", result);
+    }
 }
