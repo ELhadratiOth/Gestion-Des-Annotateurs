@@ -11,5 +11,9 @@ import java.util.List;
 public interface TaskService {
     public void createTask(TaskCreate task);
     public List<TaskToDo> getAll();
+    public List<TaskToDo> getTasksByAnnotatorId(Long annotatorId);
+    public List<TaskToDo> getTasksByDatasetId(Long datasetId);
+    public void deleteTask(Long taskId);
+    
 
 }

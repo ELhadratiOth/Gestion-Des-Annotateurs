@@ -62,17 +62,20 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
 
-//    public List<TaskToDo> getTasksByAnnotator(Long annotatorId) {
-//
-//        return taskToDoRepository.findByAnnotator(annotatorId);
-//    }
-//
-//    public List<TaskToDo> getTasksByDataset(Long datasetId) {
-//        return taskToDoRepository.findByDataset(datasetId);
-//    }
-//    public List<TaskToDo> getTasksByAnnotatorAndDataset(Long annotatorId, Long datasetId) {
-//		return taskToDoRepository.findByAnnotatorAndDataset(annotatorId, datasetId);
-//	}
-	
+    public List<TaskToDo> getTasksByAnnotatorId(Long annotatorId) {
+
+        return taskToDoRepo.findByAnnotator(annotatorId);
+    }
+
+    public List<TaskToDo> getTasksByDatasetId(Long datasetId) {
+        return taskToDoRepo.findByDataset(datasetId);
+    }
+    @Override
+    public void deleteTask(Long taskId) {
+        TaskToDo task = taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        taskToDoRepo.delete(task);
+    }
+
 
 }

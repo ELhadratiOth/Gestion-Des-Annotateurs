@@ -9,9 +9,7 @@ import java.util.List;
 
 @Repository
 public interface TaskToDoRepo extends JpaRepository<TaskToDo,Long> {
-//    List<TaskToDo> findByAnnotator(Long annotatorId);
-//
-//    List<TaskToDo> findByDataset(Long datasetId);
-//
-//    List<TaskToDo> findByAnnotatorAndDataset(Long annotatorId, Long datasetId);
+    List<TaskToDo> findByAnnotator(Long annotatorId);
+
+    List<TaskToDo> findByDataset(Long datasetId);
 }

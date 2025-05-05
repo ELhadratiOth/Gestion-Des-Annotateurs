@@ -21,12 +21,30 @@ public class TaskController {
     @GetMapping
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
         List<TaskToDo> tasks = taskService.getAll();
-        return GlobalSuccessHandler.success("Liste des tâches récupérée avec succès", tasks);
+        return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
     }
 
     @PostMapping
     public ResponseEntity<GlobalResponse<String>> createTask(@RequestBody @Valid TaskCreate taskCreate) {
         taskService.createTask(taskCreate);
-        return GlobalSuccessHandler.created("Tâche créée avec succès");
+        return GlobalSuccessHandler.created("Successfully created task");
     }
+    
+    @GetMapping("/{annotatorId}")
+    public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByAnnotatorId(@PathVariable Long annotatorId) {
+		List<TaskToDo> tasks = taskService.getTasksByAnnotatorId(annotatorId);
+		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
+	}
+
+	@GetMapping("/dataset/{datasetId}")
+	public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByDatasetId(@PathVariable Long datasetId) {
+		List<TaskToDo> tasks = taskService.getTasksByDatasetId(datasetId);
+		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
+	}
+
+	@DeleteMapping("/{taskId}")
+	public ResponseEntity<GlobalResponse<String>> deleteTask(@PathVariable Long taskId) {
+		taskService.deleteTask(taskId);
+		return GlobalSuccessHandler.deleted("Successfully deleted task");
+	}
 }
