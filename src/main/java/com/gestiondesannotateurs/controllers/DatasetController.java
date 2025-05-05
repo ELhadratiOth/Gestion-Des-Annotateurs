@@ -38,13 +38,12 @@ public class DatasetController {
     }
 
     @PostMapping()
-    public ResponseEntity<GlobalResponse<Map<String, Object>>> createDataset(
+    public ResponseEntity<?> createDataset(
             @ModelAttribute DatasetUploadRequest dataset) throws CsvValidationException, IOException {
 
         Dataset createdDataset = datasetService.createDataset(dataset);
-        return GlobalSuccessHandler.createdWithId(
+        return GlobalSuccessHandler.created(
                 "Dataset created successfully",
-                createdDataset.getId(),
                 createdDataset
         );
     }

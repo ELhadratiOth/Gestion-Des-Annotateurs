@@ -133,5 +133,4 @@ public class AnnotatorServiceImpl implements AnnotatorService {
                 .map(task -> new AnnotatorWithTaskId(task.getId(), task.getAnnotator()))
                 .collect(Collectors.toList());
     }
-
 }
