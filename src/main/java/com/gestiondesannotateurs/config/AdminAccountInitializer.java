@@ -1,6 +1,4 @@
 package com.gestiondesannotateurs.config;
-
-
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.repositories.AdminRepo;
 import org.springframework.beans.factory.annotation.Autowired;

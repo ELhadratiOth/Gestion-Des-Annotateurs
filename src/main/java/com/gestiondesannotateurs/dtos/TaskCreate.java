@@ -13,5 +13,6 @@ import java.util.List;
 public record TaskCreate(
         List<Long> annotatorId,
         Long datasetId
-) {
+){
+
 }

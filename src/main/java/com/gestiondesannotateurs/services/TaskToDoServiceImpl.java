@@ -64,11 +64,11 @@ public class TaskToDoServiceImpl implements TaskService {
 
     public List<TaskToDo> getTasksByAnnotatorId(Long annotatorId) {
 
-        return taskToDoRepo.findByAnnotator(annotatorId);
+        return taskToDoRepo.findByAnnotatorId(annotatorId);
     }
 
     public List<TaskToDo> getTasksByDatasetId(Long datasetId) {
-        return taskToDoRepo.findByDataset(datasetId);
+        return taskToDoRepo.findByDatasetId(datasetId);
     }
     @Override
     public void deleteTask(Long taskId) {

@@ -27,8 +27,6 @@ public class LabelController {
         List<LabelResponse> labels = labelService.getAll();
         return GlobalSuccessHandler.success("Liste des labels récupérée avec succès", labels);
     }
-
-
     @PostMapping
     public ResponseEntity<GlobalResponse<LabelResponse>> createLabel(
             @RequestBody @Valid LabelCreate labelCreate) {
