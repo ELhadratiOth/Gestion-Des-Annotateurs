@@ -7,6 +7,7 @@ import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -126,7 +127,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Override
     public List<AnnotatorWithTaskId> getAnnotatorsByDataset(Long datasetId) {
         Dataset dataset = datasetRepo.findById(datasetId)
-                .orElseThrow(() -> new AnnotatorNotFoundException(datasetId));
+                .orElseThrow(() -> new CustomResponseException(404,"Dataset introuvable"));
 
         return dataset.getTasks().stream()
                 .map(task -> new AnnotatorWithTaskId(task.getId(), task.getAnnotator()))
