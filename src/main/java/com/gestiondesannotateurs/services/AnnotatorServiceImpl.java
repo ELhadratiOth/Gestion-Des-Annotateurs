@@ -96,7 +96,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         annotator.setSpammer(true);
         annotatorRepository.save(annotator);
     }
-    
+
     public void deactivateAnnotator(Long id) {
 		Annotator annotator = annotatorRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Annotateur introuvable"));
@@ -104,6 +104,14 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 		annotator.setActive(false);
 		annotatorRepository.save(annotator);
 	}
+
+    public void activateAnnotator(Long id) {
+        Annotator annotator = annotatorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Annotateur introuvable"));
+
+        annotator.setActive(true);
+        annotatorRepository.save(annotator);
+    }
 
     public List<Annotator> getAnnotatorSpamers(Long datasetId) {
         Dataset dataset = datasetRepo.findById(datasetId)

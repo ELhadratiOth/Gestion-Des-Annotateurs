@@ -16,6 +16,7 @@ public interface AnnotatorService {
     void deleteAnnotator(Long annotatorId);
     public void markAsSpammer(Long id) ;
     public void deactivateAnnotator(Long id) ;
+    public void activateAnnotator(Long id) ;
     List<Annotator> getAnnotatorSpamers(Long datasetId);
     List<AnnotatorWithTaskId> getAnnotatorsByDataset(Long datasetId);
 

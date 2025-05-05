@@ -35,13 +35,11 @@ public class AnnotatorController {
         List<Annotator> annotators = annotatorService.getAllAnnotators();
         return GlobalSuccessHandler.success("All annotators retrieved successfully", annotators);
     }
-
     @PostMapping
     public ResponseEntity<GlobalResponse<Annotator>> createAnnotatorDetails(@Valid @RequestBody AnnotatorDto annotator) {
         Annotator createdAnnotator = annotatorService.createAnnotator(annotator);
         return GlobalSuccessHandler.created("Annotator created successfully", createdAnnotator);
     }
-
     @PutMapping("/{annotatorId}")
     public ResponseEntity<GlobalResponse<Annotator>> updateAnnotatorDetails(
             @PathVariable Long annotatorId,
@@ -49,28 +47,29 @@ public class AnnotatorController {
         Annotator updatedAnnotator = annotatorService.updateAnnotator(annotatorId, annotator);
         return GlobalSuccessHandler.success("Annotator updated successfully", updatedAnnotator);
     }
-
     @DeleteMapping("/{annotatorId}")
     public ResponseEntity<GlobalResponse<String>> deleteAnnotatorDetails(@PathVariable Long annotatorId) {
         annotatorService.deleteAnnotator(annotatorId);
         return GlobalSuccessHandler.deleted("Annotateur supprimé avec succès");
     }
-
     @PatchMapping("/{id}/spam")
     public ResponseEntity<GlobalResponse<Annotator>> markAsSpammer(@PathVariable Long id) {
             annotatorService.markAsSpammer(id);
             Annotator annotator = annotatorService.getAnnotatorById(id);
             return GlobalSuccessHandler.success("Annotateur marqué comme spammeur", annotator);
     }
-
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<GlobalResponse<Annotator>> deactivateAnnotator(@PathVariable Long id) {
             annotatorService.deactivateAnnotator(id);
             Annotator annotator = annotatorService.getAnnotatorById(id);
             return GlobalSuccessHandler.success("Annotateur désactivé", annotator);
-        }
-
-
+    }
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<GlobalResponse<Annotator>> activateAnnotator(@PathVariable Long id) {
+        annotatorService.activateAnnotator(id);
+        Annotator annotator = annotatorService.getAnnotatorById(id);
+        return GlobalSuccessHandler.success("Annotateur mmactivé", annotator);
+    }
     @GetMapping("/spammers/{datasetId}")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {
         List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);

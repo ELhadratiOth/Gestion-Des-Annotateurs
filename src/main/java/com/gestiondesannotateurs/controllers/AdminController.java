@@ -1,8 +1,7 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AdminDto;
 import com.gestiondesannotateurs.entities.Admin;
-import com.gestiondesannotateurs.entities.Annotator;
-import com.gestiondesannotateurs.services.AdminServiceImpl;
+import com.gestiondesannotateurs.services.adminServiceImpl;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
@@ -16,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/admins")
 public class AdminController {
     @Autowired
-    private AdminServiceImpl adminService;
+    private adminServiceImpl adminService;
 
     @GetMapping("/{adminId}")
     public ResponseEntity<GlobalResponse<Admin>> getAdminDetails(@PathVariable Long adminId) {
@@ -47,9 +46,15 @@ public class AdminController {
         return GlobalSuccessHandler.deleted("Admin supprimé avec succès");
     }
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<GlobalResponse<Annotator>> deactivateAnnotator(@PathVariable Long id) {
+    public ResponseEntity<GlobalResponse<Admin>> deactivateAnnotator(@PathVariable Long id) {
         adminService.deactivateAdmin(id);
         Admin admin = adminService.getAdminById(id);
         return GlobalSuccessHandler.success("Annotateur désactivé", admin);
+    }
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<GlobalResponse<Admin>> activateAnnotator(@PathVariable Long id) {
+        adminService.activateAdmin(id);
+        Admin admin = adminService.getAdminById(id);
+        return GlobalSuccessHandler.success("Annotateur activé", admin);
     }
 }

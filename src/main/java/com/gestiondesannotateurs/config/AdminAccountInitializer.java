@@ -31,10 +31,9 @@ public class AdminAccountInitializer implements CommandLineRunner {
         this.adminRepo = adminRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
     @Override
     public void run(String... args) {
-        if (adminRepo.findByEmail(adminEmail).isEmpty()) {
+        if (!adminRepo.existsByEmail(adminEmail)) {
             Admin admin = new Admin();
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
@@ -48,4 +47,5 @@ public class AdminAccountInitializer implements CommandLineRunner {
             System.out.println("Admin account already exists.");
         }
     }
+
 }

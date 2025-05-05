@@ -12,4 +12,5 @@ public interface AdminService {
     Admin updateAdmin(Long adminId, AdminDto adminDto);
     void deleteAdmin(Long adminId);
     public void deactivateAdmin(Long id);
+    public void activateAdmin(Long id);
 }
