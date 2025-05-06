@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "login")
-})
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type")
 @Getter
@@ -21,11 +17,35 @@ public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String firstName;
+
+    @Column(nullable = false)
     private String lastName;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+
+    @Column(unique = true, nullable = false)
     private String login;
-    private String password = "1234";
+
+
+    @Column(nullable = false)
+    private String password = "111";
+
     @Column(nullable = false)
     private boolean active = true;
+
+    @PrePersist
+    @PreUpdate
+    private void normalizeFields() {
+        if (email != null) {
+            email = email.toLowerCase().trim();
+        }
+        if (login != null) {
+            login = login.toLowerCase().trim();
+        }
+    }
 }

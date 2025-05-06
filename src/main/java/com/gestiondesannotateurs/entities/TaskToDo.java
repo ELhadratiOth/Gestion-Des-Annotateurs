@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,19 +22,23 @@ public class TaskToDo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "annotator_id")
     private Annotator annotator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ManyToOne(fetch = FetchType.LAZY )
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY )
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ManyToMany(mappedBy = "tasks", fetch = FetchType.LAZY )
     private List<Coupletext> coupletexts = new ArrayList<>();
 
     public Long  getDataset(){
         return dataset.getId();
     }
+
 
 }

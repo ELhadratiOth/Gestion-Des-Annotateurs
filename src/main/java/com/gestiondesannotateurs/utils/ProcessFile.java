@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gestiondesannotateurs.entities.Coupletext;
+import com.gestiondesannotateurs.entities.Dataset;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import static com.gestiondesannotateurs.controllers.DatasetController.JSON_CONTE
 @Component
 public class ProcessFile {
 
-    public static List<Coupletext> processFile(MultipartFile file) throws CsvValidationException, IOException {
+    public static List<Coupletext> processFile(MultipartFile file , Dataset dataset) throws CsvValidationException, IOException {
         List<Coupletext> storageDatas = new ArrayList<>();
         String contentType = file.getContentType();
 
@@ -33,6 +34,7 @@ public class ProcessFile {
                         Coupletext storageData = new Coupletext();
                         storageData.setTextA(row[0]);
                         storageData.setTextB(row[1]);
+                        storageData.setDataset(dataset);
                         System.out.println(storageData);
                         storageDatas.add(storageData);
                     }

@@ -1,25 +1,21 @@
 package com.gestiondesannotateurs.services;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.gestiondesannotateurs.dtos.TaskCreate;
-import com.gestiondesannotateurs.entities.Annotator;
-import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.entities.Label;
+import com.gestiondesannotateurs.dtos.TaskToDoDto;
+import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.TaskService;
-import com.gestiondesannotateurs.repositories.AnnotatorRepo;
-import com.gestiondesannotateurs.repositories.DatasetRepo;
-import com.gestiondesannotateurs.repositories.LabelRepo;
+import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
-
-import com.gestiondesannotateurs.entities.TaskToDo;
-import com.gestiondesannotateurs.repositories.TaskToDoRepo;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class TaskToDoServiceImpl implements TaskService {
 
     @Autowired
@@ -32,28 +28,93 @@ public class TaskToDoServiceImpl implements TaskService {
     private TaskToDoRepo taskToDoRepo ;
 
     @Autowired
-    private LabelRepo labelRepo;
+    private CoupleOfTextRepo coupletextRepo;
 
+    @Autowired
+    private LabelRepo labelRepo;
 
     @Override
     public void createTask(TaskCreate tasks) {
-        Optional<Dataset> dataset =  datasetRepo.findById(tasks.datasetId());
-        if (dataset.isEmpty()){
-            throw new RuntimeException("No such dataset");
+        // Validate number of annotators (minimum 3)
+        Integer numberOfAnnotators = tasks.annotatorIds().size();
+        if (numberOfAnnotators < 3) {
+            throw new CustomResponseException(400, "You must have at least 3 annotators");
         }
-        for (Long annotator_id : tasks.annotatorId()){
-            Optional<Annotator> annotator = annotatorRepo.findById(annotator_id) ;
-            if (annotator.isEmpty()){
-                throw new RuntimeException("No such annotator");
+
+        // Validate dataset
+        Dataset dataset = datasetRepo.findById(tasks.datasetId())
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset not found"));
+
+        // Validate annotators and ensure they are active
+        List<Annotator> annotators = new ArrayList<>();
+        for (Long annotatorId : tasks.annotatorIds()) {
+            Annotator annotator = annotatorRepo.findById(annotatorId)
+                    .orElseThrow(() -> new CustomResponseException(404, "No such annotator with ID: " + annotatorId));
+            if (!annotator.isActive()) {
+                throw new CustomResponseException(400, "Annotator with ID: " + annotatorId + " is deactivated");
             }
-            TaskToDo task =  new TaskToDo();
-            task.setAnnotator(annotator.get());
-            task.setDataset(dataset.get());
-            taskToDoRepo.save(task);
+            annotators.add(annotator);
+        }
+
+        // Create one TaskToDo per annotator (4 tasks for 4 annotators)
+        List<TaskToDo> taskList = new ArrayList<>();
+        for (Annotator annotator : annotators) {
+            TaskToDo task = new TaskToDo();
+            task.setAnnotator(annotator);
+            task.setDataset(dataset);
+            task = taskToDoRepo.save(task);
+            taskList.add(task);
+        }
+
+        // Fetch Coupletext entities for the dataset (2 couple texts)
+        List<Coupletext> coupletexts = coupletextRepo.findByDataset(dataset);
+        if (coupletexts.isEmpty()) {
+            throw new CustomResponseException(400, "No couple texts found for dataset");
+        }
+
+        // Track task assignments for fairness
+        Map<TaskToDo, Integer> taskAssignmentCount = new HashMap<>();
+        for (TaskToDo task : taskList) {
+            taskAssignmentCount.put(task, 0);
+        }
+
+        // Assign 3 tasks to each Coupletext (2 × 3 = 6 rows in association table)
+        for (Coupletext coupletext : coupletexts) {
+            // Get tasks already assigned to this Coupletext
+            List<TaskToDo> assignedTasks = coupletext.getTasks();
+
+            // Filter available tasks (not assigned to this Coupletext)
+            List<TaskToDo> availableTasks = taskList.stream()
+                    .filter(t -> !assignedTasks.contains(t))
+                    .collect(Collectors.toList());
+
+            // Ensure enough tasks are available
+            if (availableTasks.size() < 3) {
+                throw new CustomResponseException(400, "Not enough available tasks for Coupletext ID: " + coupletext.getId());
+            }
+
+            // Shuffle for randomization
+            Collections.shuffle(availableTasks);
+
+            // Sort by assignment count for fairness (least assigned first)
+            availableTasks.sort(Comparator.comparingInt(taskAssignmentCount::get));
+
+            // Select 3 tasks
+            List<TaskToDo> selectedTasks = availableTasks.subList(0, 3);
+
+            // Assign tasks to Coupletext and update counts
+            for (TaskToDo task : selectedTasks) {
+                coupletext.addTask(task);
+                taskAssignmentCount.put(task, taskAssignmentCount.get(task) + 1);
+            }
+            coupletextRepo.save(coupletext);
         }
     }
 
-    @Override
+
+
+
+   @Override
     public List<TaskToDo> getAll() {
         List<TaskToDo> tasks = taskToDoRepo.findAll();
         return tasks;
@@ -63,19 +124,19 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     public List<TaskToDo> getTasksByAnnotatorId(Long annotatorId) {
-
         return taskToDoRepo.findByAnnotatorId(annotatorId);
     }
 
-    public List<TaskToDo> getTasksByDatasetId(Long datasetId) {
-        return taskToDoRepo.findByDatasetId(datasetId);
-    }
     @Override
-    public void deleteTask(Long taskId) {
-        TaskToDo task = taskToDoRepo.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
-        taskToDoRepo.delete(task);
-    }
+    public List<TaskToDoDto> getTasksByDatasetId(Long datasetId) {
+        List<TaskToDo> tasks = taskToDoRepo.findByDatasetId(datasetId);
+        return tasks.stream()
+                .map(task -> new TaskToDoDto(task.getId()
+                        , task.getAnnotator().getId() ,
+                        task.getAnnotator().getFirstName() + " " + task.getAnnotator().getLastName()
+                        ))
+                .collect(Collectors.toList());    }
+
 
 
 }

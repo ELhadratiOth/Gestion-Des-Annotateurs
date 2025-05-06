@@ -3,12 +3,14 @@ package com.gestiondesannotateurs.services;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
-import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.entities.Label;
+import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
+import com.gestiondesannotateurs.interfaces.TaskService;
+import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.LabelRepo;
+import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
@@ -32,6 +34,15 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private CoupleOfTextService coupleOfTextService;
 
+    @Autowired
+    private CoupleOfTextRepo coupletextRepo;
+
+    @Autowired
+    private TaskToDoRepo taskToDoRepo;
+
+
+
+
     @Override
     @Transactional
     public Dataset createDataset(DatasetUploadRequest dataset) throws CsvValidationException, IOException {
@@ -53,9 +64,34 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     @Transactional
-    public void deleteDataset(Long idDataset) {
-        Dataset dataset = datasetRepo.findById(idDataset)
-                .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
+    public void deleteDataset(Long datasetId) {
+        // Validate dataset
+        Dataset dataset = datasetRepo.findById(datasetId)
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID: " + datasetId + " not found"));
+
+        // Fetch all Coupletext entities for the dataset
+        List<Coupletext> coupletexts = coupletextRepo.findByDataset(dataset);
+
+//        // Delete AnnotationClass entities linked to each Coupletext
+//        for (Coupletext coupletext : coupletexts) {
+//            List<AnnotationClass> annotations = annotationClassRepo.findByCoupletext(coupletext);
+//            annotationClassRepo.deleteAll(annotations);
+//        }
+
+        // Delete coupletext_task associations by clearing tasks from Coupletext
+        for (Coupletext coupletext : coupletexts) {
+            coupletext.getTasks().clear(); // Removes all entries in coupletext_task for this Coupletext
+            coupletextRepo.save(coupletext);
+        }
+
+        // Delete all Coupletext entities
+        coupletextRepo.deleteAll(coupletexts);
+
+        // Delete all TaskToDo entities for the dataset
+        List<TaskToDo> tasks = taskToDoRepo.findByDataset(dataset);
+        taskToDoRepo.deleteAll(tasks);
+
+        // Delete the Dataset
         datasetRepo.delete(dataset);
     }
 

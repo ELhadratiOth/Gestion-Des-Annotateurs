@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record TaskCreate(
-        List<Long> annotatorId,
+        List<Long> annotatorIds,
         Long datasetId
 ){
 

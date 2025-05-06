@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gestiondesannotateurs.entities.Label;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,8 @@ public class Dataset {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
 
     public Long getLabel() {

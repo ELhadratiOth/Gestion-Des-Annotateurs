@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -21,9 +22,13 @@ import java.util.List;
 @Getter
 @Setter
 public class Annotator extends Person {
+
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
 

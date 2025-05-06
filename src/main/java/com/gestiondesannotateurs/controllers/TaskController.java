@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.TaskCreate;
+import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
@@ -37,14 +38,15 @@ public class TaskController {
 	}
 
 	@GetMapping("/dataset/{datasetId}")
-	public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByDatasetId(@PathVariable Long datasetId) {
-		List<TaskToDo> tasks = taskService.getTasksByDatasetId(datasetId);
+	public ResponseEntity<GlobalResponse<List<TaskToDoDto>>> getTasksByDatasetId(@PathVariable Long datasetId) {
+
+        List<TaskToDoDto> tasks = taskService.getTasksByDatasetId(datasetId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
 
-	@DeleteMapping("/{taskId}")
-	public ResponseEntity<GlobalResponse<String>> deleteTask(@PathVariable Long taskId) {
-		taskService.deleteTask(taskId);
-		return GlobalSuccessHandler.deleted("Successfully deleted task");
-	}
+//	@DeleteMapping("/{taskId}")
+//	public ResponseEntity<GlobalResponse<String>> deleteTask(@PathVariable Long taskId) {
+//		taskService.deleteTask(taskId);
+//		return GlobalSuccessHandler.deleted("Successfully deleted task");
+//	}
 }

@@ -1,6 +1,9 @@
 package com.gestiondesannotateurs.config;
 import com.gestiondesannotateurs.entities.Admin;
+import com.gestiondesannotateurs.entities.AnnotationClass;
+import com.gestiondesannotateurs.entities.Othman;
 import com.gestiondesannotateurs.repositories.AdminRepo;
+import com.gestiondesannotateurs.repositories.OthmanRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,6 +15,9 @@ public class AdminAccountInitializer implements CommandLineRunner {
 
     @Autowired
     private  AdminRepo adminRepo;
+
+    @Autowired
+    private OthmanRepo othmanRepo;
     @Value("${admin.first.name}")
     private String adminFirstName;
     @Value("${admin.last.name}")
@@ -31,18 +37,18 @@ public class AdminAccountInitializer implements CommandLineRunner {
     }
     @Override
     public void run(String... args) {
-        if (!adminRepo.existsByEmail(adminEmail)) {
-            Admin admin = new Admin();
+        if (!othmanRepo.existsByEmail(adminEmail)) {
+            Othman admin = new Othman();
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setFirstName(adminFirstName);
             admin.setLastName(adminLastName);
             admin.setLogin(adminLogin);
             admin.setActive(true);
-            adminRepo.save(admin);
-            System.out.println("Admin account created successfully.");
+            othmanRepo.save(admin);
+            System.out.println("Super Admin account created successfully.");
         } else {
-            System.out.println("Admin account already exists.");
+            System.out.println("super admin account already exists.");
         }
     }
 

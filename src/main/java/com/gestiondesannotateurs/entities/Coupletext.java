@@ -24,12 +24,31 @@ public class Coupletext {
     private String textA;
     @Column(unique = true, nullable = false)
     private String textB;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id")
-    private TaskToDo task;
+
+    @ManyToOne(fetch = FetchType.LAZY )
+    @JoinColumn(name = "dataset_id")
+    private Dataset dataset;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "couple_text_and_task",
+            joinColumns = @JoinColumn(name = "coupletext_id"),
+            inverseJoinColumns = @JoinColumn(name = "task_id")
+    )
+    private List<TaskToDo>  tasks;
 
     @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
     private List<AnnotationClass> annotations = new ArrayList<>();
 
+
+    public void addTask(TaskToDo task) {
+        if (tasks == null) {
+            tasks = new ArrayList<>();
+        }
+        if (!tasks.contains(task)) {
+            tasks.add(task);
+            task.getCoupletexts().add(this);
+        }
+    }
 
 }

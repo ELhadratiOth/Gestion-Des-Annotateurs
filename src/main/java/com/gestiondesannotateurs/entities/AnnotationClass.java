@@ -28,4 +28,5 @@ public class AnnotationClass {
     private Coupletext coupletext;
     // afficher les ananotations de tous les annotateurs by datasetid
     // affichage de annotateurID ET  label coupletext
+
 }

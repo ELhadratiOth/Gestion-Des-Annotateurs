@@ -31,18 +31,9 @@ public class GlobalSuccessHandler {
         return ResponseEntity.noContent().build();
     }
 
-    // Méthodes spécialisées pour vos cas d'utilisation
-    public static ResponseEntity<GlobalResponse<Map<String, Object>>> createdWithId(String message, Long id, Object entity) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("id", id);
-        response.put("entity", entity);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new GlobalResponse<>("success", message, response, null));
-    }
     public static ResponseEntity<GlobalResponse<String>> deleted(String message) {
         return ResponseEntity
-                .status(HttpStatus.OK)  // Ou NO_CONTENT si vous préférez
+                .status(HttpStatus.OK)
                 .body(new GlobalResponse<>("success", message, null, null));
     }
 

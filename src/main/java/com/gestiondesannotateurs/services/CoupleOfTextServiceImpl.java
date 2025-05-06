@@ -31,7 +31,8 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
             throw  new CustomResponseException(401 , "File is null or empty");
         }
 
-        List<Coupletext> storageDatas =  processFile.processFile(file);
+
+        List<Coupletext> storageDatas =  processFile.processFile(file , dataset);
 
         coupleOfTextRepo.saveAll(storageDatas);
 
