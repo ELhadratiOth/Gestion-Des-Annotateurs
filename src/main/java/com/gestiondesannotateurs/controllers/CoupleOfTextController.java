@@ -1,0 +1,41 @@
+package com.gestiondesannotateurs.controllers;
+
+import com.gestiondesannotateurs.dtos.CoupletextDto;
+import com.gestiondesannotateurs.entities.Dataset;
+import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
+import com.gestiondesannotateurs.shared.GlobalResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/coupletexts")
+@RequiredArgsConstructor
+public class CoupleOfTextController {
+
+    private final CoupleOfTextService coupleOfTextService;
+
+    @GetMapping("/{datasetId}")
+    public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getDatasetCoupleTexts(
+            @PathVariable Long datasetId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Dataset dataset = new Dataset();
+        dataset.setId(datasetId);
+
+        List<CoupletextDto> results = coupleOfTextService.findDtoByDataset(
+                dataset,
+                PageRequest.of(page, size)
+        );
+
+        return GlobalSuccessHandler.success(
+                "Couples de textes récupérés avec succès",
+                results
+        );
+    }
+}
