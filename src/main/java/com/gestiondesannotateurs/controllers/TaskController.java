@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
+
 public class TaskController {
     @Autowired
     private TaskService taskService;
@@ -43,10 +44,4 @@ public class TaskController {
         List<TaskToDoDto> tasks = taskService.getTasksByDatasetId(datasetId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
-
-//	@DeleteMapping("/{taskId}")
-//	public ResponseEntity<GlobalResponse<String>> deleteTask(@PathVariable Long taskId) {
-//		taskService.deleteTask(taskId);
-//		return GlobalSuccessHandler.deleted("Successfully deleted task");
-//	}
 }
