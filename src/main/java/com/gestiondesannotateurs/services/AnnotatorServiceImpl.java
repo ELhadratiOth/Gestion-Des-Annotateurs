@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
 import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
@@ -125,12 +126,19 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         return spamers;
     }
     @Override
-    public List<AnnotatorWithTaskId> getAnnotatorsByDataset(Long datasetId) {
+    public List<AnnotatorTaskDto> getAnnotatorsByDataset(Long datasetId) {
         Dataset dataset = datasetRepo.findById(datasetId)
-                .orElseThrow(() -> new CustomResponseException(404,"Dataset introuvable"));
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset introuvable"));
 
         return dataset.getTasks().stream()
-                .map(task -> new AnnotatorWithTaskId(task.getId(), task.getAnnotator()))
+                .map(task -> new AnnotatorTaskDto(
+                        task.getId(),
+                        task.getAnnotator().getId(),
+                        task.getAnnotator().getFirstName(),
+                        task.getAnnotator().getLastName(),
+                        task.getAnnotator().getLogin(),
+                        task.getAnnotator().getEmail()
+                ))
                 .collect(Collectors.toList());
     }
 }

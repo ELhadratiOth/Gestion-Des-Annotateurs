@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
+import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
 import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.entities.TaskToDo;
@@ -76,10 +77,9 @@ public class AnnotatorController {
         return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
     }
     @GetMapping("/dataset/{datasetId}")
-    public ResponseEntity<GlobalResponse<List<AnnotatorWithTaskId>>> getAnnotatorsByDataset(
-            @PathVariable Long datasetId
-    ) {
-        List<AnnotatorWithTaskId> result = annotatorService.getAnnotatorsByDataset(datasetId);
+    public ResponseEntity<GlobalResponse<List<AnnotatorTaskDto>>> getAnnotatorsByDataset(
+            @PathVariable Long datasetId) {
+        List<AnnotatorTaskDto> result = annotatorService.getAnnotatorsByDataset(datasetId);
         return GlobalSuccessHandler.success("Annotateurs et tâches récupérés", result);
     }
 }
