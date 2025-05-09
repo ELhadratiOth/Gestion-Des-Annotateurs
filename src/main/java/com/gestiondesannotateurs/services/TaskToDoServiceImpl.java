@@ -1,11 +1,13 @@
 package com.gestiondesannotateurs.services;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.*;
+import com.gestiondesannotateurs.interfaces.AnnotationService;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
@@ -33,6 +35,10 @@ public class TaskToDoServiceImpl implements TaskService {
     @Autowired
     private LabelRepo labelRepo;
 
+    @Autowired
+    private AnnotationRepo annotationRepo;
+    @Autowired
+    AnnotationService annotationService;
     @Override
     public void createTask(TaskCreate tasks) {
         // Validate number of annotators (minimum 3)
@@ -137,6 +143,29 @@ public class TaskToDoServiceImpl implements TaskService {
                         ))
                 .collect(Collectors.toList());    }
 
+
+    public Coupletext getNextUnannotatedCoupletext(Long taskId, Long annotatorId) {
+        List<Coupletext> coupletexts = coupletextRepo.findByTaskId(taskId);
+        List<Long> annotatedIds = annotationRepo
+                .findByAnnotatorId(annotatorId)
+                .stream()
+                .map(a -> a.getCoupletext().getId())
+                .toList();
+
+        for (Coupletext ct : coupletexts) {
+            if (!annotatedIds.contains(ct.getId())) {
+                return ct;
+            }
+        }
+
+        return null;
+    }
+
+    public double getProgress(Long taskId, Long annotatorId) {
+        long total = coupletextRepo.countByTaskId(taskId);
+        long done = annotationService.countAnnotationsForAnnotator(annotatorId);
+        return (double) done / total * 100.0;
+    }
 
 
 }

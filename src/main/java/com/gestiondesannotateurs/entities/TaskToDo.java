@@ -36,6 +36,8 @@ public class TaskToDo {
     @ManyToMany(mappedBy = "tasks", fetch = FetchType.LAZY )
     private List<Coupletext> coupletexts = new ArrayList<>();
 
+    private String status;
+
     public Long  getDataset(){
         return dataset.getId();
     }

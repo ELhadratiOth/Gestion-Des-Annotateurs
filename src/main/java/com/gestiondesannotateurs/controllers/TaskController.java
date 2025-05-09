@@ -2,11 +2,16 @@ package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
+import com.gestiondesannotateurs.entities.Annotator;
+import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.TaskToDo;
+import com.gestiondesannotateurs.interfaces.AnnotationService;
+import com.gestiondesannotateurs.interfaces.AnnotatorService;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,10 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private AnnotationService annotationService;
+    @Autowired
+    private AnnotatorService annotatorService;
 
     @GetMapping
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
@@ -32,7 +41,7 @@ public class TaskController {
         return GlobalSuccessHandler.created("Successfully created task");
     }
     
-    @GetMapping("/{annotatorId}")
+    @GetMapping("/annotator/{annotatorId}")
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByAnnotatorId(@PathVariable Long annotatorId) {
 		List<TaskToDo> tasks = taskService.getTasksByAnnotatorId(annotatorId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
@@ -44,4 +53,17 @@ public class TaskController {
         List<TaskToDoDto> tasks = taskService.getTasksByDatasetId(datasetId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
+
+    @GetMapping("/{taskId}/next")
+    public ResponseEntity<?> getNextCoupletextToAnnotate(@PathVariable Long taskId,Authentication authentication) {
+        String email=authentication.name();
+        Annotator ann=annotatorService.getAnnotatorByEmail(email);
+        Long annotatorId=ann.getId();
+        Coupletext next = taskService.getNextUnannotatedCoupletext(taskId, annotatorId);
+        if (next != null) {
+            return GlobalSuccessHandler.noContent();
+        }
+        return GlobalSuccessHandler.success("Next couple get sucessfully", next);
+    }
+
 }

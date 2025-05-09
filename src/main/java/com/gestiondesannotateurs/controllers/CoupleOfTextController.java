@@ -38,4 +38,20 @@ public class CoupleOfTextController {
                 results
         );
     }
+    @GetMapping("/tasks/{taskId}")
+    public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getTaskCoupleTexts(
+            @PathVariable Long taskId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int size) {
+
+        List<CoupletextDto> results = coupleOfTextService.getCouplesByTaskPaged(
+                taskId,
+                PageRequest.of(page, size)
+        );
+
+        return GlobalSuccessHandler.success(
+                "Couples de textes récupérés avec succès",
+                results
+        );
+    }
 }

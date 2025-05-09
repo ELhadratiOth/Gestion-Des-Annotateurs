@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
 @Service
 public class CoupleOfTextServiceImpl implements CoupleOfTextService {
 
@@ -54,6 +56,18 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                 .map(c -> new CoupletextDto(c.getId(), c.getTextA(), c.getTextB()))
                 .collect(Collectors.toList());
     }
+
+    public List<CoupletextDto> getCouplesByTaskPaged(Long taskId, Pageable pageable) {
+        Page<Coupletext> page = coupleOfTextRepo.findByTaskId(taskId, pageable);
+        if (page.isEmpty()) {
+            throw new CustomResponseException(404, "Aucun couple de texte trouvé");
+        }
+        return page.getContent()
+                .stream()
+                .map(c -> new CoupletextDto(c.getId(), c.getTextA(), c.getTextB()))
+                .collect(Collectors.toList());
+    }
+
 
 
 }

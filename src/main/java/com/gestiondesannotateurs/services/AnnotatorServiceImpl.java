@@ -38,6 +38,15 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     }
 
     @Override
+    public Annotator getAnnotatorByEmail(String email) {
+        Annotator annotator=annotatorRepository.findByEmail(email);
+        if(annotator==null){
+            new CustomResponseException(404,"No user found with this email");
+        }
+        return annotator;
+    }
+
+    @Override
     public List<Annotator> getAllAnnotators() {
         return annotatorRepository.findAll();
     }
