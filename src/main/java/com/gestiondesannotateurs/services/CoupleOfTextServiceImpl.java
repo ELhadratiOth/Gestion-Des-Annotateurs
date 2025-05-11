@@ -58,7 +58,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     }
 
     public List<CoupletextDto> getCouplesByTaskPaged(Long taskId, Pageable pageable) {
-        Page<Coupletext> page = coupleOfTextRepo.findByTaskId(taskId, pageable);
+        Page<Coupletext> page = coupleOfTextRepo.findByTasks_Id(taskId,pageable);
         if (page.isEmpty()) {
             throw new CustomResponseException(404, "Aucun couple de texte trouvé");
         }

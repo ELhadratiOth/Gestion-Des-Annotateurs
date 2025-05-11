@@ -145,7 +145,7 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     public Coupletext getNextUnannotatedCoupletext(Long taskId, Long annotatorId) {
-        List<Coupletext> coupletexts = coupletextRepo.findByTaskId(taskId);
+        List<Coupletext> coupletexts = coupletextRepo.findByTasks_Id(taskId);
         List<Long> annotatedIds = annotationRepo
                 .findByAnnotatorId(annotatorId)
                 .stream()
@@ -162,7 +162,7 @@ public class TaskToDoServiceImpl implements TaskService {
     }
 
     public double getProgress(Long taskId, Long annotatorId) {
-        long total = coupletextRepo.countByTaskId(taskId);
+        long total = coupletextRepo.countByTasks_Id(taskId);
         long done = annotationService.countAnnotationsForAnnotator(annotatorId);
         return (double) done / total * 100.0;
     }

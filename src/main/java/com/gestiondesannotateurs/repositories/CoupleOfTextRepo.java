@@ -17,8 +17,9 @@ import java.util.List;
 public interface CoupleOfTextRepo extends JpaRepository<Coupletext,Long> {
     List<Coupletext> findByDataset(Dataset dataset);
     Page<Coupletext> findByDataset(Dataset dataset, Pageable pageable);
-    List<Coupletext> findByTaskId(Long taskId);
     @Query("SELECT c FROM Coupletext c JOIN c.tasks t WHERE t.id = :taskId")
-    Page<Coupletext> findByTaskId(@Param("taskId") Long taskId, Pageable pageable);
-    long countByTaskId(Long taskId);
+    List<Coupletext> findByTasks_Id(@Param("taskId") Long taskId);
+    @Query("SELECT c FROM Coupletext c JOIN c.tasks t WHERE t.id = :taskId")
+    Page<Coupletext> findByTasks_Id(@Param("taskId") Long taskId, Pageable pageable);
+    long countByTasks_Id(Long taskId);
 }
