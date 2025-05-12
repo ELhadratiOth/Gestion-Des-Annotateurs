@@ -1,9 +1,7 @@
 package com.gestiondesannotateurs.services;
 
-import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.*;
@@ -11,8 +9,9 @@ import com.gestiondesannotateurs.interfaces.AnnotationService;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import com.gestiondesannotateurs.utils.AdminAnnotationSplitter;
+import com.gestiondesannotateurs.utils.CoupleOfTextSplitResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,15 +29,17 @@ public class TaskToDoServiceImpl implements TaskService {
     private TaskToDoRepo taskToDoRepo ;
 
     @Autowired
-    private CoupleOfTextRepo coupletextRepo;
-
-    @Autowired
-    private LabelRepo labelRepo;
+    private CoupleOfTextRepo coupleOfTextRepo;
 
     @Autowired
     private AnnotationRepo annotationRepo;
     @Autowired
     AnnotationService annotationService;
+
+    @Autowired
+    AdminAnnotationSplitter adminAnnotationSplitter;
+
+
     @Override
     public void createTask(TaskCreate tasks) {
         // Validate number of annotators (minimum 3)
@@ -73,9 +74,20 @@ public class TaskToDoServiceImpl implements TaskService {
         }
 
         // Fetch Coupletext entities for the dataset (2 couple texts)
-        List<Coupletext> coupletexts = coupletextRepo.findByDataset(dataset);
+        List<Coupletext> coupletexts = coupleOfTextRepo.findByDataset(dataset);
+
         if (coupletexts.isEmpty()) {
             throw new CustomResponseException(400, "No couple texts found for dataset");
+        }
+
+        CoupleOfTextSplitResult coupleTextsAdminSplitter = AdminAnnotationSplitter.splitCoupletexts(coupletexts);
+        List<Coupletext> adminList = coupleTextsAdminSplitter.getAdminList();
+        coupletexts = coupleTextsAdminSplitter.getOthersList();
+
+        for (Coupletext coupletext : adminList) {
+            coupletext.setIsAnnotatedByAdmin(true);
+            coupletext.setTasks(taskList);
+            coupleOfTextRepo.save(coupletext);
         }
 
         // Track task assignments for fairness
@@ -113,7 +125,7 @@ public class TaskToDoServiceImpl implements TaskService {
                 coupletext.addTask(task);
                 taskAssignmentCount.put(task, taskAssignmentCount.get(task) + 1);
             }
-            coupletextRepo.save(coupletext);
+            coupleOfTextRepo.save(coupletext);
         }
     }
 
@@ -145,7 +157,7 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     public Coupletext getNextUnannotatedCoupletext(Long taskId, Long annotatorId) {
-        List<Coupletext> coupletexts = coupletextRepo.findByTasks_Id(taskId);
+        List<Coupletext> coupletexts = coupleOfTextRepo.findByTasks_Id(taskId);
         List<Long> annotatedIds = annotationRepo
                 .findByAnnotatorId(annotatorId)
                 .stream()
@@ -162,9 +174,24 @@ public class TaskToDoServiceImpl implements TaskService {
     }
 
     public double getProgress(Long taskId, Long annotatorId) {
-        long total = coupletextRepo.countByTasks_Id(taskId);
+        long total = coupleOfTextRepo.countByTasks_Id(taskId);
         long done = annotationService.countAnnotationsForAnnotator(annotatorId);
         return (double) done / total * 100.0;
+    }
+
+    public void deleteTaskByDatasetId(Long datasetId) {
+        Optional<Dataset> dataset = datasetRepo.findById(datasetId);
+        if(dataset.isEmpty()){
+            throw new CustomResponseException(404,"Dataset doesnt exist with this id");
+        }
+        taskToDoRepo.deleteAllByDatasetId(datasetId);
+        List<Coupletext> coupletexts = coupleOfTextRepo.findByDataset(dataset.get());
+        for (Coupletext coupletext : coupletexts) {
+            coupletext.setTasks(null);
+            coupleOfTextRepo.save(coupletext);
+        }
+
+
     }
 
 

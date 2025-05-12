@@ -15,6 +15,7 @@ import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
@@ -40,30 +42,37 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private TaskToDoRepo taskToDoRepo;
 
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
 
 
 
     @Override
-    @Transactional
     public Dataset createDataset(DatasetUploadRequest dataset) throws CsvValidationException, IOException {
         Label label = labelRepo.findById(dataset.labelId())
                 .orElseThrow(() -> new IllegalArgumentException("Label with ID " + dataset.labelId() + " not found"));
+//        System.out.println("bugg1");
 
         Dataset datasetEntity = new Dataset();
         datasetEntity.setName(dataset.name());
         datasetEntity.setDescription(dataset.description());
         datasetEntity.setLabel(label);
+        datasetEntity.setFilePath(uploadDir+dataset.file().getOriginalFilename());
         Dataset createdDataset = datasetRepo.save(datasetEntity);
-
+//System.out.println("bugg2");
         Long rowNumber = coupleOfTextService.createRows(createdDataset, dataset.file());
+//        System.out.println("buggyyyy");
+
         createdDataset.setSize(rowNumber);
+//        System.out.println("bugg3");
+
         datasetRepo.save(createdDataset);
 
         return createdDataset;
     }
 
     @Override
-    @Transactional
     public void deleteDataset(Long datasetId) {
         // Validate dataset
         Dataset dataset = datasetRepo.findById(datasetId)
@@ -107,7 +116,7 @@ public class DatasetServiceImpl implements DatasetService {
                             dataset.getId(),
                             dataset.getSize(),
                             dataset.getName(),
-                            90.5,
+                            dataset.getAdvancement(),
                             dataset.getDescription(),
                             label.get().getName(),
                             dataset.getCreatedAt()
@@ -117,7 +126,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    @Transactional
     public Dataset updateDataset(DatasetUpdata datasetUpdata, Long idDataset) {
         Optional<Dataset> dataset = datasetRepo.findById(idDataset);
         if(dataset.isEmpty()) {
@@ -151,11 +159,24 @@ public class DatasetServiceImpl implements DatasetService {
                 dataset.get().getId(),
                 dataset.get().getSize(),
                 dataset.get().getName(),
-                90.0,
+                dataset.get().getAdvancement(),
                 dataset.get().getDescription(),
                 label.get().getName(),
                 dataset.get().getCreatedAt()
         );
+    }
+
+
+    @Override
+    public List<Dataset> getTerminatedAnnotatedDatasets() {
+        List<Dataset> datasets =  datasetRepo.findAllWithAdvancement100();
+        return datasets;
+    }
+
+    @Override
+    public List<Dataset> getNotTerminatedAnnotatedDatasets() {
+        List<Dataset> datasets =  datasetRepo.findAllWithAdvancementNot100();
+        return datasets;
     }
 
     @Override

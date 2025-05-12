@@ -82,4 +82,11 @@ public class AnnotatorController {
         List<AnnotatorTaskDto> result = annotatorService.getAnnotatorsByDataset(datasetId);
         return GlobalSuccessHandler.success("Annotateurs et tâches récupérés", result);
     }
+
+    @GetMapping("/search/{annotatorName}")
+    public ResponseEntity<GlobalResponse<List<Annotator>>> getAnnotatorsByAnnotatorName(@PathVariable String annotatorName) {
+        List<Annotator> annotators = annotatorService.getMatchingAnnotators(annotatorName);
+        return GlobalSuccessHandler.success("Spammers retrieved successfully", annotators);
+    }
+
 }

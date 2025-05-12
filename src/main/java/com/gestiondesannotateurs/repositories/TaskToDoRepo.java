@@ -14,7 +14,7 @@ public interface TaskToDoRepo extends JpaRepository<TaskToDo,Long> {
 
     List<TaskToDo> findByDatasetId(Long datasetId);
 
-//    void deleteAllByDatasetId(Dataset dataset);
+   void  deleteAllByDatasetId(Long dataset_id);
 
     List<TaskToDo> findByDataset(Dataset dataset);
 }

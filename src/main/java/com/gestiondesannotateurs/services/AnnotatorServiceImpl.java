@@ -26,7 +26,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     private AnnotatorRepo annotatorRepository;
 
     @Autowired
-    private DatasetRepo datasetRepo; // Ajoutez cette ligne
+    private DatasetRepo datasetRepo;
 
     @Autowired
     private  BCryptPasswordEncoder passwordEncoder;
@@ -150,4 +150,12 @@ public class AnnotatorServiceImpl implements AnnotatorService {
                 ))
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<Annotator> getMatchingAnnotators (String name){
+        List<Annotator> annotators = annotatorRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name,name);
+        return annotators;
+
+    }
+
+
 }

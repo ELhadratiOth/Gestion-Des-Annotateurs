@@ -2,22 +2,32 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AdminDto;
 import com.gestiondesannotateurs.entities.Admin;
+import com.gestiondesannotateurs.entities.Coupletext;
+import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.AdminService;
 import com.gestiondesannotateurs.repositories.AdminRepo;
+import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
+import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AdminNotFoundException;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class adminServiceImpl implements AdminService {
+public class AdminServiceImpl implements AdminService {
     @Autowired
-    private AdminRepo adminRepository;// crreer que admin repo
+    private AdminRepo adminRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private CoupleOfTextRepo coupleOfTextRepo;
+    @Autowired
+    private DatasetRepo datasetRepo;
 
     @Override
     public Admin getAdminById(Long adminId) {
@@ -82,11 +92,11 @@ public class adminServiceImpl implements AdminService {
     }
     @Override
     public void deactivateAdmin(Long id) {
-            Admin admin= adminRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Admin introuvable"));
+        Admin admin= adminRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Admin introuvable"));
 
-            admin.setActive(false);
-            adminRepository.save(admin);
+        admin.setActive(false);
+        adminRepository.save(admin);
     }
     @Override
     public void activateAdmin(Long id) {
@@ -96,5 +106,20 @@ public class adminServiceImpl implements AdminService {
         admin.setActive(true);
         adminRepository.save(admin);
     }
+
+    @Override
+    public List<Coupletext> getAnannotatedCoupletexts(Long datasetId) {
+
+        Optional<Dataset> dataset = datasetRepo.findById(datasetId);
+        if(dataset.isEmpty()){
+            throw new CustomResponseException(404 , "Dataset not found");
+        }
+        List<Coupletext> coupletexts = coupleOfTextRepo.getAllByDatasetAndIsAnnotatedByAdmin(dataset.get() , true );
+        System.out.println(coupletexts);
+
+        return coupletexts  ;
+    }
+
+
 
 }

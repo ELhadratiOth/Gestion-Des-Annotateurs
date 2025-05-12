@@ -49,7 +49,6 @@ public class TaskController {
 
 	@GetMapping("/dataset/{datasetId}")
 	public ResponseEntity<GlobalResponse<List<TaskToDoDto>>> getTasksByDatasetId(@PathVariable Long datasetId) {
-
         List<TaskToDoDto> tasks = taskService.getTasksByDatasetId(datasetId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
@@ -64,6 +63,12 @@ public class TaskController {
             return GlobalSuccessHandler.noContent();
         }
         return GlobalSuccessHandler.success("Next couple get sucessfully", next);
+    }
+
+    @DeleteMapping("/dataset/{datasetId}")
+    public ResponseEntity<?> deleteTasksByDatasetId(@PathVariable Long datasetId) {
+         taskService.deleteTaskByDatasetId(datasetId);
+         return GlobalSuccessHandler.deleted("Successfully deleted tasks only");
     }
 
 }

@@ -16,6 +16,7 @@ public interface TaskService {
     public List<TaskToDo> getTasksByAnnotatorId(Long annotatorId);
     public List<TaskToDoDto> getTasksByDatasetId(Long datasetId);
     Coupletext getNextUnannotatedCoupletext(Long taskId, Long annotatorId);
+    void deleteTaskByDatasetId(Long datasetId);
 //    public void deleteTask(Long taskId);
 //    void deleteTasksByDataset(Dataset dataset);
 }

@@ -1,7 +1,10 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AdminDto;
 import com.gestiondesannotateurs.entities.Admin;
-import com.gestiondesannotateurs.services.adminServiceImpl;
+import com.gestiondesannotateurs.entities.Coupletext;
+import com.gestiondesannotateurs.entities.Dataset;
+import com.gestiondesannotateurs.interfaces.AdminService;
+import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
@@ -15,7 +18,9 @@ import java.util.List;
 @RequestMapping("/api/admins")
 public class AdminController {
     @Autowired
-    private adminServiceImpl adminService;
+    private AdminService adminService;
+    @Autowired
+    private CoupleOfTextRepo coupleOfTextRepo;
 
     @GetMapping("/{adminId}")
     public ResponseEntity<GlobalResponse<Admin>> getAdminDetails(@PathVariable Long adminId) {
@@ -57,4 +62,13 @@ public class AdminController {
         Admin admin = adminService.getAdminById(id);
         return GlobalSuccessHandler.success("Annotateur activé", admin);
     }
+
+
+    @GetMapping("/coupleoftext/{datasetId}")
+    public ResponseEntity<GlobalResponse<List<Coupletext>>> getCoupleOfTextByDatasetId(@PathVariable Long datasetId) {
+        List<Coupletext> coupletexts = adminService.getAnannotatedCoupletexts(datasetId);
+
+        return GlobalSuccessHandler.success("Successfully retrived admin coupletexts for dataset id = " + datasetId, coupletexts);
+    }
+
 }

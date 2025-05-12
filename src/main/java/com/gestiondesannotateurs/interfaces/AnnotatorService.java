@@ -21,4 +21,5 @@ public interface AnnotatorService {
     public void activateAnnotator(Long id) ;
     List<Annotator> getAnnotatorSpamers(Long datasetId);
     List<AnnotatorTaskDto> getAnnotatorsByDataset(Long datasetId);
+     List<Annotator> getMatchingAnnotators (String name);
  }

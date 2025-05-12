@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.shared;
 
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -88,4 +89,16 @@ public class GlobalErrorHandler {
         return ResponseEntity.badRequest()
                 .body(GlobalResponse.error(errorMessages));
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<GlobalResponse<?>> dataIntegrityViolationException(DataIntegrityViolationException ex) {
+
+        List<String> errorMessages = List.of("the  inserted data violates the database constraint");
+        return ResponseEntity.badRequest()
+                .body(GlobalResponse.error(errorMessages));
+    }
+
+
+
+
 }

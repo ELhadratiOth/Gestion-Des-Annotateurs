@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +26,19 @@ public class Coupletext {
     @Column(unique = true, nullable = false)
     private String textB;
 
+    @Column()
+//    @Column(nullable = false)
+    private Boolean isAnnotatedByAdmin = false;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY )
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
+
+
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "couple_text_and_task",
@@ -37,9 +47,10 @@ public class Coupletext {
     )
     private List<TaskToDo>  tasks;
 
-    @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
-    private List<AnnotationClass> annotations = new ArrayList<>();
-
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
+//    private List<AnnotationClass> annotations = new ArrayList<>();
+//
 
     public void addTask(TaskToDo task) {
         if (tasks == null) {

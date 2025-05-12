@@ -31,12 +31,14 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
 
     @Override
     public Long createRows(Dataset dataset , MultipartFile file) throws CsvValidationException, IOException {
+//        System.out.println("bugg hh");
 
 
         if(file == null || file.isEmpty() ){
             throw  new CustomResponseException(401 , "File is null or empty");
         }
 
+//        System.out.println("bugg hhh");
 
         List<Coupletext> storageDatas =  processFile.processFile(file , dataset);
 

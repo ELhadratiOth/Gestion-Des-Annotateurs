@@ -15,7 +15,9 @@ public interface DatasetService {
     void deleteDataset(Long idDataset);
     List<DatasetInfo> getAll();
     Dataset updateDataset(DatasetUpdata  datasetUpdata , Long idDataset);
-    DatasetInfo taskInfo(Long idTask);
+    DatasetInfo taskInfo(Long idDataset);
+    List<Dataset> getTerminatedAnnotatedDatasets();
+    List<Dataset> getNotTerminatedAnnotatedDatasets();
 
     Dataset findDatasetById(Long idDataset);
 }
