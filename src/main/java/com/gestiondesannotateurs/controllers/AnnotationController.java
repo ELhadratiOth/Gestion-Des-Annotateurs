@@ -21,7 +21,7 @@ public class AnnotationController {
     private AnnotationService annotationService;
     @Autowired
     private AnnotatorService annotatorService;
-    @PostMapping("/{taskId}")
+    @PostMapping()
     public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, Authentication authentication) {
         String email =authentication.getName();
         Annotator annotator=annotatorService.getAnnotatorByEmail(email);
