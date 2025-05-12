@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
@@ -8,6 +9,7 @@ import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
+import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +26,9 @@ import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 public class AnnotatorServiceImpl implements AnnotatorService {
     @Autowired
     private AnnotatorRepo annotatorRepository;
+
+    @Autowired
+    private TaskToDoRepo taskToDoRepo;
 
     @Autowired
     private DatasetRepo datasetRepo;
@@ -149,6 +154,12 @@ public class AnnotatorServiceImpl implements AnnotatorService {
                         task.getAnnotator().getEmail()
                 ))
                 .collect(Collectors.toList());
+    }
+    public Annotator getAnnotatorByTask(Long taskId){
+        Optional<TaskToDo> task= Optional.ofNullable(taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "No such task")));
+        Annotator annotator = task.get().getAnnotator();
+        return annotator;
     }
     @Override
     public List<Annotator> getMatchingAnnotators (String name){

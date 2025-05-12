@@ -54,11 +54,8 @@ public class TaskController {
 	}
 
     @GetMapping("/{taskId}/next")
-    public ResponseEntity<?> getNextCoupletextToAnnotate(@PathVariable Long taskId,Authentication authentication) {
-        String email=authentication.name();
-        Annotator ann=annotatorService.getAnnotatorByEmail(email);
-        Long annotatorId=ann.getId();
-        Coupletext next = taskService.getNextUnannotatedCoupletext(taskId, annotatorId);
+    public ResponseEntity<?> getNextCoupletextToAnnotate(@PathVariable Long taskId) {
+        Coupletext next = taskService.getNextUnannotatedCoupletextForTask(taskId);
         if (next != null) {
             return GlobalSuccessHandler.noContent();
         }

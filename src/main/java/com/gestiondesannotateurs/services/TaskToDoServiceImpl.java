@@ -156,10 +156,14 @@ public class TaskToDoServiceImpl implements TaskService {
                 .collect(Collectors.toList());    }
 
 
-    public Coupletext getNextUnannotatedCoupletext(Long taskId, Long annotatorId) {
-        List<Coupletext> coupletexts = coupleOfTextRepo.findByTasks_Id(taskId);
+    public Coupletext getNextUnannotatedCoupletextForTask(Long taskId) {
+        Optional<TaskToDo> task= Optional.ofNullable(taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "No such task")));
+
+        List<Coupletext> coupletexts = task.get().getCoupletexts();
+        Annotator annotator = task.get().getAnnotator();
         List<Long> annotatedIds = annotationRepo
-                .findByAnnotatorId(annotatorId)
+                .findByAnnotatorId(annotator.getId())
                 .stream()
                 .map(a -> a.getCoupletext().getId())
                 .toList();
@@ -173,7 +177,7 @@ public class TaskToDoServiceImpl implements TaskService {
         return null;
     }
 
-    public double getProgress(Long taskId, Long annotatorId) {
+    public double getProgressForTask(Long taskId, Long annotatorId) {
         long total = coupleOfTextRepo.countByTasks_Id(taskId);
         long done = annotationService.countAnnotationsForAnnotator(annotatorId);
         return (double) done / total * 100.0;
