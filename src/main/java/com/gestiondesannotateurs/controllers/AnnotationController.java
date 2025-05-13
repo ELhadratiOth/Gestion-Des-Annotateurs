@@ -15,16 +15,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/annotations")
+@RequestMapping("api/annotations/{datasetId}")
 public class AnnotationController {
     @Autowired
     private AnnotationService annotationService;
     @Autowired
     private AnnotatorService annotatorService;
-    @PostMapping()
-    public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, Authentication authentication) {
-        String email =authentication.getName();
-        Annotator annotator=annotatorService.getAnnotatorByEmail(email);
+    @PostMapping("/{taskId}")
+    public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, @PathVariable Long  taskId) {
+        Annotator annotator=annotatorService.getAnnotatorByTask(taskId);
         Long annotatorId=annotator.getId();
         AnnotationDto ann=new AnnotationDto();
         ann.setCoupletextId(request.getCoupletextId());
@@ -34,7 +33,7 @@ public class AnnotationController {
         return GlobalSuccessHandler.success("Annotation Created Sucessfully",ann);
     }
 
-    @GetMapping("/datasets/{datasetId}")
+    @GetMapping()
     public ResponseEntity<?> getAnnotationForDataset(@PathVariable Long datasetId){
         List<AnnotationDto> res=annotationService.getAnnotationsByDataset(datasetId);
 
