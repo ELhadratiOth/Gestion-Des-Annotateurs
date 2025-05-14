@@ -10,4 +10,5 @@ public interface AnnotationService {
     List<AnnotationDto> findByAnnotatorIdAndCoupletextId(Long annotatorId,Long CoupleOfTextId);
     List<AnnotationDto> getAnnotationsByDataset(Long datasetId);
     public long countAnnotationsForAnnotator(Long annotatorId);
+    AnnotationDto findByAnnotationIdSharedWithAdmin(Long annotationId , Long coupleOfTextId);
 }

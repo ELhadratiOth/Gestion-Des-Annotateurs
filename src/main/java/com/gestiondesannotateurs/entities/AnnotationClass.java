@@ -22,10 +22,12 @@ public class AnnotationClass {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "annotator_id")
-    private Annotator annotator;
+    private Person annotator;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupletext_id")
     private Coupletext coupletext;
+
+    private Boolean isAdmin = false ;
     // afficher les ananotations de tous les annotateurs by datasetid
     // affichage de annotateurID ET  label coupletext
 

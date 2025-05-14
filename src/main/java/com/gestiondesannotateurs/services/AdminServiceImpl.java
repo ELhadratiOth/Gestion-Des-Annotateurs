@@ -1,11 +1,14 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AdminDto;
+import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
+import com.gestiondesannotateurs.entities.AnnotationClass;
 import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.AdminService;
 import com.gestiondesannotateurs.repositories.AdminRepo;
+import com.gestiondesannotateurs.repositories.AnnotationRepo;
 import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AdminNotFoundException;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +32,9 @@ public class AdminServiceImpl implements AdminService {
     private CoupleOfTextRepo coupleOfTextRepo;
     @Autowired
     private DatasetRepo datasetRepo;
+
+    @Autowired
+    private AnnotationRepo annotationRepo;
 
     @Override
     public Admin getAdminById(Long adminId) {
@@ -108,7 +115,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<Coupletext> getAnannotatedCoupletexts(Long datasetId) {
+    public List<Coupletext> getAnonnotatedCoupletexts(Long datasetId) {
 
         Optional<Dataset> dataset = datasetRepo.findById(datasetId);
         if(dataset.isEmpty()){
@@ -120,6 +127,43 @@ public class AdminServiceImpl implements AdminService {
         return coupletexts  ;
     }
 
+    @Override
+    public List<CoupleOfTextWithAnnotation> getListOfCoupleOfTextWithThereAnnotation(Long datasetId) {
+        List<Coupletext> coupletexts = getAnonnotatedCoupletexts(datasetId); // only the affecteds to  the  admin
+
+        List<CoupleOfTextWithAnnotation> coupleOfTextWithAnnotations = new ArrayList<>();
+        for (int i = 0; i < coupletexts.size(); i++) {
+            Coupletext coupletext = coupletexts.get(i);
+//            System.out.println("this  is the coupletext id = " + coupletext.getId() );
+            Optional<AnnotationClass> annotation = annotationRepo.findAdminsAnnotationAnnotationByCoupleOfText(coupletext.getId());
+//            System.out.println("this  is the annotation i= " + annotation.get().getChoosenLabel() );
+
+            if(annotation.isEmpty()){
+                CoupleOfTextWithAnnotation dto = new CoupleOfTextWithAnnotation(
+                        coupletext.getId(),
+                        null,
+                        coupletext.getTextA(),
+                        coupletext.getTextB(),
+                        null
+                        // not annotated yet
+                );
+                coupleOfTextWithAnnotations.add(dto);
+//                System.out.println("this  is the dto = " + dto );
+            }
+            else{
+                CoupleOfTextWithAnnotation dto = new CoupleOfTextWithAnnotation(
+                        coupletext.getId(),
+                        annotation.get().getId(),
+                        coupletext.getTextA(),
+                        coupletext.getTextB(),
+                        annotation.get().getChoosenLabel()
+                );
+                coupleOfTextWithAnnotations.add(dto);
+            }
+    }
+        return coupleOfTextWithAnnotations ;
 
 
+
+    }
 }

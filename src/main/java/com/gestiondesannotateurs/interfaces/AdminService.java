@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.interfaces;
 
 import com.gestiondesannotateurs.dtos.AdminDto;
+import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
@@ -16,5 +17,7 @@ public interface AdminService {
     public void deactivateAdmin(Long id);
     public void activateAdmin(Long id);
 
-    public List<Coupletext> getAnannotatedCoupletexts(Long datasetId);
+    public List<Coupletext> getAnonnotatedCoupletexts(Long datasetId);
+
+    List<CoupleOfTextWithAnnotation>  getListOfCoupleOfTextWithThereAnnotation(Long datasetId) ;
 }

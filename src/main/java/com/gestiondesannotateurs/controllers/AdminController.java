@@ -1,10 +1,14 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AdminDto;
+import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
+import com.gestiondesannotateurs.entities.AnnotationClass;
 import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.AdminService;
+import com.gestiondesannotateurs.repositories.AnnotationRepo;
 import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import jakarta.validation.Valid;
@@ -12,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admins")
@@ -21,6 +27,8 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private CoupleOfTextRepo coupleOfTextRepo;
+    @Autowired
+    private AnnotationRepo annotationRepo;
 
     @GetMapping("/{adminId}")
     public ResponseEntity<GlobalResponse<Admin>> getAdminDetails(@PathVariable Long adminId) {
@@ -64,11 +72,17 @@ public class AdminController {
     }
 
 
-    @GetMapping("/coupleoftext/{datasetId}")
-    public ResponseEntity<GlobalResponse<List<Coupletext>>> getCoupleOfTextByDatasetId(@PathVariable Long datasetId) {
-        List<Coupletext> coupletexts = adminService.getAnannotatedCoupletexts(datasetId);
+    @GetMapping("/coupleoftextannotated/{datasetId}")
+    public ResponseEntity<GlobalResponse<List<CoupleOfTextWithAnnotation>>> getAdminsCoupleOfTextWithTheirAnnotationsByDatasetId(@PathVariable Long datasetId) {
 
-        return GlobalSuccessHandler.success("Successfully retrived admin coupletexts for dataset id = " + datasetId, coupletexts);
+        List<CoupleOfTextWithAnnotation>  coupleOfTextWithAnnotations = adminService.getListOfCoupleOfTextWithThereAnnotation(datasetId);
+
+
+        return GlobalSuccessHandler.success(
+                "Successfully retrieved admin coupletexts for dataset id = " + datasetId,
+                coupleOfTextWithAnnotations
+        );
     }
+
 
 }

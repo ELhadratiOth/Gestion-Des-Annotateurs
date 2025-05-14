@@ -2,17 +2,12 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AnnotationDto;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
-import com.gestiondesannotateurs.entities.AnnotationClass;
-import com.gestiondesannotateurs.entities.Annotator;
-import com.gestiondesannotateurs.entities.Coupletext;
-import com.gestiondesannotateurs.entities.Dataset;
+import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
-import com.gestiondesannotateurs.repositories.AnnotationRepo;
-import com.gestiondesannotateurs.repositories.AnnotatorRepo;
-import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
-import com.gestiondesannotateurs.repositories.DatasetRepo;
+import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,18 +30,46 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     @Autowired
     private DatasetRepo datasetRepo;
+    @Autowired
+    private AdminRepo adminRepo;
 
     @Override
     public AnnotationDto saveAnnotation(AnnotationDto dto) {
-        // Vérifier que l'annotateur existe
-        Annotator annotator = annotatorRepo.findById(dto.getAnnotatorId())
-                .orElseThrow(() -> new AnnotatorNotFoundException(dto.getAnnotatorId()));
+        // Validate input
+        if (dto == null || dto.getAnnotatorId() == null || dto.getCoupletextId() == null) {
+            throw new CustomResponseException(400, "Invalid input: Annotator ID or Coupletext ID is missing");
+        }
 
+        // Check if the annotatorId corresponds to an Annotator
+        Optional<Annotator> annotator = annotatorRepo.findById(dto.getAnnotatorId());
+        if (annotator.isPresent()) {
+            // Coupletext lookup
+            Coupletext coupletext = coupletextRepo.findById(dto.getCoupletextId())
+                    .orElseThrow(() -> new CustomResponseException(404, "Coupletext Not Found"));
+
+            // Save annotation
+            AnnotationClass annotation = new AnnotationClass();
+            annotation.setAnnotator(annotator.get());
+            annotation.setCoupletext(coupletext);
+            annotation.setChoosenLabel(dto.getLabel());
+            annotationRepo.save(annotation);
+            return dto; // Consider returning a DTO with the saved annotation's ID
+        }
+
+        // If not an Annotator, check if it's an Admin
+        Optional<Admin> admin = adminRepo.findById(dto.getAnnotatorId());
+        if (admin.isEmpty()) {
+            throw new CustomResponseException(404, "User Not Found: Neither Annotator nor Admin");
+        }
+
+        // Coupletext lookup
         Coupletext coupletext = coupletextRepo.findById(dto.getCoupletextId())
-                .orElseThrow(() -> new CustomResponseException(404,"Couple of ext Not Found"));
+                .orElseThrow(() -> new CustomResponseException(404, "Coupletext Not Found"));
 
+        // Save annotation
         AnnotationClass annotation = new AnnotationClass();
-        annotation.setAnnotator(annotator);
+        annotation.setAnnotator(admin.get());
+        annotation.setIsAdmin(true);
         annotation.setCoupletext(coupletext);
         annotation.setChoosenLabel(dto.getLabel());
         annotationRepo.save(annotation);
@@ -121,6 +144,31 @@ public class AnnotationServiceImpl implements AnnotationService {
         Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
                 .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId)));
         return findByAnnotatorId(annotatorId).toArray().length;
+    }
+
+    @Override
+    public AnnotationDto findByAnnotationIdSharedWithAdmin(Long annotatorId, Long coupleOfTextId) {
+        // Check if annotator exists
+        Optional<Annotator> annotator = annotatorRepo.findById(annotatorId);
+//        System.out.println(annotator.get().getId() + "!!!! " + annotatorId);
+        if (annotator.isEmpty()) {
+            throw new CustomResponseException(404,"Annotator with ID " + annotatorId + " does not exist");
+        }
+
+        // Query annotation by annotatorId
+        Optional<AnnotationClass> annotationClasse = annotationRepo.findByAnnotatorIdSharedWithAdmin(annotatorId,coupleOfTextId );
+//        System.out.println(annotationClasse.get().getCoupletext().getId() + "!!!! " + coupleOfTextId);
+        if (annotationClasse.isEmpty()) {
+            throw new CustomResponseException(404,"Annotator " + annotator.get().getFirstName() + " has not yet annotate the couple of text shared with admin");
+        }
+
+        AnnotationClass annotation = annotationClasse.get();
+        AnnotationDto annotationDto = new AnnotationDto();
+        annotationDto.setAnnotatorId(annotatorId);
+        annotationDto.setLabel(annotation.getChoosenLabel());
+        annotationDto.setCoupletextId(annotation.getCoupletext().getId());
+
+        return annotationDto;
     }
 
 }
