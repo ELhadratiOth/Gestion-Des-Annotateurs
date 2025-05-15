@@ -20,6 +20,7 @@ public interface CoupleOfTextRepo extends JpaRepository<Coupletext,Long> {
 
     @Query("SELECT c FROM Coupletext c JOIN c.tasks t WHERE t.id = :taskId")
     Page<Coupletext> findByTasks_Id(@Param("taskId") Long taskId, Pageable pageable);
+    List<Coupletext> findByTasks_Id(@Param("taskId") Long taskId);
     long countByTasks_Id(Long taskId);
 
     List<Coupletext> getAllByDatasetAndIsAnnotatedByAdmin(Dataset dataset , boolean isAnnotatedByAdmin);

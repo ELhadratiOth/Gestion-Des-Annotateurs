@@ -2,6 +2,8 @@ package com.gestiondesannotateurs.services;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.*;
@@ -127,6 +129,30 @@ public class TaskToDoServiceImpl implements TaskService {
             }
             coupleOfTextRepo.save(coupletext);
         }
+
+        // Duplicate some couple of text of each annotator for spamers detection purpose
+        int repetitionsPerAnnotator = 5;
+
+        for (TaskToDo task : taskList) {
+            // get assigned couples of text
+
+            List<Coupletext> assignedCouples = coupleOfTextRepo.findByTasks_Id(task.getId());
+
+            if (assignedCouples.size() < repetitionsPerAnnotator) {
+                throw new CustomResponseException(400, "Not enough couples to duplicate for annotator ID: " + task.getAnnotator().getId());
+            }
+
+            // randomly select the couple to duplicates
+            Collections.shuffle(assignedCouples);
+            List<Coupletext> toDuplicate = assignedCouples.subList(0, repetitionsPerAnnotator);
+
+            for (Coupletext ct : toDuplicate) {
+                // create the duplication
+                ct.addTask(task);
+                coupleOfTextRepo.save(ct);
+            }
+        }
+
     }
 
 
@@ -157,25 +183,73 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     public Coupletext getNextUnannotatedCoupletextForTask(Long taskId) {
-        Optional<TaskToDo> task= Optional.ofNullable(taskToDoRepo.findById(taskId)
-                .orElseThrow(() -> new CustomResponseException(404, "No such task")));
+        TaskToDo task = taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "No such task"));
+        Annotator annotator = task.getAnnotator();
 
-        List<Coupletext> coupletexts = task.get().getCoupletexts();
-        Annotator annotator = task.get().getAnnotator();
-        List<Long> annotatedIds = annotationRepo
-                .findByAnnotatorId(annotator.getId())
-                .stream()
-                .map(a -> a.getCoupletext().getId())
-                .toList();
+        List<Long> annotatedIds = annotationRepo.findByAnnotatorId(annotator.getId())
+                .stream().map(a -> a.getCoupletext().getId()).toList();
 
-        for (Coupletext ct : coupletexts) {
-            if (!annotatedIds.contains(ct.getId())) {
-                return ct;
+        // load all couple of text
+        List<Coupletext> allCouples = task.getCoupletexts();
+
+        // count occurence of couple to determine duplicated coouple
+        Map<Long, Long> countById = allCouples.stream()
+                .collect(Collectors.groupingBy(Coupletext::getId, Collectors.counting()));
+
+        // delete dupliction in list of couple
+        List<Coupletext> unique = allCouples.stream().distinct().toList();
+
+        // divide couple (sharedWithAdmin,duplicated,normal)
+        List<Coupletext> sharedWithAdmin = new ArrayList<>();
+        List<Coupletext> duplicateFirstHalf = new ArrayList<>();
+        List<Coupletext> normalFirstTen = new ArrayList<>();
+        List<Coupletext> duplicateSecondHalf = new ArrayList<>();
+        List<Coupletext> normalRest = new ArrayList<>();
+
+        int normalCount = 0;
+        int duplicateCount = 0;
+
+        for (Coupletext ct : unique) {
+            Long id = ct.getId();
+            long count = countById.getOrDefault(id, 1L);
+            boolean isAnnotated = annotatedIds.contains(id);
+
+            if (isAnnotated) continue;
+
+            if (Boolean.TRUE.equals(ct.getIsAnnotatedByAdmin())) {
+                sharedWithAdmin.add(ct);
+            } else if (count >= 2) {
+                // firsthalfduplicated
+                if (duplicateCount < 5) {
+                    duplicateFirstHalf.add(ct);
+                } else {
+                    duplicateSecondHalf.add(ct);
+                }
+                duplicateCount++;
+            } else {
+                if (normalCount < 10) {
+                    normalFirstTen.add(ct);
+                } else {
+                    normalRest.add(ct);
+                }
+                normalCount++;
             }
         }
 
-        return null;
+        // getting priority : admin → duplicatas (1) → normal (10) → duplicatas (2) → rest of normal
+        List<Coupletext> priorityOrdered = Stream.of(
+                sharedWithAdmin,
+                duplicateFirstHalf,
+                normalFirstTen,
+                duplicateSecondHalf,
+                normalRest
+        ).flatMap(List::stream).toList();
+
+        // Retourne the first one
+        return priorityOrdered.stream().findFirst().orElse(null);
     }
+
 
     public double getProgressForTask(Long taskId, Long annotatorId) {
         long total = coupleOfTextRepo.countByTasks_Id(taskId);

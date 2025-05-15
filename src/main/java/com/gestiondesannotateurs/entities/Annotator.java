@@ -34,6 +34,4 @@ public class Annotator extends Person {
 
     private boolean isSpammer = false;
 
-
-
 }
