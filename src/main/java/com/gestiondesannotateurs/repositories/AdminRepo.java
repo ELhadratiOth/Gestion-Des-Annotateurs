@@ -13,5 +13,5 @@ import java.util.Optional;
 @Repository
 public interface AdminRepo extends JpaRepository<Admin,Long> {
     boolean existsByEmail(String email);
-    boolean existsByLogin(String newLogin);
+//    boolean existsByUsername(String newLogin);
 }

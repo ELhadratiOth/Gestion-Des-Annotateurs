@@ -23,7 +23,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
     @Value("${admin.last.name}")
     private String adminLastName;
     @Value("${admin.login}")
-    private String adminLogin;
+    private String adminUserName;
     @Value("${admin.email}")
     private String adminEmail;
     @Value("${admin.password}")
@@ -43,8 +43,9 @@ public class AdminAccountInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setFirstName(adminFirstName);
             admin.setLastName(adminLastName);
-            admin.setLogin(adminLogin);
+            admin.setUserName(adminUserName);
             admin.setActive(true);
+            admin.setRole("SUPER_ADMIN");
             othmanRepo.save(admin);
             System.out.println("Super Admin account created successfully.");
         } else {

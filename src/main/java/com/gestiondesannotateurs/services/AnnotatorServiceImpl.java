@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.services;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
@@ -23,6 +24,7 @@ import com.gestiondesannotateurs.repositories.AnnotatorRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 
 @Service
+@Transactional
 public class AnnotatorServiceImpl implements AnnotatorService {
     @Autowired
     private AnnotatorRepo annotatorRepository;
@@ -34,7 +36,9 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     private DatasetRepo datasetRepo;
 
     @Autowired
-    private  BCryptPasswordEncoder passwordEncoder;
+    private EmailService emailService;
+
+
 
     @Override
     public Annotator getAnnotatorById(Long annotatorId) {
@@ -59,15 +63,20 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Override
     public Annotator createAnnotator( AnnotatorDto annotator) {
     	Annotator newAnnotator = new Annotator();
-		newAnnotator.setFirstName(annotator.getFirstName());
+        String token = UUID.randomUUID().toString();
+
+        newAnnotator.setFirstName(annotator.getFirstName());
 		newAnnotator.setLastName(annotator.getLastName());
 		newAnnotator.setEmail(annotator.getEmail());
-		newAnnotator.setLogin(annotator.getLogin());
+		newAnnotator.setUserName(annotator.getLogin());
         newAnnotator.setSpammer(false);
         newAnnotator.setActive(true);
+        newAnnotator.setVerified(false);
+        newAnnotator.setAccountCreationToken(token);
     	if (annotatorRepository.existsByEmail(newAnnotator.getEmail())) {
 			throw new AnnotatorNotFoundException(newAnnotator.getId());
 		}
+        emailService.sendAccountCreationEmail(newAnnotator.getEmail(), token);
 
         return annotatorRepository.save(newAnnotator);
     }
@@ -78,22 +87,19 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 				.orElseThrow(() -> new AnnotatorNotFoundException(annotatorId));
 
     	Annotator currentAnnotator= annotatorRepository.findById(existingAnnotator.getId()).get();
+
     	String firstName = annotator.getFirstName();
-    	if (firstName != null) {
-			currentAnnotator.setFirstName(firstName);
-		}
+        currentAnnotator.setFirstName(firstName);
+
     	String lastName = annotator.getLastName();
-    	if (lastName != null) {
-    		currentAnnotator.setLastName(lastName);
-    	}
+        currentAnnotator.setLastName(lastName);
+
     	String login = annotator.getLogin();
-    	if (login != null) {
-    		currentAnnotator.setLogin(login);
-    	}
+        currentAnnotator.setUserName(login);
+
     	String email = annotator.getEmail();
-    	if (email != null) {
-			currentAnnotator.setEmail(email);
-		}
+        currentAnnotator.setEmail(email);
+
     	return annotatorRepository.save(currentAnnotator);
     }
 
@@ -150,7 +156,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
                         task.getAnnotator().getId(),
                         task.getAnnotator().getFirstName(),
                         task.getAnnotator().getLastName(),
-                        task.getAnnotator().getLogin(),
+                        task.getAnnotator().getUsername(),
                         task.getAnnotator().getEmail()
                 ))
                 .collect(Collectors.toList());

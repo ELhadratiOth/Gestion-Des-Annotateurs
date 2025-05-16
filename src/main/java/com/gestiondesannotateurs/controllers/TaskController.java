@@ -14,22 +14,22 @@ import jakarta.validation.Valid;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
+@PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
 
 public class TaskController {
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private AnnotationService annotationService;
-    @Autowired
-    private AnnotatorService annotatorService;
+
 
     @GetMapping
+
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
         List<TaskToDo> tasks = taskService.getAll();
         return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -32,6 +33,8 @@ public class AdminServiceImpl implements AdminService {
     private CoupleOfTextRepo coupleOfTextRepo;
     @Autowired
     private DatasetRepo datasetRepo;
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private AnnotationRepo annotationRepo;
@@ -53,15 +56,28 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeException("Email already exists");
         }
 
-        Admin newAdmin = new Admin();
-        newAdmin.setFirstName(adminDto.getFirstName());
-        newAdmin.setLastName(adminDto.getLastName());
-        newAdmin.setEmail(adminDto.getEmail());
-        newAdmin.setLogin(adminDto.getLogin());
-        newAdmin.setPassword(passwordEncoder.encode("1234")); // Default password
-        newAdmin.setActive(true);
 
-        return adminRepository.save(newAdmin);
+        Admin newAdmin = new Admin();
+        String token = UUID.randomUUID().toString();
+        try {
+
+            newAdmin.setFirstName(adminDto.getFirstName());
+            newAdmin.setLastName(adminDto.getLastName());
+            newAdmin.setEmail(adminDto.getEmail());
+            newAdmin.setUserName(adminDto.getLogin());
+            newAdmin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
+            newAdmin.setActive(true);
+            newAdmin.setActive(true);
+            newAdmin.setVerified(false);
+            newAdmin.setRole("ADMIN");
+            newAdmin.setAccountCreationToken(token);
+            emailService.sendAccountCreationEmail(newAdmin.getEmail(), token);
+
+            return adminRepository.save(newAdmin);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
     }
     @Override
     public Admin updateAdmin(Long adminId, AdminDto adminDto) {
@@ -84,8 +100,8 @@ public class AdminServiceImpl implements AdminService {
             existingAdmin.setEmail(adminDto.getEmail());
         }
 
-        if (adminDto.getLogin() != null && !adminDto.getLogin().equals(existingAdmin.getLogin())) {
-            existingAdmin.setLogin(adminDto.getLogin());
+        if (adminDto.getLogin() != null && !adminDto.getLogin().equals(existingAdmin.getUsername())) {
+            existingAdmin.setUserName(adminDto.getLogin());
         }
         return adminRepository.save(existingAdmin);
     }

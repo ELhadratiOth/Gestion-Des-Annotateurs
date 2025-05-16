@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -26,22 +27,26 @@ public class AnnotatorController {
     private AnnotatorService annotatorService;
 
     @GetMapping("/{annotatorId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN','ANNOTATOR')")
     public ResponseEntity<GlobalResponse<Annotator>> getAnnotatorDetails(@PathVariable Long annotatorId) {
         Annotator annotator = annotatorService.getAnnotatorById(annotatorId);
         return GlobalSuccessHandler.success("Annotator details retrieved successfully", annotator);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getAllAnnotatorDetails() {
         List<Annotator> annotators = annotatorService.getAllAnnotators();
         return GlobalSuccessHandler.success("All annotators retrieved successfully", annotators);
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<Annotator>> createAnnotatorDetails(@Valid @RequestBody AnnotatorDto annotator) {
         Annotator createdAnnotator = annotatorService.createAnnotator(annotator);
         return GlobalSuccessHandler.created("Annotator created successfully", createdAnnotator);
     }
     @PutMapping("/{annotatorId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN','ANNOTATOR')")
     public ResponseEntity<GlobalResponse<Annotator>> updateAnnotatorDetails(
             @PathVariable Long annotatorId,
             @RequestBody AnnotatorDto annotator) {
@@ -49,34 +54,45 @@ public class AnnotatorController {
         return GlobalSuccessHandler.success("Annotator updated successfully", updatedAnnotator);
     }
     @DeleteMapping("/{annotatorId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<String>> deleteAnnotatorDetails(@PathVariable Long annotatorId) {
         annotatorService.deleteAnnotator(annotatorId);
         return GlobalSuccessHandler.deleted("Annotateur supprimé avec succès");
     }
     @PatchMapping("/{id}/spam")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<Annotator>> markAsSpammer(@PathVariable Long id) {
             annotatorService.markAsSpammer(id);
             Annotator annotator = annotatorService.getAnnotatorById(id);
             return GlobalSuccessHandler.success("Annotateur marqué comme spammeur", annotator);
     }
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<Annotator>> deactivateAnnotator(@PathVariable Long id) {
             annotatorService.deactivateAnnotator(id);
             Annotator annotator = annotatorService.getAnnotatorById(id);
             return GlobalSuccessHandler.success("Annotateur désactivé", annotator);
     }
     @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<Annotator>> activateAnnotator(@PathVariable Long id) {
         annotatorService.activateAnnotator(id);
         Annotator annotator = annotatorService.getAnnotatorById(id);
         return GlobalSuccessHandler.success("Annotateur mmactivé", annotator);
     }
     @GetMapping("/spammers/{datasetId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {
         List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);
         return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
     }
     @GetMapping("/dataset/{datasetId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<AnnotatorTaskDto>>> getAnnotatorsByDataset(
             @PathVariable Long datasetId) {
         List<AnnotatorTaskDto> result = annotatorService.getAnnotatorsByDataset(datasetId);
@@ -84,6 +100,7 @@ public class AnnotatorController {
     }
 
     @GetMapping("/search/{annotatorName}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getAnnotatorsByAnnotatorName(@PathVariable String annotatorName) {
         List<Annotator> annotators = annotatorService.getMatchingAnnotators(annotatorName);
         return GlobalSuccessHandler.success("Spammers retrieved successfully", annotators);

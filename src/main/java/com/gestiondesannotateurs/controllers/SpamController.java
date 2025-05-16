@@ -14,6 +14,7 @@ import com.gestiondesannotateurs.utils.AdminDetectSpammers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class SpamController {
     private AdminDetectSpammers adminDetectSpammers;
 
     @GetMapping("/scan/{datasetId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<?> scan(@PathVariable Long datasetId){
 
         //1 admin check

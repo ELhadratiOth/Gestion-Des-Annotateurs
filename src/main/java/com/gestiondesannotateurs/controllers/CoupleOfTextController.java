@@ -6,8 +6,10 @@ import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +18,12 @@ import java.util.List;
 @RequestMapping("/api/coupletexts")
 @RequiredArgsConstructor
 public class CoupleOfTextController {
-
-    private final CoupleOfTextService coupleOfTextService;
+    @Autowired
+    private  CoupleOfTextService coupleOfTextService;
 
     @GetMapping("/{datasetId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getDatasetCoupleTexts(
             @PathVariable Long datasetId,
             @RequestParam(defaultValue = "0") int page,
@@ -39,6 +43,8 @@ public class CoupleOfTextController {
         );
     }
     @GetMapping("/tasks/{taskId}")
+    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getTaskCoupleTexts(
             @PathVariable Long taskId,
             @RequestParam(defaultValue = "0") int page,

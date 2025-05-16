@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -36,21 +37,20 @@ public class DatasetController {
     @Autowired
     private DatasetService datasetService;
 
-
-    @Autowired
-    private TaskToDoRepo taskToDoRepo;
-
     @Autowired
     private ProcessFile processFile;
 
 
     @GetMapping("/{idDataset}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
+
     public ResponseEntity<GlobalResponse<DatasetInfo>> infoDataset(@PathVariable Long idDataset) {
         DatasetInfo datasetInfo = datasetService.taskInfo(idDataset);
         return GlobalSuccessHandler.success(datasetInfo);
     }
 
     @PostMapping()
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     public ResponseEntity<?> createDataset(
             @ModelAttribute DatasetUploadRequest dataset) throws CsvValidationException, IOException {
 
@@ -62,18 +62,23 @@ public class DatasetController {
     }
 
     @DeleteMapping("/{idDataset}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ROLE_ADMIN')")
+
     public ResponseEntity<GlobalResponse<String>> deleteDataset(@PathVariable Long idDataset) {
         datasetService.deleteDataset(idDataset);
         return GlobalSuccessHandler.deleted("Dataset supprimé avec succès");
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<List<DatasetInfo>>> getAllDatasets() {
+        System.out.println("getAllDatasets");
         List<DatasetInfo> datasets = datasetService.getAll();
         return GlobalSuccessHandler.success("Liste des datasets récupérée avec succès", datasets);
     }
 
     @PutMapping("/{idDataset}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     public ResponseEntity<GlobalResponse<Dataset>> updateDataset(
             @RequestBody DatasetUpdata updataDataset,
             @PathVariable Long idDataset) {
@@ -82,6 +87,8 @@ public class DatasetController {
     }
 
     @GetMapping("/advancement/1")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<Dataset>>> getTerminatedAnnotatedDatasets(){
         List<Dataset> datasets =  datasetService.getTerminatedAnnotatedDatasets();
 
@@ -89,12 +96,15 @@ public class DatasetController {
     }
 
     @GetMapping("/advancement/0")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+
     public ResponseEntity<GlobalResponse<List<Dataset>>> getNotTerminatedAnnotatedDatasets(){
         List<Dataset> datasets =  datasetService.getNotTerminatedAnnotatedDatasets();
         return GlobalSuccessHandler.success("List of all the datasets that are not 100% annotated " , datasets);
     }
 
     @GetMapping("/download/{datasetId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
     public ResponseEntity<?> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
         Dataset dataset = datasetService.findDatasetById(datasetId);
 
@@ -116,7 +126,6 @@ public class DatasetController {
             contentType = "application/octet-stream";
         }
 
-        // Generate a download-friendly file name
         String originalFileName = new File(dataset.getFilePath()).getName();
         String downloadFileName = "dataset_" + datasetId +  processFile.getFileExtension(originalFileName);
 

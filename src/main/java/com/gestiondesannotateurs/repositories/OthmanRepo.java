@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OthmanRepo extends JpaRepository<Othman,Long> {
     boolean existsByEmail(String email);
-    boolean existsByLogin(String newLogin);
+//    boolean existsByUsername(String newLogin);
 }

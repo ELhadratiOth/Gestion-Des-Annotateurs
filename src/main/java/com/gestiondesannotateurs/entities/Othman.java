@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@DiscriminatorValue("SUPER-ADMIN")
+@DiscriminatorValue("SUPER_ADMIN")
 @Getter
 @Setter
 //@AllArgsConstructor
