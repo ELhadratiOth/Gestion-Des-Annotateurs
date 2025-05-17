@@ -3,14 +3,18 @@ import com.gestiondesannotateurs.interfaces.KappaEvaluationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
 public class KappaEvaluationServiceImpl implements KappaEvaluationService {
 
     public double calculateKappa(List<List<Integer>> annotations) {
-        if (annotations == null || annotations.size() < 2) {
-            throw new IllegalArgumentException("At least 2 annotators required");
+        if (annotations == null || annotations.isEmpty() || annotations.get(0).size() < 2) {
+            throw new IllegalArgumentException("At least 2 annotators and 1 item required");
         }
         int annotatorCount = annotations.get(0).size();
 
@@ -28,34 +32,46 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
                 .map(item -> item.get(1))
                 .collect(Collectors.toList());
 
+        // Détection dynamique des catégories
+        Set<Integer> categories = new HashSet<>();
+        categories.addAll(annotator1);
+        categories.addAll(annotator2);
+        int categoryCount = categories.size();
+
         int n = annotator1.size();
-        int[][] matrix = new int[3][3]; // 3 catégories (0,1,2)
+        int[][] matrix = new int[categoryCount][categoryCount];
+
+        // Créer une correspondance entre les labels et les indices de matrice
+        List<Integer> sortedCategories = new ArrayList<>(categories);
+        Collections.sort(sortedCategories);
 
         // Remplir la matrice de confusion
         for (int i = 0; i < n; i++) {
-            matrix[annotator1.get(i)][annotator2.get(i)]++;
+            int row = sortedCategories.indexOf(annotator1.get(i));
+            int col = sortedCategories.indexOf(annotator2.get(i));
+            matrix[row][col]++;
         }
 
         // Calculer l'accord observé (po)
         double po = 0.0;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < categoryCount; i++) {
             po += matrix[i][i];
         }
         po /= n;
 
         // Calculer l'accord attendu (pe)
         double pe = 0.0;
-        int[] rowSums = new int[3];
-        int[] colSums = new int[3];
+        int[] rowSums = new int[categoryCount];
+        int[] colSums = new int[categoryCount];
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < categoryCount; i++) {
+            for (int j = 0; j < categoryCount; j++) {
                 rowSums[i] += matrix[i][j];
                 colSums[j] += matrix[i][j];
             }
         }
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < categoryCount; i++) {
             pe += (rowSums[i] * colSums[i]);
         }
         pe /= (n * n);
@@ -65,16 +81,25 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
 
     private double calculateFleissKappa(List<List<Integer>> annotations) {
         int n = annotations.size();       // Nombre d'items
-        int k = 3;                        // Nombre de catégories
         int m = annotations.get(0).size(); // Nombre d'annotateurs
+
+        // Détection dynamique des catégories
+        Set<Integer> uniqueLabels = new HashSet<>();
+        for (List<Integer> item : annotations) {
+            uniqueLabels.addAll(item);
+        }
+        int k = uniqueLabels.size();
+        List<Integer> labels = new ArrayList<>(uniqueLabels);
+        Collections.sort(labels);
 
         int[][] counts = new int[n][k];
 
         // Compter les votes par catégorie
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                int category = annotations.get(i).get(j);
-                counts[i][category]++;
+                int label = annotations.get(i).get(j);
+                int labelIndex = labels.indexOf(label);
+                counts[i][labelIndex]++;
             }
         }
 
@@ -102,6 +127,11 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
         double Pexp = 0.0;
         for (double pj : Pj) {
             Pexp += pj * pj;
+        }
+
+        // Gestion des cas limites
+        if (Pexp == 1.0) {
+            return 1.0; // Accord parfait
         }
 
         return (Pbar - Pexp) / (1 - Pexp);
