@@ -34,12 +34,12 @@ public class Person implements UserDetails {
     private String email;
 
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String userName;
 
 
-    @Column(nullable = false)
-    private String password = "111";
+    @Column()
+    private String password ;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE" ,nullable = false)
     private boolean active = true;

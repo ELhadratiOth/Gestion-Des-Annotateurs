@@ -3,6 +3,8 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.config.JwtHelper;
 import com.gestiondesannotateurs.dtos.LoginRequest;
+import com.gestiondesannotateurs.dtos.LoginResp;
+import com.gestiondesannotateurs.dtos.PersonDTO;
 import com.gestiondesannotateurs.dtos.SignupRequest;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.Annotator;
@@ -31,12 +33,14 @@ public class AuthServiceImpl {
     @Autowired
     private JwtHelper jwtHelper;
 
-    public void signup(SignupRequest signupRequest, String token) {
-        Person person = personRepo.findOneByAccountCreationToken(token)
-                .orElseThrow(() -> new CustomResponseException(404,"Invalid token"));
+    public PersonDTO signup(SignupRequest signupRequest) {
+        System.out.println("tokennn : " + signupRequest.token());
+
+        Person person = personRepo.findOneByAccountCreationToken(signupRequest.token())
+                .orElseThrow(() -> new CustomResponseException(404, "Invalid token"));
 
         if (person.isVerified()) {
-            throw  new CustomResponseException(404,"Account already created");
+            throw new CustomResponseException(404, "Account already created");
         }
 
         person.setUserName(signupRequest.username());
@@ -44,12 +48,20 @@ public class AuthServiceImpl {
         person.setVerified(true);
         person.setAccountCreationToken(null);
 
-        personRepo.save(person);
+        Person savedPerson = personRepo.save(person);
 
+        return new PersonDTO(
+                savedPerson.getId(),
+                savedPerson.getFirstName(),
+                savedPerson.getLastName(),
+                savedPerson.getEmail(),
+                savedPerson.getUsername(),
+                savedPerson.getRole()
+        );
     }
 
 
-    public String login(LoginRequest loginRequest) {
+    public LoginResp login(LoginRequest loginRequest ) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.username(),
@@ -64,6 +76,17 @@ public class AuthServiceImpl {
 
         Map<String, Object> customClaims = new HashMap<>();
         customClaims.put("userId", user.getId());
-        return jwtHelper.generateToken(customClaims, user);
+
+
+        PersonDTO personDTO = new PersonDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole()
+        );
+
+        return  new LoginResp(jwtHelper.generateToken(customClaims, user) , personDTO) ;
     }
 }
