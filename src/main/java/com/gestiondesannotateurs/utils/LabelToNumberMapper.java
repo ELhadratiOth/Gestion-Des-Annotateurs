@@ -76,7 +76,6 @@ public class LabelToNumberMapper {
                 result.add(annotatorPairs);
             }
         }
-
         return result;
     }
 }
