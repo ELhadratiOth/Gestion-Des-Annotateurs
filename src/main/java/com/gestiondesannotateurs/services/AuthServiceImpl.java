@@ -5,8 +5,8 @@ import com.gestiondesannotateurs.config.JwtHelper;
 import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.repositories.AnnotationRepo;
-import com.gestiondesannotateurs.repositories.PasswordRestRepo;
 import com.gestiondesannotateurs.repositories.PersonRepo;
+import com.gestiondesannotateurs.repositories.ResetPasswordRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +33,7 @@ public class AuthServiceImpl {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private PasswordRestRepo passwordRestRepo;
+    private ResetPasswordRepo resetPasswordRepo;
 
     public PersonDTO signup(SignupRequest signupRequest) {
         System.out.println("tokennn : " + signupRequest.token());
@@ -110,7 +110,7 @@ public class AuthServiceImpl {
             resetToken.setExpiryDate(expiry);
             resetToken.setPerson(person);
 
-            passwordRestRepo.save(resetToken);
+            resetPasswordRepo.save(resetToken);
 
             emailService.sendPasswordRestEmail(person.getEmail(), token);
         } catch (Exception e) {
@@ -120,19 +120,19 @@ public class AuthServiceImpl {
 
 
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        PasswordResetToken resetToken = passwordRestRepo.findOneByToken(resetPasswordRequest.token())
+        PasswordResetToken resetToken = resetPasswordRepo.findOneByToken(resetPasswordRequest.token())
                 .orElseThrow(() -> new CustomResponseException(404,"Invalid token"));
 
         boolean isTokenExpired = resetToken.getExpiryDate().isBefore(LocalDateTime.now());
         if (isTokenExpired) {
-            passwordRestRepo.delete(resetToken);
+            resetPasswordRepo.delete(resetToken);
             throw new CustomResponseException(404 ,"Token has expired, request a new one");
         }
 
         Person person = resetToken.getPerson();
         person.setPassword(passwordEncoder.encode(resetPasswordRequest.newPassword()));
         personRepo.save(person);
-        passwordRestRepo.delete(resetToken);
+        resetPasswordRepo.delete(resetToken);
     }
 
 }
