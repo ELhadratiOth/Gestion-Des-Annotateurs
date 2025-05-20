@@ -41,7 +41,7 @@ public class AnnotatorController {
     }
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
-    public ResponseEntity<GlobalResponse<Annotator>> createAnnotatorDetails(@Valid @RequestBody AnnotatorDto annotator) {
+    public ResponseEntity<GlobalResponse<Annotator>> createAnnotatorDetails(@RequestBody AnnotatorDto annotator) {
         Annotator createdAnnotator = annotatorService.createAnnotator(annotator);
         return GlobalSuccessHandler.created("Annotator created successfully", createdAnnotator);
     }

@@ -68,7 +68,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         newAnnotator.setFirstName(annotator.getFirstName());
 		newAnnotator.setLastName(annotator.getLastName());
 		newAnnotator.setEmail(annotator.getEmail());
-		newAnnotator.setUserName(annotator.getLogin());
+//        newAnnotator.setUserName(annotator.getUsername());
         newAnnotator.setSpammer(false);
         newAnnotator.setActive(true);
         newAnnotator.setVerified(false);
@@ -94,8 +94,8 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     	String lastName = annotator.getLastName();
         currentAnnotator.setLastName(lastName);
 
-    	String login = annotator.getLogin();
-        currentAnnotator.setUserName(login);
+//    	String login = annotator.getLogin();
+//        currentAnnotator.setUserName(login);
 
     	String email = annotator.getEmail();
         currentAnnotator.setEmail(email);
