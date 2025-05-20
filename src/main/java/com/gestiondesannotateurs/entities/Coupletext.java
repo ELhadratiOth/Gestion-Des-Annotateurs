@@ -46,7 +46,6 @@ public class Coupletext {
             inverseJoinColumns = @JoinColumn(name = "task_id")
     )
     private List<TaskToDo>  tasks;
-
 //    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 //    @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY)
 //    private List<AnnotationClass> annotations = new ArrayList<>();

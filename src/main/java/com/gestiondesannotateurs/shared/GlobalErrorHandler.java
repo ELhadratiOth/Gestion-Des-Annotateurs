@@ -1,7 +1,6 @@
 package com.gestiondesannotateurs.shared;
 
-import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
-import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import com.gestiondesannotateurs.shared.Exceptions.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +13,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -99,6 +99,7 @@ public class GlobalErrorHandler {
     }
 
 
-
-
 }
+
+
+

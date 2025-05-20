@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.shared;
 
 import java.util.List;
+import java.util.Map;
 
 public record GlobalResponse<T>(
         String status,
@@ -18,5 +19,9 @@ public record GlobalResponse<T>(
 
     public static GlobalResponse<?> error(List<String> messages) {
         return new GlobalResponse<>("error", null, null, messages);
+    }
+
+    public static <E, K, V> Object error(List<E> message, Map<K, V> invalidValue) {
+        return null;
     }
 }

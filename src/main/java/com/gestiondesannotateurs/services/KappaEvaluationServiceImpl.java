@@ -4,6 +4,7 @@ import com.gestiondesannotateurs.interfaces.KappaEvaluationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,19 +53,16 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
         int n = annotator1.size();
         int[][] matrix = new int[numberOfCategories][numberOfCategories];
 
-        // Fill confusion matrix
         for (int i = 0; i < n; i++) {
             matrix[annotator1.get(i)][annotator2.get(i)]++;
         }
 
-        // Calculate observed agreement (po)
         double po = 0.0;
         for (int i = 0; i < numberOfCategories; i++) {
             po += matrix[i][i];
         }
         po /= n;
 
-        // Calculate expected agreement (pe)
         double pe = 0.0;
         int[] rowSums = new int[numberOfCategories];
         int[] colSums = new int[numberOfCategories];
@@ -85,19 +83,17 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
     }
 
     private double calculateFleissKappa(List<List<Integer>> annotations, int numberOfCategories) {
-        int n = annotations.size();       // Number of items
-        int m = annotations.get(0).size(); // Number of annotators
+        int n = annotations.size();
+        int m = annotations.get(0).size();
 
         int[][] counts = new int[n][numberOfCategories];
 
-        // Count votes per category
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 counts[i][annotations.get(i).get(j)]++;
             }
         }
 
-        // Calculate global proportions (Pj)
         double[] Pj = new double[numberOfCategories];
         for (int j = 0; j < numberOfCategories; j++) {
             for (int i = 0; i < n; i++) {
@@ -106,7 +102,6 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
             Pj[j] /= (n * m);
         }
 
-        // Calculate average agreement (Pbar)
         double Pbar = 0.0;
         for (int i = 0; i < n; i++) {
             double sum = 0.0;
@@ -117,17 +112,94 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
         }
         Pbar /= n;
 
-        // Calculate expected agreement (Pexp)
         double Pexp = 0.0;
         for (double pj : Pj) {
             Pexp += pj * pj;
         }
 
-        // Handle edge cases
         if (Math.abs(1.0 - Pexp) < 1e-10) {
-            return 1.0; // Perfect agreemen
+            return 1.0;
         }
 
         return (Pbar - Pexp) / (1 - Pexp);
+    }
+
+    private void validateSingleItemAnnotations(List<Integer> annotations,
+                                               Map<Integer, String> categoryLabels) {
+        if (annotations == null || categoryLabels == null) {
+            throw new IllegalArgumentException("Annotations and labels cannot be null");
+        }
+
+        if (annotations.size() < 2) {
+            throw new IllegalArgumentException("At least 2 annotations are required");
+        }
+
+        if (categoryLabels.size() < 2) {
+            throw new IllegalArgumentException("At least 2 categories must be defined");
+        }
+
+        for (Integer annotation : annotations) {
+            if (annotation == null || !categoryLabels.containsKey(annotation)) {
+                throw new IllegalArgumentException(
+                        "Invalid annotation: " + annotation +
+                                ". Valid categories: " + categoryLabels.keySet()
+                );
+            }
+        }
+    }
+
+    private double calculateFleissKappaForSingleItem(List<Integer> annotations, int numberOfCategories) {
+        int numAnnotations = annotations.size();
+        int[][] counts = new int[1][numberOfCategories];
+
+        for (int annotation : annotations) {
+            counts[0][annotation]++;
+        }
+
+        double[] Pj = new double[numberOfCategories];
+        for (int j = 0; j < numberOfCategories; j++) {
+            Pj[j] = counts[0][j] / (double) numAnnotations;
+        }
+
+        double Pbar = 0.0;
+        for (int j = 0; j < numberOfCategories; j++) {
+            Pbar += counts[0][j] * (counts[0][j] - 1);
+        }
+        Pbar /= numAnnotations * (numAnnotations - 1);
+
+        double Pexp = 0.0;
+        for (double pj : Pj) {
+            Pexp += pj * pj;
+        }
+
+        if (Math.abs(1.0 - Pexp) < 1e-10) {
+            return 1.0;
+        }
+
+        return (Pbar - Pexp) / (1 - Pexp);
+    }
+
+    @Override
+    public String getMostFrequentCategoryWithKappa(List<Integer> singleItemAnnotations,
+                                                   Map<Integer, String> categoryLabels) {
+        validateSingleItemAnnotations(singleItemAnnotations, categoryLabels);
+
+        double kappa = calculateFleissKappaForSingleItem(singleItemAnnotations, categoryLabels.size());
+
+        Map<Integer, Long> frequencyMap = singleItemAnnotations.stream()
+                .collect(Collectors.groupingBy(
+                        annotation -> annotation,
+                        Collectors.counting()
+                ));
+
+        int mostFrequentCategory = frequencyMap.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElseThrow(() -> new IllegalStateException("Could not determine category"));
+
+        // Formatage avec point comme séparateur décimal
+        return String.format("%s (Kappa: %.2f)",
+                categoryLabels.get(mostFrequentCategory),
+                kappa).replace(",", ".");
     }
 }
