@@ -139,13 +139,19 @@ public class TaskToDoServiceImpl implements TaskService {
 
             List<Coupletext> assignedCouples = coupleOfTextRepo.findByTasks_Id(task.getId());
 
-            if (assignedCouples.size() < repetitionsPerAnnotator) {
+            // Filtrer les couples qui ne sont pas annotés par l'admin
+            List<Coupletext> filteredCouples = assignedCouples.stream()
+                    .filter(ct -> !ct.getIsDuplicated())
+                    .collect(Collectors.toList());
+
+
+            if (filteredCouples.size() < repetitionsPerAnnotator) {
                 throw new CustomResponseException(400, "Not enough couples to duplicate for annotator ID: " + task.getAnnotator().getId());
             }
 
             // randomly select the couple to duplicates
-            Collections.shuffle(assignedCouples);
-            List<Coupletext> toDuplicate = assignedCouples.subList(0, repetitionsPerAnnotator);
+            Collections.shuffle(filteredCouples);
+            List<Coupletext> toDuplicate = filteredCouples.subList(0, repetitionsPerAnnotator);
 
             for (Coupletext ct : toDuplicate) {
                 // Si ce couple est déjà marqué comme duplicata, on le laisse comme tel

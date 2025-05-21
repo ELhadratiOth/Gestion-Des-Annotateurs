@@ -4,6 +4,7 @@ import com.gestiondesannotateurs.dtos.AnnotationDto;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
 import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
+import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
@@ -33,6 +34,9 @@ public class AnnotationServiceImpl implements AnnotationService {
     @Autowired
     private AdminRepo adminRepo;
 
+    @Autowired
+    private DatasetService datasetService;
+
     @Override
     public AnnotationDto saveAnnotation(AnnotationDto dto) {
         // Validate input
@@ -53,6 +57,8 @@ public class AnnotationServiceImpl implements AnnotationService {
             annotation.setCoupletext(coupletext);
             annotation.setChoosenLabel(dto.getLabel());
             annotationRepo.save(annotation);
+            Long datasetId = annotation.getCoupletext().getDataset().getId();
+            datasetService.updateDatasetAdvancement(datasetId);
             return dto; // Consider returning a DTO with the saved annotation's ID
         }
 

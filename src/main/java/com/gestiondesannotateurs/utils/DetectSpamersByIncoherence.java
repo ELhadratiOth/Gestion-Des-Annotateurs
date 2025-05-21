@@ -35,7 +35,7 @@ public class DetectSpamersByIncoherence {
     private AnnotatorRepo annotatorRepo;
 
     // 👉 configurable threshold
-    private static final int INCOHERENCE_THRESHOLD = 3;
+    private static final int INCOHERENCE_THRESHOLD = 4;
 
     public void detectSpammerByInconsistency(Long annotatorId) {
         Annotator annotator = annotatorService.getAnnotatorById(annotatorId);

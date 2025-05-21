@@ -19,5 +19,9 @@ public interface DatasetService {
     List<Dataset> getTerminatedAnnotatedDatasets();
     List<Dataset> getNotTerminatedAnnotatedDatasets();
 
+    double calculateDatasetAdvacement(Long datasetId);
+
+    void updateDatasetAdvancement(Long datasetId);
+
     Dataset findDatasetById(Long idDataset);
 }

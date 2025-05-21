@@ -41,9 +41,16 @@ public class AnnotationController {
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<?> getAnnotationForDataset(@PathVariable Long datasetId){
         List<AnnotationDto> res=annotationService.getAnnotationsByDataset(datasetId);
-        return GlobalSuccessHandler.success("Annotations found",res);
+        return GlobalSuccessHandler.success("Annotations found ",res);
 
     }
+
+    @GetMapping("/{annotatorId}")
+    public ResponseEntity<?> getAnnotationForAnnotator(@PathVariable Long  annotatorId){
+        List<AnnotationDto> res=annotationService.findByAnnotatorId(annotatorId);
+        return GlobalSuccessHandler.success("Annotations found",res);
+    }
+
 
 
 }

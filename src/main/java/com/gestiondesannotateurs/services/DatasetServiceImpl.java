@@ -43,6 +43,9 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private TaskToDoRepo taskToDoRepo;
 
+    @Autowired
+    TaskService taskService;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -150,6 +153,33 @@ public class DatasetServiceImpl implements DatasetService {
         Hibernate.initialize(savedDataset.getLabel());
 
         return savedDataset;
+    }
+
+    @Override
+    public double calculateDatasetAdvacement(Long datasetId){
+        Optional<Dataset> dataset = datasetRepo.findById(datasetId);
+        if(dataset.isEmpty()){
+            throw new CustomResponseException(404,"Dataset doesnt exist with this id");
+        }
+        List<TaskToDo> datasetTasks = taskToDoRepo.findByDataset(dataset.get());
+        double totalAdavement =0;
+        for(TaskToDo taskToDo : datasetTasks){
+            Long annotatorAssociatedToTask=taskToDo.getAnnotator().getId();
+            totalAdavement+=taskService.getProgressForTask(taskToDo.getId(),annotatorAssociatedToTask);
+
+        }
+
+        return totalAdavement/datasetTasks.toArray().length;
+
+    }
+    @Override
+    public void updateDatasetAdvancement(Long datasetId) {
+        double advancement = calculateDatasetAdvacement(datasetId);
+        Dataset dataset = datasetRepo.findById(datasetId)
+                .orElseThrow(() -> new CustomResponseException(404, "Dataset not found"));
+
+        dataset.setAdvancement(advancement);
+        datasetRepo.save(dataset);
     }
 
     @Override
