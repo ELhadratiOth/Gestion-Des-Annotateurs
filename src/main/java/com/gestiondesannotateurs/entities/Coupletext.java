@@ -29,6 +29,9 @@ public class Coupletext {
     @Column()
 //    @Column(nullable = false)
     private Boolean isAnnotatedByAdmin = false;
+    @Column
+
+    private Boolean isDuplicated = false;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY )

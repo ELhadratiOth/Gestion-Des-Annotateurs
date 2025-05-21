@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -22,6 +23,8 @@ public interface CoupleOfTextRepo extends JpaRepository<Coupletext,Long> {
     Page<Coupletext> findByTasks_Id(@Param("taskId") Long taskId, Pageable pageable);
     List<Coupletext> findByTasks_Id(@Param("taskId") Long taskId);
     long countByTasks_Id(Long taskId);
+    Optional<Coupletext> findByTextAAndTextBAndDatasetAndIsDuplicatedTrue(String textA, String textB, Dataset dataset);
+
 
     List<Coupletext> getAllByDatasetAndIsAnnotatedByAdmin(Dataset dataset , boolean isAnnotatedByAdmin);
 

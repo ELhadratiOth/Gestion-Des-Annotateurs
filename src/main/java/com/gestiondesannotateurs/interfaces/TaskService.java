@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.interfaces;
 
+import com.gestiondesannotateurs.dtos.CoupletextDto;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
@@ -17,6 +18,9 @@ public interface TaskService {
     public List<TaskToDoDto> getTasksByDatasetId(Long datasetId);
     Coupletext getNextUnannotatedCoupletextForTask(Long taskId);
     void deleteTaskByDatasetId(Long datasetId);
+    public double getProgressForTask(Long taskId, Long annotatorId);
+    public List<Coupletext> getDuplicatedCoupletextsForTask(Long taskId);
+
 //    public void deleteTask(Long taskId);
 //    void deleteTasksByDataset(Dataset dataset);
 }

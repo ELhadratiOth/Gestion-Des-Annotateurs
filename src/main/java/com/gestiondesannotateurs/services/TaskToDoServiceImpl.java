@@ -43,6 +43,7 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     @Override
+    @Transactional
     public void createTask(TaskCreate tasks) {
         // Validate number of annotators (minimum 3)
         Integer numberOfAnnotators = tasks.annotatorIds().size();
@@ -147,18 +148,34 @@ public class TaskToDoServiceImpl implements TaskService {
             List<Coupletext> toDuplicate = assignedCouples.subList(0, repetitionsPerAnnotator);
 
             for (Coupletext ct : toDuplicate) {
-                // create the duplication
-                ct.addTask(task);
+                // Si ce couple est déjà marqué comme duplicata, on le laisse comme tel
+                ct.setIsDuplicated(true);
+
+                // Sinon on l'assigne à cette tâche
+                if (!ct.getTasks().contains(task)) {
+                    ct.addTask(task);
+                }
+
                 coupleOfTextRepo.save(ct);
             }
+
+
         }
 
     }
 
+    public List<Coupletext> getDuplicatedCoupletextsForTask(Long taskId) {
+        TaskToDo task = taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "Task not found with id: " + taskId));
+
+        return task.getCoupletexts().stream()
+                .filter(ct -> Boolean.TRUE.equals(ct.getIsDuplicated()))
+                .collect(Collectors.toList());
+    }
 
 
 
-   @Override
+    @Override
     public List<TaskToDo> getAll() {
         List<TaskToDo> tasks = taskToDoRepo.findAll();
         return tasks;
@@ -185,70 +202,82 @@ public class TaskToDoServiceImpl implements TaskService {
     public Coupletext getNextUnannotatedCoupletextForTask(Long taskId) {
         TaskToDo task = taskToDoRepo.findById(taskId)
                 .orElseThrow(() -> new CustomResponseException(404, "No such task"));
+
         Annotator annotator = task.getAnnotator();
 
-        List<Long> annotatedIds = annotationRepo.findByAnnotatorId(annotator.getId())
-                .stream().map(a -> a.getCoupletext().getId()).toList();
+        List<AnnotationClass> annotations = annotationRepo.findByAnnotatorId(annotator.getId());
 
-        // load all couple of text
-        List<Coupletext> allCouples = task.getCoupletexts();
+        Set<Long> annotatedIds = annotations.stream()
+                .map(a -> a.getCoupletext().getId())
+                .collect(Collectors.toSet());
 
-        // count occurence of couple to determine duplicated coouple
-        Map<Long, Long> countById = allCouples.stream()
-                .collect(Collectors.groupingBy(Coupletext::getId, Collectors.counting()));
+        // Tous les couples uniques
+        List<Coupletext> allCouples = task.getCoupletexts().stream().distinct().toList();
 
-        // delete dupliction in list of couple
-        List<Coupletext> unique = allCouples.stream().distinct().toList();
-
-        // divide couple (sharedWithAdmin,duplicated,normal)
+        // Séparer les couples en catégories
         List<Coupletext> sharedWithAdmin = new ArrayList<>();
-        List<Coupletext> duplicateFirstHalf = new ArrayList<>();
-        List<Coupletext> normalFirstTen = new ArrayList<>();
-        List<Coupletext> duplicateSecondHalf = new ArrayList<>();
-        List<Coupletext> normalRest = new ArrayList<>();
+        List<Coupletext> duplicates = new ArrayList<>();
+        List<Coupletext> normals = new ArrayList<>();
 
-        int normalCount = 0;
-        int duplicateCount = 0;
-
-        for (Coupletext ct : unique) {
-            Long id = ct.getId();
-            long count = countById.getOrDefault(id, 1L);
-            boolean isAnnotated = annotatedIds.contains(id);
-
-            if (isAnnotated) continue;
-
+        for (Coupletext ct : allCouples) {
             if (Boolean.TRUE.equals(ct.getIsAnnotatedByAdmin())) {
                 sharedWithAdmin.add(ct);
-            } else if (count >= 2) {
-                // firsthalfduplicated
-                if (duplicateCount < 5) {
-                    duplicateFirstHalf.add(ct);
-                } else {
-                    duplicateSecondHalf.add(ct);
-                }
-                duplicateCount++;
+            } else if (Boolean.TRUE.equals(ct.getIsDuplicated())) {
+                duplicates.add(ct);
             } else {
-                if (normalCount < 10) {
-                    normalFirstTen.add(ct);
-                } else {
-                    normalRest.add(ct);
-                }
-                normalCount++;
+                normals.add(ct);
             }
         }
 
-        // getting priority : admin → duplicatas (1) → normal (10) → duplicatas (2) → rest of normal
-        List<Coupletext> priorityOrdered = Stream.of(
-                sharedWithAdmin,
-                duplicateFirstHalf,
-                normalFirstTen,
-                duplicateSecondHalf,
-                normalRest
-        ).flatMap(List::stream).toList();
+        // Compter combien l’annotateur a déjà annoté dans chaque groupe
+        long annotatedDupes = annotations.stream()
+                .map(a -> a.getCoupletext())
+                .filter(ct -> Boolean.TRUE.equals(ct.getIsDuplicated()))
+                .count();
 
-        // Retourne the first one
-        return priorityOrdered.stream().findFirst().orElse(null);
+        long annotatedNormals = annotations.stream()
+                .map(a -> a.getCoupletext())
+                .filter(ct -> !Boolean.TRUE.equals(ct.getIsDuplicated())
+                        && !Boolean.TRUE.equals(ct.getIsAnnotatedByAdmin()))
+                .count();
+
+        // Étape 1 : admin non annotés
+        for (Coupletext ct : sharedWithAdmin) {
+            if (!annotatedIds.contains(ct.getId())) return ct;
+        }
+
+        // Étape 2 : duplicatas (1)
+        if (annotatedDupes < 5) {
+            for (Coupletext ct : duplicates) {
+                if (!annotatedIds.contains(ct.getId())) return ct;
+            }
+        }
+
+        // Étape 3 : normaux (10)
+        if (annotatedDupes >= 5 && annotatedNormals < 10) {
+            for (Coupletext ct : normals) {
+                if (!annotatedIds.contains(ct.getId())) return ct;
+            }
+        }
+
+        // Étape 4 : duplicatas restants
+        if (annotatedDupes >= 5 && annotatedNormals >= 10) {
+            for (Coupletext ct : duplicates) {
+                if (!annotatedIds.contains(ct.getId())) return ct;
+            }
+        }
+
+        // Étape 5 : normaux restants
+        if (annotatedDupes >= 5 && annotatedNormals >= 10) {
+            for (Coupletext ct : normals) {
+                if (!annotatedIds.contains(ct.getId())) return ct;
+            }
+        }
+
+        // Rien trouvé
+        return null;
     }
+
 
 
     public double getProgressForTask(Long taskId, Long annotatorId) {

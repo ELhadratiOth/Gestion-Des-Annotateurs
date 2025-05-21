@@ -58,7 +58,7 @@ public class TaskController {
     @GetMapping("/{taskId}/next")
     public ResponseEntity<?> getNextCoupletextToAnnotate(@PathVariable Long taskId) {
         Coupletext next = taskService.getNextUnannotatedCoupletextForTask(taskId);
-        if (next != null) {
+        if (next == null) {
             return GlobalSuccessHandler.noContent();
         }
         return GlobalSuccessHandler.success("Next couple get sucessfully", next);
@@ -68,6 +68,13 @@ public class TaskController {
     public ResponseEntity<?> deleteTasksByDatasetId(@PathVariable Long datasetId) {
          taskService.deleteTaskByDatasetId(datasetId);
          return GlobalSuccessHandler.deleted("Successfully deleted tasks only");
+    }
+
+    @GetMapping("/{annotatorId}/{taskId}")
+    public ResponseEntity<?> getTaskProgressForAnnotator(@PathVariable Long taskId,@PathVariable Long annotatorId){
+        double prog=taskService.getProgressForTask(taskId,annotatorId);
+        return GlobalSuccessHandler.success("the progress of the the task "+taskId,prog);
+
     }
 
 }
