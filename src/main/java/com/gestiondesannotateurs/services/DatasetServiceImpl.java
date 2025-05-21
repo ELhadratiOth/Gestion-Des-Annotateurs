@@ -14,6 +14,7 @@ import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -125,22 +126,30 @@ public class DatasetServiceImpl implements DatasetService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public Dataset updateDataset(DatasetUpdata datasetUpdata, Long idDataset) {
         Optional<Dataset> dataset = datasetRepo.findById(idDataset);
-        if(dataset.isEmpty()) {
-            throw new CustomResponseException(400,"Dataset with ID " + idDataset + " not found");
+        if (dataset.isEmpty()) {
+            throw new CustomResponseException(400, "Dataset with ID " + idDataset + " not found");
         }
         Optional<Label> label = labelRepo.findById(datasetUpdata.labelId());
-        if(label.isEmpty()) {
-            throw new CustomResponseException(400,"Label with ID " + datasetUpdata.labelId() + " not found");
+        if (label.isEmpty()) {
+            throw new CustomResponseException(400, "Label with ID " + datasetUpdata.labelId() + " not found");
         }
 
-        dataset.get().setName(datasetUpdata.name());
-        dataset.get().setDescription(datasetUpdata.description());
-        dataset.get().setLabel(label.get());
+        Dataset datasetEntity = dataset.get();
+        datasetEntity.setName(datasetUpdata.name());
+        datasetEntity.setDescription(datasetUpdata.description());
+        datasetEntity.setLabel(label.get());
 
-        return datasetRepo.save(dataset.get());
+        // Save the entity
+        Dataset savedDataset = datasetRepo.save(datasetEntity);
+
+        // Ensure the label is initialized within the transaction
+        Hibernate.initialize(savedDataset.getLabel());
+
+        return savedDataset;
     }
 
     @Override
