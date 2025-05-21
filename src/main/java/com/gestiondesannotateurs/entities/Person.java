@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -65,6 +66,7 @@ public class Person implements UserDetails {
     }
 
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         System.out.println("the  current role is : " + role );

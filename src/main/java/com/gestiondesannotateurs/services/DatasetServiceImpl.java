@@ -108,7 +108,7 @@ public class DatasetServiceImpl implements DatasetService {
     public List<DatasetInfo> getAll() {
         return datasetRepo.findAll().stream()
                 .map(dataset -> {
-                    Optional<Label> label = labelRepo.findById(dataset.getLabel());
+                    Optional<Label> label = labelRepo.findById(dataset.getLabel().getId());
                     if(label.isEmpty()) {
                         throw new CustomResponseException(400,"Label with ID " + dataset.getLabel() + " not found");
                     }
@@ -150,7 +150,7 @@ public class DatasetServiceImpl implements DatasetService {
             throw new CustomResponseException(404,"Dataset doesnt exist with this id");
         }
 
-        Optional<Label> label = labelRepo.findById(dataset.get().getLabel());
+        Optional<Label> label = labelRepo.findById(dataset.get().getLabel().getId());
         if(label.isEmpty()){
             throw new CustomResponseException(404,"Label doesnt exist");
         }

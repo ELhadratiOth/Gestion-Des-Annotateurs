@@ -43,8 +43,8 @@ public class Dataset {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
     private List<TaskToDo> tasks = new ArrayList<>();
-
-    public Long getLabel() {
-        return label.getId();
-    }
+//
+//    public Long getLabel() {
+//        return label.getId();
+//    }
 }

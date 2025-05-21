@@ -69,7 +69,7 @@ public class AdminDetectSpammers {
 
         var allAnnotationsT=  AnnotationTransformer.transformAnnotations(allAnnotations);
         System.out.println(allAnnotationsT);
-        Long labelId = datasetService.findDatasetById(datasetId).getLabel();
+        Long labelId = datasetService.findDatasetById(datasetId).getLabel().getId();
 
         String labelClass = labelRepo.findById(labelId).get().getName() ;
         List<String> labels = Arrays.asList(labelClass.split(","));

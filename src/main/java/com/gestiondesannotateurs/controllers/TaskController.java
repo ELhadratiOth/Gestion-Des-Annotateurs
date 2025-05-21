@@ -37,6 +37,8 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<GlobalResponse<String>> createTask(@RequestBody @Valid TaskCreate taskCreate) {
+        System.out.println(taskCreate);
+
         taskService.createTask(taskCreate);
         return GlobalSuccessHandler.created("Successfully created task");
     }
