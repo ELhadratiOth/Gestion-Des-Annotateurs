@@ -141,7 +141,7 @@ public class TaskToDoServiceImpl implements TaskService {
 
             // Filtrer les couples qui ne sont pas annotés par l'admin
             List<Coupletext> filteredCouples = assignedCouples.stream()
-                    .filter(ct -> !ct.getIsDuplicated())
+                    .filter(ct -> !ct.getIsAnnotatedByAdmin())
                     .collect(Collectors.toList());
 
 
@@ -164,6 +164,7 @@ public class TaskToDoServiceImpl implements TaskService {
 
                 coupleOfTextRepo.save(ct);
             }
+
 
 
         }
