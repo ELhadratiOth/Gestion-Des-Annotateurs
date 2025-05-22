@@ -12,14 +12,24 @@ import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.LabelRepo;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import com.gestiondesannotateurs.utils.ProcessFile;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,28 +62,36 @@ public class DatasetServiceImpl implements DatasetService {
 
 
 
+
     @Override
     public Dataset createDataset(DatasetUploadRequest dataset) throws CsvValidationException, IOException {
-        Label label = labelRepo.findById(dataset.labelId())
-                .orElseThrow(() -> new IllegalArgumentException("Label with ID " + dataset.labelId() + " not found"));
+        try {
+            Label label = labelRepo.findById(dataset.labelId())
+                    .orElseThrow(() -> new IllegalArgumentException("Label with ID " + dataset.labelId() + " not found"));
 //        System.out.println("bugg1");
 
-        Dataset datasetEntity = new Dataset();
-        datasetEntity.setName(dataset.name());
-        datasetEntity.setDescription(dataset.description());
-        datasetEntity.setLabel(label);
-        datasetEntity.setFilePath(uploadDir+dataset.file().getOriginalFilename());
-        Dataset createdDataset = datasetRepo.save(datasetEntity);
+            Dataset datasetEntity = new Dataset();
+            datasetEntity.setName(dataset.name());
+            datasetEntity.setDescription(dataset.description());
+            datasetEntity.setLabel(label);
+            datasetEntity.setSizeMB(dataset.sizeMB());
+            datasetEntity.setFilePath(uploadDir+dataset.file().getOriginalFilename());
+            Dataset createdDataset = datasetRepo.save(datasetEntity);
 //System.out.println("bugg2");
-        Long rowNumber = coupleOfTextService.createRows(createdDataset, dataset.file());
+            Long rowNumber = coupleOfTextService.createRows(createdDataset, dataset.file());
 //        System.out.println("buggyyyy");
 
-        createdDataset.setSize(rowNumber);
+            createdDataset.setSize(rowNumber);
 //        System.out.println("bugg3");
 
-        datasetRepo.save(createdDataset);
+            datasetRepo.save(createdDataset);
 
-        return createdDataset;
+            return createdDataset;
+        }
+        catch (Exception e){
+            throw new CustomResponseException(400,e.getMessage());
+        }
+
     }
 
     @Override
@@ -119,6 +137,7 @@ public class DatasetServiceImpl implements DatasetService {
                     return new DatasetInfo(
                             dataset.getId(),
                             dataset.getSize(),
+                            dataset.getSizeMB(),
                             dataset.getName(),
                             dataset.getAdvancement(),
                             dataset.getDescription(),
@@ -197,6 +216,7 @@ public class DatasetServiceImpl implements DatasetService {
         return new DatasetInfo(
                 dataset.get().getId(),
                 dataset.get().getSize(),
+                dataset.get().getSizeMB(),
                 dataset.get().getName(),
                 dataset.get().getAdvancement(),
                 dataset.get().getDescription(),
@@ -223,4 +243,40 @@ public class DatasetServiceImpl implements DatasetService {
         return datasetRepo.findById(idDataset)
                 .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
     }
+
+    public ResponseEntity<Resource> downloadFileByDatasetId(Long datasetId) throws IOException {
+        Dataset dataset = findDatasetById(datasetId);
+
+        if (dataset.getFilePath() == null || dataset.getFilePath().isEmpty()) {
+            throw new CustomResponseException(404, "No file associated with this dataset");
+        }
+
+        Path filePath = Paths.get(dataset.getFilePath());
+        if (!Files.exists(filePath)) {
+            throw new CustomResponseException(404, "File not found on server");
+        }
+
+        Resource resource = new FileSystemResource(filePath.toFile());
+
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        String originalFileName = new File(dataset.getFilePath()).getName();
+        String downloadFileName = "dataset_" + datasetId + ProcessFile.getFileExtension(originalFileName);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + downloadFileName);
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+        headers.add(HttpHeaders.PRAGMA, "no-cache");
+        headers.add(HttpHeaders.EXPIRES, "0");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(resource.getFile().length())
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AdminDto;
+import com.gestiondesannotateurs.dtos.AdminDtoo;
 import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.AnnotationClass;
@@ -64,8 +65,7 @@ public class AdminServiceImpl implements AdminService {
             newAdmin.setFirstName(adminDto.getFirstName());
             newAdmin.setLastName(adminDto.getLastName());
             newAdmin.setEmail(adminDto.getEmail());
-            newAdmin.setUserName(adminDto.getLogin());
-            newAdmin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
+//            newAdmin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
             newAdmin.setActive(true);
             newAdmin.setActive(true);
             newAdmin.setVerified(false);
@@ -80,7 +80,7 @@ public class AdminServiceImpl implements AdminService {
 
     }
     @Override
-    public Admin updateAdmin(Long adminId, AdminDto adminDto) {
+    public Admin updateAdmin(Long adminId, AdminDtoo adminDto) {
         Admin existingAdmin = adminRepository.findById(adminId)
                 .orElseThrow(() -> new AdminNotFoundException(adminId));
 
@@ -118,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
         Admin admin= adminRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Admin introuvable"));
 
-        admin.setActive(false);
+        admin.setActive(!admin.isActive());
         adminRepository.save(admin);
     }
     @Override

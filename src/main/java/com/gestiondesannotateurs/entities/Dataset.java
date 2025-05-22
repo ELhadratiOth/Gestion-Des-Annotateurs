@@ -27,8 +27,9 @@ public class Dataset {
     private String name;
     private String description;
     private Long size;
-    private Double advancement = 90.0 ;
+    private Double advancement = 0.0;
     private String filePath;
+    private Double sizeMB;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

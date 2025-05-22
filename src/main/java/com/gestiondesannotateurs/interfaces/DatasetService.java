@@ -6,6 +6,8 @@ import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.opencsv.exceptions.CsvValidationException;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,4 +26,5 @@ public interface DatasetService {
     void updateDatasetAdvancement(Long datasetId);
 
     Dataset findDatasetById(Long idDataset);
+    ResponseEntity<Resource> downloadFileByDatasetId(Long datasetId) throws IOException;
 }

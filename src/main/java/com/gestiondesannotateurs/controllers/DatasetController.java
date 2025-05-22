@@ -106,40 +106,7 @@ public class DatasetController {
     @GetMapping("/download/{datasetId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
     public ResponseEntity<?> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
-        Dataset dataset = datasetService.findDatasetById(datasetId);
-
-        if (dataset.getFilePath() == null || dataset.getFilePath().isEmpty()) {
-            throw new CustomResponseException(404, "No file associated with this dataset");
-        }
-
-        // Resolve the file
-        Path filePath = Paths.get(dataset.getFilePath());
-        if (!Files.exists(filePath)) {
-            throw new CustomResponseException(404, "File not found on server");
-        }
-
-        // Create resource
-        Resource resource = new FileSystemResource(filePath.toFile());
-
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        String originalFileName = new File(dataset.getFilePath()).getName();
-        String downloadFileName = "dataset_" + datasetId +  processFile.getFileExtension(originalFileName);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + downloadFileName);
-        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
-        headers.add(HttpHeaders.PRAGMA, "no-cache");
-        headers.add(HttpHeaders.EXPIRES, "0");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(resource.getFile().length())
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(resource);
+        return datasetService.downloadFileByDatasetId(datasetId);
     }
 
 

@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AdminDto;
+import com.gestiondesannotateurs.dtos.AdminDtoo;
 import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.AnnotationClass;
@@ -51,7 +52,7 @@ public class AdminController {
     @PreAuthorize("hasAnyRole('SUPER-ADMIN','ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> updateAdminDetails(
             @PathVariable Long adminId,
-            @Valid @RequestBody AdminDto adminDto) {
+            @Valid @RequestBody AdminDtoo adminDto) {
         Admin updatedAdmin = adminService.updateAdmin(adminId, adminDto);
         return GlobalSuccessHandler.success("Admin updated successfully", updatedAdmin);
     }
@@ -61,7 +62,7 @@ public class AdminController {
         adminService.deleteAdmin(adminId);
         return GlobalSuccessHandler.deleted("Admin supprimé avec succès");
     }
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> deactivateAdmin(@PathVariable Long id) {
         adminService.deactivateAdmin(id);

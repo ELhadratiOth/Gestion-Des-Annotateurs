@@ -100,7 +100,7 @@ public class ProcessFile {
 
         return filePath.toString();
     }
-    public String getFileExtension(String fileName) {
+    public static String getFileExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             return "";
         }

@@ -72,6 +72,7 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         newAnnotator.setSpammer(false);
         newAnnotator.setActive(true);
         newAnnotator.setVerified(false);
+        newAnnotator.setActive(annotator.getActive());
         newAnnotator.setAccountCreationToken(token);
     	if (annotatorRepository.existsByEmail(newAnnotator.getEmail())) {
 			throw new AnnotatorNotFoundException(newAnnotator.getId());
@@ -123,7 +124,12 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 		Annotator annotator = annotatorRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Annotateur introuvable"));
 
-		annotator.setActive(false);
+        if(annotator.isActive()){
+            annotator.setActive(false);
+        }
+        else{
+            annotator.setActive(true);
+        }
 		annotatorRepository.save(annotator);
 	}
 

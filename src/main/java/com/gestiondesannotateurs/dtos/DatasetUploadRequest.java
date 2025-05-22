@@ -17,6 +17,9 @@ public record DatasetUploadRequest(
         @Positive(message = "Label ID must be a positive number")
         Long labelId,
 
+        @NotBlank(message = "Size is required")
+        Double sizeMB,
+
         @NotNull(message = "File is required")
         MultipartFile file
 ) {

@@ -67,7 +67,7 @@ public class AnnotatorController {
             Annotator annotator = annotatorService.getAnnotatorById(id);
             return GlobalSuccessHandler.success("Annotateur marqué comme spammeur", annotator);
     }
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
 
     public ResponseEntity<GlobalResponse<Annotator>> deactivateAnnotator(@PathVariable Long id) {
