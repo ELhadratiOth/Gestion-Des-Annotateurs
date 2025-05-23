@@ -16,5 +16,4 @@ public interface DatasetRepo extends JpaRepository<Dataset,Long> {
     @Query("SELECT d FROM Dataset d WHERE d.advancement != 100.0")
     List<Dataset> findAllWithAdvancementNot100();
 
-
 }

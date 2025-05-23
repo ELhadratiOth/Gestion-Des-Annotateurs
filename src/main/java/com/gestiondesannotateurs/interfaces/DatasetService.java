@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.interfaces;
 
 
 import com.gestiondesannotateurs.dtos.DatasetInfo;
+import com.gestiondesannotateurs.dtos.DatasetInfoTask;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
@@ -17,7 +18,7 @@ public interface DatasetService {
     void deleteDataset(Long idDataset);
     List<DatasetInfo> getAll();
     Dataset updateDataset(DatasetUpdata  datasetUpdata , Long idDataset);
-    DatasetInfo taskInfo(Long idDataset);
+    DatasetInfoTask taskInfo(Long idDataset);
     List<Dataset> getTerminatedAnnotatedDatasets();
     List<Dataset> getNotTerminatedAnnotatedDatasets();
 

@@ -23,13 +23,12 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-// @EnableMethodSecurity(prePostEnabled = true) // Comment out to disable method security
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -42,30 +41,33 @@ public class SecurityConfig {
                     CorsConfigurationSource source = corsConfigurationSource();
                     c.configurationSource(source);
                 })
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(
-                                "/h2-console/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/auth/**",
-                                "/**"
-                        ))
+                .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Allow all requests without authentication
-                );
-        // Remove the filter and authentication manager to bypass JWT validation
-        // .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        // .authenticationManager(authenticationManager(http));
+
+                                .requestMatchers(
+                                        "/auth/**",
+                                        "/h2-console/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**"
+                                ).permitAll()
+//						.requestMatchers(HttpMethod.GET, "").hasAnyRole("ADMIN", "USER")
+                                .anyRequest()
+                                .authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .authenticationManager(authenticationManager(http));
 
         return http.build();
     }
+
 
     @Bean
     AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         var authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+
         return authBuilder.build();
     }
 

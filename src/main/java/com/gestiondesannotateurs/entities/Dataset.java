@@ -30,9 +30,11 @@ public class Dataset {
     private Double advancement = 0.0;
     private String filePath;
     private Double sizeMB;
+    private Boolean isAssigned = false;
+    private LocalDateTime affectationDate;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "label_id")
     private Label label;
 
@@ -42,7 +44,7 @@ public class Dataset {
     private LocalDateTime createdAt;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dataset", fetch = FetchType.EAGER)
     private List<TaskToDo> tasks = new ArrayList<>();
 //
 //    public Long getLabel() {

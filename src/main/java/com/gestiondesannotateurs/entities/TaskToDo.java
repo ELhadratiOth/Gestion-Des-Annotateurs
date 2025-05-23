@@ -23,7 +23,7 @@ public class TaskToDo {
     private Long id;
 
 //    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "annotator_id")
     private Annotator annotator;
 

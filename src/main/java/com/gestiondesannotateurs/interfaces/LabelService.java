@@ -11,4 +11,5 @@ public interface LabelService {
     Label createLabel(LabelCreate label);
     List<LabelResponse> getAll();
 //    Label findByDataset(Long datasetsId);
+    void deleteLabel(Long labelId);
 }

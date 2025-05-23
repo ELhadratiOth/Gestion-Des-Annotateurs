@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.DatasetInfo;
+import com.gestiondesannotateurs.dtos.DatasetInfoTask;
 import com.gestiondesannotateurs.dtos.DatasetUpdata;
 import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
 import com.gestiondesannotateurs.entities.Dataset;
@@ -37,15 +38,13 @@ public class DatasetController {
     @Autowired
     private DatasetService datasetService;
 
-    @Autowired
-    private ProcessFile processFile;
 
 
     @GetMapping("/{idDataset}")
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
 
-    public ResponseEntity<GlobalResponse<DatasetInfo>> infoDataset(@PathVariable Long idDataset) {
-        DatasetInfo datasetInfo = datasetService.taskInfo(idDataset);
+    public ResponseEntity<GlobalResponse<DatasetInfoTask>> infoDataset(@PathVariable Long idDataset) {
+        DatasetInfoTask datasetInfo = datasetService.taskInfo(idDataset);
         return GlobalSuccessHandler.success(datasetInfo);
     }
 
@@ -108,6 +107,7 @@ public class DatasetController {
     public ResponseEntity<?> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
         return datasetService.downloadFileByDatasetId(datasetId);
     }
+
 
 
 }

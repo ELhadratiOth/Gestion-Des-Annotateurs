@@ -42,9 +42,9 @@ public class CoupleOfTextController {
                 results
         );
     }
+
     @GetMapping("/tasks/{taskId}")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
-
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getTaskCoupleTexts(
             @PathVariable Long taskId,
             @RequestParam(defaultValue = "0") int page,

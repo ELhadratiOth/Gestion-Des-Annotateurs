@@ -5,7 +5,7 @@ import com.gestiondesannotateurs.entities.Annotator;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record DatasetInfo(
+public record DatasetInfoTask(
 		Long datasetId,
 		Long datasetSize,
 		Double datsetSizeMB,
@@ -14,8 +14,6 @@ public record DatasetInfo(
 		String datasetDescription,
 		String datasetLabel,
 		LocalDateTime datasetCreatedAt,
-		Boolean assigned,
-		List<Annotator> annotators,
-		LocalDateTime assignedAt
+		Boolean assigned
 ) {
 }

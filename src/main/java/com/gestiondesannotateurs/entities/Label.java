@@ -23,6 +23,11 @@ public class Label {
 
     @Column(unique = true, nullable = false)
     private String name;
+    @Column(nullable = false)
+    private String classes;
+
+    @Column(nullable = false)
+    private Boolean deleted = false ;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "label", fetch = FetchType.LAZY)

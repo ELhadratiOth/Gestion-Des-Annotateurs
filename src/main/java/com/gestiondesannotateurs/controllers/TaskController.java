@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
 
 public class TaskController {
     @Autowired

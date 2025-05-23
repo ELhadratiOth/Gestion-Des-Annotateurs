@@ -25,18 +25,6 @@ import java.util.List;
 @RequestMapping("/api/spams")
 public class SpamController {
 
-    @Autowired
-    public SpamService spamService ;
-
-
-    @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private TaskService taskService;
-
-    @Autowired
-    private AnnotationService annotationService;
 
     @Autowired
     private AdminDetectSpammers adminDetectSpammers;

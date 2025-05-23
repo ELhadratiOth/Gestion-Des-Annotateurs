@@ -1,16 +1,12 @@
 package com.gestiondesannotateurs.services;
 
-import com.gestiondesannotateurs.dtos.DatasetInfo;
-import com.gestiondesannotateurs.dtos.DatasetUpdata;
-import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
+import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.*;
+import com.gestiondesannotateurs.interfaces.AnnotatorService;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.interfaces.TaskService;
-import com.gestiondesannotateurs.repositories.CoupleOfTextRepo;
-import com.gestiondesannotateurs.repositories.DatasetRepo;
-import com.gestiondesannotateurs.repositories.LabelRepo;
-import com.gestiondesannotateurs.repositories.TaskToDoRepo;
+import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import com.gestiondesannotateurs.utils.ProcessFile;
 import com.opencsv.exceptions.CsvValidationException;
@@ -30,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,6 +52,11 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     TaskService taskService;
+
+
+
+    @Autowired
+    AnnotatorRepo annotatorRepo;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -130,10 +132,25 @@ public class DatasetServiceImpl implements DatasetService {
     public List<DatasetInfo> getAll() {
         return datasetRepo.findAll().stream()
                 .map(dataset -> {
+                    System.out.println("date assigne :"+dataset.getAffectationDate());
                     Optional<Label> label = labelRepo.findById(dataset.getLabel().getId());
                     if(label.isEmpty()) {
                         throw new CustomResponseException(400,"Label with ID " + dataset.getLabel() + " not found");
                     }
+
+                    List<Annotator> annotators = new ArrayList<>() ;
+
+                    List<TaskToDoDto> tasks =  taskService.getTasksByDatasetId(dataset.getId());
+                    for (TaskToDoDto task : tasks){
+                        Optional<Annotator> annotator = annotatorRepo.getAnnotatorByTask(task.id());
+                        if(annotator.isPresent()){
+                            annotators.add(annotator.get());
+                        }else{
+                            throw new CustomResponseException(400,"Annotator with ID " + task.annotatorId() + " not found");
+                        }
+                    }
+
+
                     return new DatasetInfo(
                             dataset.getId(),
                             dataset.getSize(),
@@ -142,7 +159,11 @@ public class DatasetServiceImpl implements DatasetService {
                             dataset.getAdvancement(),
                             dataset.getDescription(),
                             label.get().getName(),
-                            dataset.getCreatedAt()
+                            dataset.getCreatedAt(),
+                            dataset.getIsAssigned(),
+                            annotators,
+                            dataset.getAffectationDate()
+
                     );
                 })
                 .collect(Collectors.toList());
@@ -202,7 +223,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public DatasetInfo taskInfo(Long idDataset) {
+    public DatasetInfoTask taskInfo(Long idDataset) {
         Optional<Dataset> dataset = datasetRepo.findById(idDataset);
         if(dataset.isEmpty()){
             throw new CustomResponseException(404,"Dataset doesnt exist with this id");
@@ -213,7 +234,7 @@ public class DatasetServiceImpl implements DatasetService {
             throw new CustomResponseException(404,"Label doesnt exist");
         }
 
-        return new DatasetInfo(
+        return new DatasetInfoTask(
                 dataset.get().getId(),
                 dataset.get().getSize(),
                 dataset.get().getSizeMB(),
@@ -221,7 +242,8 @@ public class DatasetServiceImpl implements DatasetService {
                 dataset.get().getAdvancement(),
                 dataset.get().getDescription(),
                 label.get().getName(),
-                dataset.get().getCreatedAt()
+                dataset.get().getCreatedAt(),
+                dataset.get().getIsAssigned()
         );
     }
 
@@ -278,5 +300,6 @@ public class DatasetServiceImpl implements DatasetService {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
+
 
 }

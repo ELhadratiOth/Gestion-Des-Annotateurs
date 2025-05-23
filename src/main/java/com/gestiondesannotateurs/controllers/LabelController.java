@@ -24,22 +24,29 @@ public class LabelController {
 
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
 
     public ResponseEntity<GlobalResponse<List<LabelResponse>>> getAllLabels() {
         List<LabelResponse> labels = labelService.getAll();
         return GlobalSuccessHandler.success("Liste des labels récupérée avec succès", labels);
     }
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
 
     public ResponseEntity<GlobalResponse<LabelResponse>> createLabel(
             @RequestBody @Valid LabelCreate labelCreate) {
-
+        System.out.println(labelCreate);
         Label label = labelService.createLabel(labelCreate);
-        LabelResponse response = new LabelResponse(label.getId(), label.getName());
+        LabelResponse response = new LabelResponse(label.getId(), label.getName() , label.getClasses());
 
         return GlobalSuccessHandler.created("Label créé avec succès", response);
+    }
+
+    @DeleteMapping("/{idLabel}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    public ResponseEntity<GlobalResponse<String>> deleteLabel(@PathVariable Long idLabel) {
+        labelService.deleteLabel(idLabel);
+        return GlobalSuccessHandler.deleted("label supprimé avec succès");
     }
 
 

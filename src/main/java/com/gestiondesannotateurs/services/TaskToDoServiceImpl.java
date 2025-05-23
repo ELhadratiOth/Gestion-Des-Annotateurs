@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.services;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,6 +55,10 @@ public class TaskToDoServiceImpl implements TaskService {
         // Validate dataset
         Dataset dataset = datasetRepo.findById(tasks.datasetId())
                 .orElseThrow(() -> new CustomResponseException(404, "Dataset not found"));
+
+        dataset.setIsAssigned(true);
+        dataset.setAffectationDate(LocalDateTime.now());
+        datasetRepo.save(dataset);
 
         // Validate annotators and ensure they are active
         List<Annotator> annotators = new ArrayList<>();
