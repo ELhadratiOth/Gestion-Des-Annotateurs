@@ -29,7 +29,6 @@ public class TaskController {
 
 
     @GetMapping
-
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
         List<TaskToDo> tasks = taskService.getAll();
         return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
@@ -74,7 +73,6 @@ public class TaskController {
     public ResponseEntity<?> getTaskProgressForAnnotator(@PathVariable Long taskId,@PathVariable Long annotatorId){
         double prog=taskService.getProgressForTask(taskId,annotatorId);
         return GlobalSuccessHandler.success("the progress of the the task "+taskId,prog);
-
     }
 
 }

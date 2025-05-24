@@ -42,7 +42,6 @@ public class AnnotationController {
     public ResponseEntity<?> getAnnotationForDataset(@PathVariable Long datasetId){
         List<AnnotationDto> res=annotationService.getAnnotationsByDataset(datasetId);
         return GlobalSuccessHandler.success("Annotations found ",res);
-
     }
 
     @GetMapping("/{annotatorId}")

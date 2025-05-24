@@ -35,7 +35,7 @@ public class ModelController {
             String response = modelService.uploadFullDataset(request);
             return GlobalSuccessHandler.success(response);
         } catch (IOException e) {
-            return GlobalSuccessHandler.success("❌ Internal server error during dataset upload.");
+            return GlobalSuccessHandler.success("Internal server error during dataset upload");
         }
     }
 

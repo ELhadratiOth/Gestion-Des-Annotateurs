@@ -27,7 +27,7 @@ public class CoupleOfTextController {
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getDatasetCoupleTexts(
             @PathVariable Long datasetId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
         Dataset dataset = new Dataset();
         dataset.setId(datasetId);
@@ -44,7 +44,7 @@ public class CoupleOfTextController {
     }
 
     @GetMapping("/tasks/{taskId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getTaskCoupleTexts(
             @PathVariable Long taskId,
             @RequestParam(defaultValue = "0") int page,

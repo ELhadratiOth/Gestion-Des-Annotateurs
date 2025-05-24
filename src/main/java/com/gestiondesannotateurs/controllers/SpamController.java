@@ -29,13 +29,13 @@ public class SpamController {
     @Autowired
     private AdminDetectSpammers adminDetectSpammers;
 
+
     @GetMapping("/scan/{datasetId}")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
     public ResponseEntity<?> scan(@PathVariable Long datasetId){
 
         //1 admin check
-        List<List<String>>  annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
-
+        List<List<Integer>>  annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
         return null;
     }
 

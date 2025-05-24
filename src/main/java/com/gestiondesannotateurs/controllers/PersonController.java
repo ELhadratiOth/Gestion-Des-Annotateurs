@@ -24,9 +24,6 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
-
-
-
     @GetMapping("/{personId}")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN','ADMIN','ANNOTATOR')")
     public ResponseEntity<GlobalResponse<Person>> getPersonDetails(@PathVariable Long personId) {

@@ -35,9 +35,13 @@ public class AdminDetectSpammers {
     @Autowired
     private DatasetService datasetService;
 
+    @Autowired
+    private KappaEvaluationService kappaEvaluationService;
 
 
-    public List<List<String>> detect(Long datasetId) {
+
+
+    public List<List<Integer>> detect(Long datasetId) {
         // 1. Admin check
         List<CoupleOfTextWithAnnotation> coupleOfTextAnnotated = adminService.getListOfCoupleOfTextWithThereAnnotation(datasetId);
         for (CoupleOfTextWithAnnotation coupleOfText : coupleOfTextAnnotated) {
@@ -79,8 +83,18 @@ public class AdminDetectSpammers {
         var allAnnotationsToIntegers =  LabelToNumberMapper.mapLabelsToNumbers(allAnnotationsT,categories);
         System.out.println(allAnnotationsToIntegers);
 
+        List<Double> kappaValues = new ArrayList<>();
 
-        return allAnnotations;
+        for(List<List<Integer>> integers : allAnnotationsToIntegers){
+            kappaValues.add(kappaEvaluationService.calculateKappa(integers , categories)) ;
+        }
+        // threshold = 0.3 max
+
+
+
+//        return allAnnotationsToIntegers;
+        return null;
+
     }
 
 

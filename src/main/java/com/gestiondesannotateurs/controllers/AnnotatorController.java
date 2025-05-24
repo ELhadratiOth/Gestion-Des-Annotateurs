@@ -85,11 +85,11 @@ public class AnnotatorController {
     }
     @GetMapping("/spammers/{datasetId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
-
     public ResponseEntity<GlobalResponse<List<Annotator>>> getSpammersByDataset(@PathVariable Long datasetId) {
         List<Annotator> spammers = annotatorService.getAnnotatorSpamers(datasetId);
         return GlobalSuccessHandler.success("Spammers retrieved successfully", spammers);
     }
+
     @GetMapping("/dataset/{datasetId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
 

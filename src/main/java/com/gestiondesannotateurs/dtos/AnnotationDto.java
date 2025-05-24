@@ -12,4 +12,6 @@ public class AnnotationDto {
     @NotNull
     private Long annotatorId;
     private String label; // "similar" ou "not_similar"
+    private String textA ;
+    private String textB ;
 }
