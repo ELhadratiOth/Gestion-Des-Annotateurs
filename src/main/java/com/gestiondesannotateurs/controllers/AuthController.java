@@ -31,7 +31,7 @@ public class AuthController {
     public ResponseEntity<GlobalResponse<PersonDTO>> signup(
             @RequestBody SignupRequest signupRequest
     ) {
-
+        System.out.println("username :" + signupRequest);
         PersonDTO person = authService.signup(signupRequest);
         return GlobalSuccessHandler.success( "Signed Up",person);  //Signed Up
 
@@ -39,9 +39,8 @@ public class AuthController {
 
     @PostMapping("/forgot-password/")
     public ResponseEntity<GlobalResponse<String>> forgotPassword(@RequestBody ResetPasswordReq resetPasswordReq) {
-
         authService.initiatePasswordRest(resetPasswordReq.username(),resetPasswordReq.email() );
-        return GlobalSuccessHandler.success(  "Password reset email sent!",null);
+        return GlobalSuccessHandler.simpleMessage(  "Password reset email sent!");
     }
 
     @PostMapping("/reset-password")
@@ -49,7 +48,7 @@ public class AuthController {
             @RequestBody ResetPasswordRequest resetPasswordRequest
     ) {
         authService.resetPassword(resetPasswordRequest);
-        return GlobalSuccessHandler.success(  "Password reset successfully!",null);
+        return GlobalSuccessHandler.simpleMessage(  "Password reset successfully!" );
     }
 
 }

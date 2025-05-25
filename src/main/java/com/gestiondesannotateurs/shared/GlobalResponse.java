@@ -5,7 +5,7 @@ import java.util.Map;
 
 public record GlobalResponse<T>(
         String status,
-        String message,  // Ajout du champ message
+        String message,
         T data,
         List<String> erreurs
 ) {
@@ -21,7 +21,4 @@ public record GlobalResponse<T>(
         return new GlobalResponse<>("error", null, null, messages);
     }
 
-    public static <E, K, V> Object error(List<E> message, Map<K, V> invalidValue) {
-        return null;
-    }
 }

@@ -25,7 +25,7 @@ public class AnnotationController {
 
 
     @PostMapping("/{taskId}")
-    @PreAuthorize("hasAnyRole('ANNOTATOR')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
     public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, @PathVariable Long  taskId) {
         Annotator annotator=annotatorService.getAnnotatorByTask(taskId);
         Long annotatorId=annotator.getId();
@@ -38,7 +38,7 @@ public class AnnotationController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<?> getAnnotationForDataset(@PathVariable Long datasetId){
         List<AnnotationDto> res=annotationService.getAnnotationsByDataset(datasetId);
         return GlobalSuccessHandler.success("Annotations found ",res);

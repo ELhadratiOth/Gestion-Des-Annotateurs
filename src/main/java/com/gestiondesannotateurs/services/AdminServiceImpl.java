@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AdminDto;
 import com.gestiondesannotateurs.dtos.AdminDtoo;
+import com.gestiondesannotateurs.dtos.AdminTask;
 import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.AnnotationClass;
@@ -178,8 +179,45 @@ public class AdminServiceImpl implements AdminService {
             }
     }
         return coupleOfTextWithAnnotations ;
-
-
-
     }
+
+    @Override
+    public List<AdminTask> getListOfTasksForAdmin() {
+        List<Dataset> datasets = datasetRepo.findAll();
+
+        List<AdminTask> adminTasks = new ArrayList<>();
+
+        for(Dataset dataset : datasets){
+            List<CoupleOfTextWithAnnotation> coupleOfTextWithAnnotations =    getListOfCoupleOfTextWithThereAnnotation(dataset.getId());
+            System.out.println("dataset in search :" + dataset.getName());
+            int counter = 0 ;
+            for(CoupleOfTextWithAnnotation coupleOfTextWithAnnotation : coupleOfTextWithAnnotations){
+                if (coupleOfTextWithAnnotation.annotationId() != null){
+                    counter++;
+                }
+            }
+
+            Long adminRowsInDataset = dataset.getSize() > 10 ? 10L : dataset.getSize()   ;
+            Double advancement = (Double) (counter / (double) adminRowsInDataset * 100);
+
+            String status = advancement == 100.0 ? "Completed" :  advancement == 0.0 ? "Not Start" : "In Progress" ;
+            String action = status.equals("Completed") ? "Review" : status.equals("Not Start") ? "Start" : "Continue" ;
+//            String availableLabelClasses = dataset.getLabel().getClasses();
+
+            AdminTask adminTask = new AdminTask(
+                    dataset.getId(),
+                    dataset.getName(),
+                    dataset.getDescription(),
+                    dataset.getLabel().getName(),
+                    advancement,
+                    status,
+                    action,
+                    adminRowsInDataset
+            );
+            adminTasks.add(adminTask);
+        }
+        return adminTasks;
+    }
+
+
 }

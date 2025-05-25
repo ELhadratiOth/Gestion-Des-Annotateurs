@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.controllers;
 import com.gestiondesannotateurs.dtos.AdminDto;
 import com.gestiondesannotateurs.dtos.AdminDtoo;
+import com.gestiondesannotateurs.dtos.AdminTask;
 import com.gestiondesannotateurs.dtos.CoupleOfTextWithAnnotation;
 import com.gestiondesannotateurs.entities.Admin;
 import com.gestiondesannotateurs.entities.AnnotationClass;
@@ -30,26 +31,26 @@ public class AdminController {
 
 
     @GetMapping("/{adminId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> getAdminDetails(@PathVariable Long adminId) {
         Admin admin = adminService.getAdminById(adminId);
         return GlobalSuccessHandler.success("Admin details retrieved successfully", admin);
     }
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<GlobalResponse<List<Admin>>> getAllAdminDetails() {
         List<Admin> admins = adminService.getAllAdmins();
         return GlobalSuccessHandler.success("All admins retrieved successfully", admins);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> createAdminDetails(@Valid @RequestBody AdminDto adminDto) {
         Admin createdAdmin = adminService.createAdmin(adminDto);
         return GlobalSuccessHandler.created("Admin created successfully", createdAdmin);
     }
     @PutMapping("/{adminId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> updateAdminDetails(
             @PathVariable Long adminId,
             @Valid @RequestBody AdminDtoo adminDto) {
@@ -57,20 +58,20 @@ public class AdminController {
         return GlobalSuccessHandler.success("Admin updated successfully", updatedAdmin);
     }
     @DeleteMapping("/{adminId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<GlobalResponse<String>> deleteAdminDetails(@PathVariable Long adminId) {
         adminService.deleteAdmin(adminId);
         return GlobalSuccessHandler.deleted("Admin supprimé avec succès");
     }
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> deactivateAdmin(@PathVariable Long id) {
         adminService.deactivateAdmin(id);
         Admin admin = adminService.getAdminById(id);
         return GlobalSuccessHandler.success("Admin désactivé", admin);
     }
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<GlobalResponse<Admin>> activateAdmin(@PathVariable Long id) {
         adminService.activateAdmin(id);
         Admin admin = adminService.getAdminById(id);
@@ -79,12 +80,20 @@ public class AdminController {
 
 
     @GetMapping("/coupleoftextannotated/{datasetId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ResponseEntity<GlobalResponse<List<CoupleOfTextWithAnnotation>>> getAdminsCoupleOfTextWithTheirAnnotationsByDatasetId(@PathVariable Long datasetId) {
         List<CoupleOfTextWithAnnotation>  coupleOfTextWithAnnotations = adminService.getListOfCoupleOfTextWithThereAnnotation(datasetId);
         return GlobalSuccessHandler.success(
                 "Successfully retrieved admin coupletexts for dataset id = " + datasetId,
                 coupleOfTextWithAnnotations
+        );
+    }
+    @GetMapping("/getAdminTasksWithAllNeededCoupleOfText")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
+    public ResponseEntity<GlobalResponse<List<AdminTask>>> getListOfTasksForAdmin() {
+        return GlobalSuccessHandler.success(
+                "Successfully retrived list of tasks for admin",
+                adminService.getListOfTasksForAdmin()
         );
     }
 
