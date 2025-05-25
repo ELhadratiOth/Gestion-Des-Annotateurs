@@ -222,6 +222,7 @@ public class DatasetServiceImpl implements DatasetService {
         datasetRepo.save(dataset);
     }
 
+
     @Override
     public DatasetInfoTask taskInfo(Long idDataset) {
         Optional<Dataset> dataset = datasetRepo.findById(idDataset);
@@ -258,6 +259,19 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> getNotTerminatedAnnotatedDatasets() {
         List<Dataset> datasets =  datasetRepo.findAllWithAdvancementNot100();
         return datasets;
+    }
+    @Override
+    public List<Dataset> getAssignedDatasets() {
+        return datasetRepo.findAll().stream()
+                .filter(dataset -> Boolean.TRUE.equals(dataset.getIsAssigned()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Dataset> getNotAssignedDatasets() {
+        return datasetRepo.findAll().stream()
+                .filter(dataset -> !(Boolean.TRUE.equals(dataset.getIsAssigned())))
+                .collect(Collectors.toList());
     }
 
     @Override

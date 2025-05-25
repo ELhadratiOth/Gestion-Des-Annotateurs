@@ -2,6 +2,7 @@ package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.AnnotationDto;
 import com.gestiondesannotateurs.dtos.AnnotationRequest;
+import com.gestiondesannotateurs.dtos.AnnotationResponse;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
@@ -40,13 +41,13 @@ public class AnnotationController {
     @GetMapping()
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<?> getAnnotationForDataset(@PathVariable Long datasetId){
-        List<AnnotationDto> res=annotationService.getAnnotationsByDataset(datasetId);
+        List<AnnotationResponse> res=annotationService.getAnnotationsByDataset(datasetId);
         return GlobalSuccessHandler.success("Annotations found ",res);
     }
 
     @GetMapping("/{annotatorId}")
     public ResponseEntity<?> getAnnotationForAnnotator(@PathVariable Long  annotatorId){
-        List<AnnotationDto> res=annotationService.findByAnnotatorId(annotatorId);
+        List<AnnotationResponse> res=annotationService.findByAnnotatorId(annotatorId);
         return GlobalSuccessHandler.success("Annotations found",res);
     }
 

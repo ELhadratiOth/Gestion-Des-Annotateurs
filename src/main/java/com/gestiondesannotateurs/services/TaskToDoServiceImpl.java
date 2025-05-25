@@ -169,6 +169,13 @@ public class TaskToDoServiceImpl implements TaskService {
 
                 coupleOfTextRepo.save(ct);
             }
+            // Mark the datasets as assigned
+            if (!dataset.getIsAssigned()) {
+                dataset.setIsAssigned(true);
+                dataset.setAffectationDate(LocalDateTime.now());
+                datasetRepo.save(dataset);
+            }
+
 
 
 

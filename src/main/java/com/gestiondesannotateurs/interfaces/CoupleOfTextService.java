@@ -14,4 +14,5 @@ public interface CoupleOfTextService {
     Long createRows(Dataset dataset , MultipartFile file) throws CsvValidationException, IOException;
     List<CoupletextDto> findDtoByDataset(Dataset dataset, Pageable pageable);
     List <CoupletextDto> getCouplesByTaskPaged(Long taskId, Pageable pageable);
+    void computeTrueLabelsForDataset(Dataset dataset);
 }

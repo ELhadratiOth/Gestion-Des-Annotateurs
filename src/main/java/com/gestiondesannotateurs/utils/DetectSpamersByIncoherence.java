@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.utils;
 
+import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
 import com.gestiondesannotateurs.entities.AnnotationClass;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
@@ -7,6 +8,7 @@ import com.gestiondesannotateurs.interfaces.AnnotatorService;
 import com.gestiondesannotateurs.repositories.AnnotationRepo;
 import com.gestiondesannotateurs.repositories.AnnotatorRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -37,7 +39,7 @@ public class DetectSpamersByIncoherence {
     // 👉 configurable threshold
     private static final int INCOHERENCE_THRESHOLD = 4;
 
-    public void detectSpammerByInconsistency(Long annotatorId) {
+    public double detectSpammerByInconsistency(Long annotatorId) {
         Annotator annotator = annotatorService.getAnnotatorById(annotatorId);
         if (annotator == null) {
             throw new AnnotatorNotFoundException(annotatorId);
@@ -46,7 +48,6 @@ public class DetectSpamersByIncoherence {
         List<AnnotationClass> annotations = annotationRepo.findByAnnotatorId(annotatorId);
         if (annotations.isEmpty()) {
             logger.info("Annotator {} has no annotations. Skipping.", annotatorId);
-            return;
         }
 
         // Regroup by coupletext ID and collect all labels
@@ -67,22 +68,45 @@ public class DetectSpamersByIncoherence {
 
         logger.info("Annotator {} → Inconsistent pairs: {}, Spammer: {}",
                 annotatorId, inconsistentCount, isSpammer);
+        return inconsistentCount;
     }
 
     // ✅ Execution automatique toutes les heures
-    @Scheduled(cron = "0 0 * * * *")
-    public void detectAllSpammersByInconsistency() {
-        logger.info("Running scheduled spammer detection...");
+    public Map<Long, Double> detectAllSpammersByInconsistency(Long datasetId) {
 
-        List<Annotator> allAnnotators = annotatorRepo.findAll();
-        allAnnotators.forEach(a -> {
+        List<AnnotatorTaskDto> allAnnotators = annotatorService.getAnnotatorsByDataset(datasetId);
+        Map<Long, Double> inconsistencies = new HashMap<>();
+
+        for (AnnotatorTaskDto a : allAnnotators) {
             try {
-                detectSpammerByInconsistency(a.getId());
+                double inconsistency = detectSpammerByInconsistency(a.getAnnotatorId());
+                inconsistencies.put(a.getAnnotatorId(), inconsistency);
             } catch (Exception e) {
-                logger.error("Error processing annotator {}: {}", a.getId(), e.getMessage());
+                new CustomResponseException(404,"error processing annotator "+a.getAnnotatorId());
             }
-        });
+        }
 
-        logger.info("Spammer detection completed.");
+        return inconsistencies;
     }
+
+//    @Scheduled(cron = "0 0 * * * *")
+//    public void detectAutomatically(){
+//        logger.info("Running scheduled spammer detection...");
+//        List<Annotator> allAnnotators = annotatorService.getAllAnnotators();
+//        Map<Long, Double> inconsistencies = new HashMap<>();
+//
+//        for (Annotator a : allAnnotators) {
+//            try {
+//                double inconsistency = detectSpammerByInconsistency(a.getId());
+//                inconsistencies.put(a.getId(), inconsistency);
+//            } catch (Exception e) {
+//                logger.error("Error processing annotator {}: {}", a.getId(), e.getMessage());
+//            }
+//        }
+//
+//        logger.info("Spammer detection completed.");
+//    }
+
+
+
 }

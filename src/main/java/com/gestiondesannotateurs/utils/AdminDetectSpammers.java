@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -41,7 +42,7 @@ public class AdminDetectSpammers {
 
 
 
-    public List<List<Integer>> detect(Long datasetId) {
+    public Map<Long, Double> detect(Long datasetId) {
         // 1. Admin check
         List<CoupleOfTextWithAnnotation> coupleOfTextAnnotated = adminService.getListOfCoupleOfTextWithThereAnnotation(datasetId);
         for (CoupleOfTextWithAnnotation coupleOfText : coupleOfTextAnnotated) {

@@ -21,7 +21,8 @@ public interface DatasetService {
     DatasetInfoTask taskInfo(Long idDataset);
     List<Dataset> getTerminatedAnnotatedDatasets();
     List<Dataset> getNotTerminatedAnnotatedDatasets();
-
+    List<Dataset> getAssignedDatasets();
+    List<Dataset> getNotAssignedDatasets();
     double calculateDatasetAdvacement(Long datasetId);
 
     void updateDatasetAdvancement(Long datasetId);

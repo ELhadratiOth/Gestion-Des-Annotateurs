@@ -28,6 +28,7 @@ public class TaskController {
     private TaskService taskService;
 
 
+
     @GetMapping
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
         List<TaskToDo> tasks = taskService.getAll();

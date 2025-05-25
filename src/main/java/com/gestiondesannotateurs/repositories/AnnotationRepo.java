@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface AnnotationRepo extends JpaRepository<AnnotationClass, Long> {
     List<AnnotationClass> findByAnnotatorId(Long annotatorId);
+    List<AnnotationClass> findByCoupletextId(Long coupletextId);
     List<AnnotationClass>findByAnnotatorIdAndCoupletextId(Long annotatorId,Long CoupleOfTextId);
     @Query("SELECT a FROM AnnotationClass a WHERE a.coupletext.dataset.id = :datasetId")
     List<AnnotationClass> findByDatasetId(@Param("datasetId") Long datasetId);

@@ -33,6 +33,8 @@ public class Coupletext {
 
     private Boolean isDuplicated = false;
 
+    private String trueLabel;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY )
     @JoinColumn(name = "dataset_id")

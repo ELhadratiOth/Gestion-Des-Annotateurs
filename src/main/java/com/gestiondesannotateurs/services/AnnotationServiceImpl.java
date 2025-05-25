@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AnnotationDto;
+import com.gestiondesannotateurs.dtos.AnnotationResponse;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
 import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
@@ -83,7 +84,7 @@ public class AnnotationServiceImpl implements AnnotationService {
     }
 
     @Override
-    public List <AnnotationDto> findByAnnotatorId(Long annotatorId){
+    public List <AnnotationResponse> findByAnnotatorId(Long annotatorId){
         Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
                 .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId)));
 
@@ -91,12 +92,14 @@ public class AnnotationServiceImpl implements AnnotationService {
         if(annotationClasses.isEmpty()){
             new CustomResponseException(404,"Annotator don't have annotations");
         }
-        List <AnnotationDto> result=new ArrayList<>();
+        List <AnnotationResponse> result=new ArrayList<>();
         for(AnnotationClass annotationClasse:annotationClasses){
-            AnnotationDto currAnnot= new  AnnotationDto();
+            AnnotationResponse currAnnot= new AnnotationResponse();
             currAnnot.setAnnotatorId(annotatorId);
             currAnnot.setLabel(annotationClasse.getChoosenLabel());
             currAnnot.setCoupletextId(annotationClasse.getCoupletext().getId());
+            currAnnot.setTextA(annotationClasse.getCoupletext().getTextA());
+            currAnnot.setTextB(annotationClasse.getCoupletext().getTextB());
             result.add(currAnnot);
         }
 
@@ -104,7 +107,7 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     }
     @Override
-    public List<AnnotationDto> findByAnnotatorIdAndCoupletextId(Long annotatorId,Long coupleOfTextId){
+    public List<AnnotationResponse> findByAnnotatorIdAndCoupletextId(Long annotatorId,Long coupleOfTextId){
         Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
                 .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId)));
         Optional<Coupletext> coupletext= Optional.ofNullable(coupletextRepo.findById(annotatorId)
@@ -113,12 +116,14 @@ public class AnnotationServiceImpl implements AnnotationService {
         if(annotationClasses.isEmpty()){
             new CustomResponseException(404,"Annotator don't have annotations for this Couple of text");
         }
-        List <AnnotationDto> result=new ArrayList<>();
+        List <AnnotationResponse> result=new ArrayList<>();
         for(AnnotationClass annotationClasse:annotationClasses){
-            AnnotationDto currAnnot= new  AnnotationDto();
+            AnnotationResponse currAnnot= new  AnnotationResponse();
             currAnnot.setAnnotatorId(annotatorId);
             currAnnot.setLabel(annotationClasse.getChoosenLabel());
             currAnnot.setCoupletextId(annotationClasse.getCoupletext().getId());
+            currAnnot.setTextA(annotationClasse.getCoupletext().getTextA());
+            currAnnot.setTextB(annotationClasse.getCoupletext().getTextB());
             result.add(currAnnot);
         }
 
@@ -126,19 +131,21 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     }
     @Override
-    public List<AnnotationDto> getAnnotationsByDataset(Long datasetId){
+    public List<AnnotationResponse> getAnnotationsByDataset(Long datasetId){
         Optional<Dataset> dt= Optional.ofNullable(datasetRepo.findById(datasetId)
                 .orElseThrow(() -> new CustomResponseException(404,"Dataset don't exist")));
         List<AnnotationClass> annotationClasses=annotationRepo.findByDatasetId(dt.get().getId());
         if(annotationClasses.isEmpty()){
             new CustomResponseException(404,"This Dataset wasn't yet annotated");
         }
-        List <AnnotationDto> result=new ArrayList<>();
+        List <AnnotationResponse> result=new ArrayList<>();
         for(AnnotationClass annotationClasse:annotationClasses){
-            AnnotationDto currAnnot= new  AnnotationDto();
+            AnnotationResponse currAnnot= new AnnotationResponse();
             currAnnot.setAnnotatorId(annotationClasse.getAnnotator().getId());
             currAnnot.setLabel(annotationClasse.getChoosenLabel());
             currAnnot.setCoupletextId(annotationClasse.getCoupletext().getId());
+            currAnnot.setTextA(annotationClasse.getCoupletext().getTextA());
+            currAnnot.setTextB(annotationClasse.getCoupletext().getTextB());
             result.add(currAnnot);
         }
 
