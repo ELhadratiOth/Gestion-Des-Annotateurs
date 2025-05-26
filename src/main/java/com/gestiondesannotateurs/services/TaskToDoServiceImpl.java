@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.gestiondesannotateurs.dtos.LastFinishedTask;
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.*;
@@ -192,6 +193,28 @@ public class TaskToDoServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public LastFinishedTask lastCompletedTask() {
+        Optional<TaskToDo> taskGet = taskToDoRepo.findLastFinishedTask();
+        if(taskGet.isEmpty()){
+            return null;
+        }
+        TaskToDo task = taskGet.get();
+        System.out.println("task:"+ task.getAnnotator().getUsername());
+        Long nbrOfPendingTasks = taskToDoRepo.CountNonFinishedTasks() ;
+        System.out.println("task:"+ nbrOfPendingTasks);
+
+        return new LastFinishedTask(
+                        task.getDataset().getName(),
+                        task.getAnnotator().getFirstName() + " " + task.getAnnotator().getLastName(),
+                        task.getFinishedAt().toString(),
+                nbrOfPendingTasks
+
+        );
+
+    }
+
+
 
 
     @Override
@@ -299,10 +322,22 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
 
+
     public double getProgressForTask(Long taskId, Long annotatorId) {
         long total = coupleOfTextRepo.countByTasks_Id(taskId);
         long done = annotationService.countAnnotationsForAnnotator(annotatorId);
-        return (double) done / total * 100.0;
+        Optional<TaskToDo> taskToDo= taskToDoRepo.findById(taskId);
+        Double progress = (double) done / total * 100.0;
+
+        if(taskToDo.isEmpty()){
+            throw new CustomResponseException(404,"Task not found with this id");
+        }
+        taskToDo.get().setStatus(progress);
+
+        taskToDoRepo.save(taskToDo.get());
+
+
+        return progress ;
     }
 
     public void deleteTaskByDatasetId(Long datasetId) {

@@ -1,4 +1,5 @@
 package com.gestiondesannotateurs.services;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,11 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     public Annotator getAnnotatorById(Long annotatorId) {
         return annotatorRepository.findById(annotatorId)
                 .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId));
+    }
+
+    @Override
+    public Annotator getLastAnnotatorById() {
+        return annotatorRepository.findTopByOrderByIdDesc();
     }
 
     @Override
@@ -179,6 +185,8 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         return annotators;
 
     }
+
+
 
 
 }

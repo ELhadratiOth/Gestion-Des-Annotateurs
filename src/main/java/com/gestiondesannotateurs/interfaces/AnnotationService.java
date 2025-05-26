@@ -12,4 +12,5 @@ public interface AnnotationService {
     List<AnnotationResponse> getAnnotationsByDataset(Long datasetId);
     public long countAnnotationsForAnnotator(Long annotatorId);
     AnnotationDto findByAnnotationIdSharedWithAdmin(Long annotationId , Long coupleOfTextId);
+    long getAnnotationsInLast24Hours();
 }

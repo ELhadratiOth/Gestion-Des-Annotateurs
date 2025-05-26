@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +38,11 @@ public class TaskToDo {
     @ManyToMany(mappedBy = "tasks", fetch = FetchType.LAZY )
     private List<Coupletext> coupletexts = new ArrayList<>();
 
-    private String status;
+    @Column(name = "finished_at")
+    private LocalDateTime finishedAt;
 
-    public Long  getDataset(){
-        return dataset.getId();
-    }
+    private Double status = 0.0;
+
 
 
 }

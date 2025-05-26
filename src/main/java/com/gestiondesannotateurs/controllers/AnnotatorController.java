@@ -33,6 +33,13 @@ public class AnnotatorController {
         return GlobalSuccessHandler.success("Annotator details retrieved successfully", annotator);
     }
 
+    @GetMapping("/last")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
+    public ResponseEntity<GlobalResponse<Annotator>> getLastAnnotatorDetails() {
+        Annotator annotator = annotatorService.getLastAnnotatorById();
+        return GlobalSuccessHandler.success("LAst Annotator details retrieved successfully", annotator);
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<GlobalResponse<List<Annotator>>> getAllAnnotatorDetails() {

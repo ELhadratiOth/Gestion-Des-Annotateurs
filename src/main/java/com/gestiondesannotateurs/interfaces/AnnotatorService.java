@@ -10,7 +10,8 @@ import java.util.List;
 
  @Service
 public interface AnnotatorService {
-    Annotator getAnnotatorById(Long annotatorId);
+     Annotator getLastAnnotatorById();
+     Annotator getAnnotatorById(Long annotatorId);
     Annotator getAnnotatorByEmail(String email);
     List<Annotator> getAllAnnotators();
     Annotator createAnnotator(AnnotatorDto annotator);

@@ -16,7 +16,8 @@ public interface AnnotatorRepo extends JpaRepository<Annotator,Long> {
     boolean existsByEmail(String email);
     Annotator findByEmail(String email);
     List<Annotator> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
-
     @Query("SELECT a FROM Annotator a JOIN a.tasks t  WHERE t.id = :taskId")
     Optional<Annotator> getAnnotatorByTask(@Param("taskId") Long taskId);
+
+    Annotator findTopByOrderByIdDesc();
 }

@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.controllers;
 
+import com.gestiondesannotateurs.dtos.LastFinishedTask;
 import com.gestiondesannotateurs.dtos.TaskCreate;
 import com.gestiondesannotateurs.dtos.TaskToDoDto;
 import com.gestiondesannotateurs.entities.Annotator;
@@ -70,10 +71,13 @@ public class TaskController {
          return GlobalSuccessHandler.deleted("Successfully deleted tasks only");
     }
 
-    @GetMapping("/{annotatorId}/{taskId}")
-    public ResponseEntity<?> getTaskProgressForAnnotator(@PathVariable Long taskId,@PathVariable Long annotatorId){
-        double prog=taskService.getProgressForTask(taskId,annotatorId);
-        return GlobalSuccessHandler.success("the progress of the the task "+taskId,prog);
+
+    @GetMapping("/last-task-completed")
+    public ResponseEntity<?> getLastTaskCompleted() {
+        LastFinishedTask task = taskService.lastCompletedTask();
+        return GlobalSuccessHandler.success("Last task completed successfully", task);
     }
+
+
 
 }

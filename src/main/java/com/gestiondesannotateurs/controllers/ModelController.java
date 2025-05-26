@@ -19,6 +19,7 @@ public class ModelController {
     private ModelService modelService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    private int datasetId;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFullDataset(
@@ -59,6 +60,7 @@ public class ModelController {
 
     @GetMapping("/test/history/{datasetId}")
     public ResponseEntity<?> getTestingHistory(@PathVariable int datasetId) {
+        this.datasetId = datasetId;
         String response = modelService.getTestingHistory(datasetId);
         return GlobalSuccessHandler.success(response);
     }
@@ -67,4 +69,5 @@ public class ModelController {
     public void receiveLog(@RequestBody String log) {
         messagingTemplate.convertAndSend("/topic/logs", log);
     }
+
 }

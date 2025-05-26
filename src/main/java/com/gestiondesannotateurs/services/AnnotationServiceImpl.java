@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -182,6 +183,12 @@ public class AnnotationServiceImpl implements AnnotationService {
         annotationDto.setCoupletextId(annotation.getCoupletext().getId());
 
         return annotationDto;
+    }
+
+
+    public long getAnnotationsInLast24Hours() {
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+        return annotationRepo.countAnnotationsInLast24Hours(twentyFourHoursAgo);
     }
 
 }
