@@ -34,6 +34,7 @@ public class DatasetController {
 
     public static final String CSV_CONTENT_TYPE = "text/csv";
     public static final String JSON_CONTENT_TYPE = "application/json";
+    public static final String XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     @Autowired
     private DatasetService datasetService;
@@ -103,7 +104,7 @@ public class DatasetController {
     }
 
     @GetMapping("/download/{datasetId}")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
+//    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
     public ResponseEntity<?> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
         return datasetService.downloadFileByDatasetId(datasetId);
     }

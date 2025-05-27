@@ -50,7 +50,8 @@ public class SecurityConfig {
                                         "/h2-console/**",
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
-                                        "/v3/api-docs/**"
+                                        "/v3/api-docs/**",
+                                        "/api/datasets/download/*"
                                 ).permitAll()
 //						.requestMatchers(HttpMethod.GET, "").hasAnyRole("ADMIN", "USER")
                                 .anyRequest()

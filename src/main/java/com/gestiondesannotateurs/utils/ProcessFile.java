@@ -5,6 +5,8 @@ import com.gestiondesannotateurs.entities.Coupletext;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,11 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.gestiondesannotateurs.controllers.DatasetController.CSV_CONTENT_TYPE;
 import static com.gestiondesannotateurs.controllers.DatasetController.JSON_CONTENT_TYPE;
-
+import static com.gestiondesannotateurs.controllers.DatasetController.XLSX_CONTENT_TYPE ;
 @Component
 public class ProcessFile {
 
@@ -34,13 +35,8 @@ public class ProcessFile {
             throw new IllegalArgumentException("Uploaded file is empty or null");
         }
 
-//        System.out.println("bugg file1");
-
-        // Save the file and get the path
         String savedFilePath = saveFile(file);
-        System.out.println("bugg file2");
 
-        // Process the file and create Coupletext entities
         List<Coupletext> storageDatas = new ArrayList<>();
         String contentType = file.getContentType();
 
@@ -54,7 +50,6 @@ public class ProcessFile {
                         storageData.setTextA(row[0]);
                         storageData.setTextB(row[1]);
                         storageData.setDataset(dataset);
-                        System.out.println(storageData);
                         storageDatas.add(storageData);
                     }
                 }
@@ -72,38 +67,63 @@ public class ProcessFile {
                 storageData.setDataset(dataset);
                 storageDatas.add(storageData);
             }
+        } else if (Objects.equals(contentType, XLSX_CONTENT_TYPE)) {
+            try (Workbook workbook = new XSSFWorkbook(Files.newInputStream(Paths.get(savedFilePath)))) {
+                Sheet sheet = workbook.getSheetAt(0);
+                boolean skipHeader = true;
+                for (Row row : sheet) {
+                    if (skipHeader) {
+                        skipHeader = false;
+                        continue;
+                    }
+                    if (row.getPhysicalNumberOfCells() >= 2) {
+                        Coupletext storageData = new Coupletext();
+                        storageData.setTextA(getCellValueAsString(row.getCell(0)));
+                        storageData.setTextB(getCellValueAsString(row.getCell(1)));
+                        storageData.setDataset(dataset);
+                        storageDatas.add(storageData);
+                    }
+                }
+            } catch (IOException e) {
+                Files.deleteIfExists(Paths.get(savedFilePath));
+                throw new RuntimeException("Error processing XLSX file", e);
+            }
         } else {
             Files.deleteIfExists(Paths.get(savedFilePath));
             throw new IllegalArgumentException("Unsupported file type: " + contentType);
         }
 
-//        System.out.println("bugg file3");
         return storageDatas;
     }
 
     private String saveFile(MultipartFile file) throws IOException {
-//        System.out.println("save 0");
         System.out.println("Upload dir: " + uploadDir);
 
         Path uploadPath = Paths.get(uploadDir);
-//        System.out.println("save 1");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
-//            System.out.println("save 2");
         }
 
         Path filePath = uploadPath.resolve(file.getOriginalFilename());
-//        System.out.println("save 3");
-
         Files.copy(file.getInputStream(), filePath);
-//        System.out.println("save 4");
 
         return filePath.toString();
     }
+
     public static String getFileExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             return "";
         }
         return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    // Helper method to get Excel cell value as text
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        // Since all data is text, force string conversion
+        cell.setCellType(CellType.STRING);
+        return cell.getStringCellValue();
     }
 }
