@@ -40,6 +40,10 @@ public class Coupletext {
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "coupletext", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnnotationClass> annotations = new ArrayList<>();
+
 
 
 

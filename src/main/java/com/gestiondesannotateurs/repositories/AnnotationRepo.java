@@ -29,4 +29,7 @@ public interface AnnotationRepo extends JpaRepository<AnnotationClass, Long> {
 
     @Query("SELECT COUNT(a) FROM AnnotationClass a WHERE a.createdAt >= :startTime")
     long countAnnotationsInLast24Hours(@Param("startTime") LocalDateTime startTime);
+
+    @Query("SELECT a FROM AnnotationClass a WHERE a.coupletext.id = :coupleofTextId AND a.isAdmin = true ")
+    Optional<AnnotationClass> findIfAlreadyAnnotatedByAdmin(@Param("coupleofTextId")  Long coupleofTextId);
 }

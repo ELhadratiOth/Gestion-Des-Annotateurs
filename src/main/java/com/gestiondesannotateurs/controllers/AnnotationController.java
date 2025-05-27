@@ -1,11 +1,14 @@
 package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.AnnotationDto;
+import com.gestiondesannotateurs.dtos.AnnotationDtoAdmin;
 import com.gestiondesannotateurs.dtos.AnnotationRequest;
 import com.gestiondesannotateurs.dtos.AnnotationResponse;
 import com.gestiondesannotateurs.entities.Annotator;
+import com.gestiondesannotateurs.entities.Othman;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
+import com.gestiondesannotateurs.repositories.OthmanRepo;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class AnnotationController {
     private AnnotationService annotationService;
     @Autowired
     private AnnotatorService annotatorService;
+    @Autowired
+    private OthmanRepo othmanRepo;
 
 
     @PostMapping("/{datasetId}/{taskId}")
@@ -55,6 +60,18 @@ public class AnnotationController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<?> getAnnotationCountLast24h() {
         return GlobalSuccessHandler.success("the number of annotations is",annotationService.getAnnotationsInLast24Hours());
+    }
+
+    @PostMapping("/{datasetId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<?> annotateByAdmin(@Valid @RequestBody AnnotationRequest request) {
+        AnnotationDtoAdmin ann=new AnnotationDtoAdmin();
+        ann.setCoupletextId(request.getCoupletextId());
+        ann.setAnnotatorId(1L);
+        ann.setLabel(request.getLabel());
+        System.out.println(ann.getIsAdmin());
+        annotationService.saveAnnotationAdmin(ann);
+        return GlobalSuccessHandler.success("Annotation Created Sucessfully By SUPER ADMIN",ann);
     }
 
 }

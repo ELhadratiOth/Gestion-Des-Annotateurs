@@ -5,6 +5,9 @@ public record CoupleOfTextWithAnnotation(
         Long annotationId,
         String textA,
         String textB,
-        String annotationLabel
+        String annotationLabel,
+        String datasetName,
+        String datasetLabelName,
+        String datasetLabelClasses
 ) {
 }

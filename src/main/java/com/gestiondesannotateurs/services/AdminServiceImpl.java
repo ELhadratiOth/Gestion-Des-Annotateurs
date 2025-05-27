@@ -148,10 +148,12 @@ public class AdminServiceImpl implements AdminService {
     public List<CoupleOfTextWithAnnotation> getListOfCoupleOfTextWithThereAnnotation(Long datasetId) {
         List<Coupletext> coupletexts = getAnonnotatedCoupletexts(datasetId); // only the affecteds to  the  admin
 
+        Dataset dataset =  datasetRepo.findById(datasetId).orElseThrow(() -> new CustomResponseException(404 , "Dataset not found"));
+
         List<CoupleOfTextWithAnnotation> coupleOfTextWithAnnotations = new ArrayList<>();
         for (int i = 0; i < coupletexts.size(); i++) {
             Coupletext coupletext = coupletexts.get(i);
-//            System.out.println("this  is the coupletext id = " + coupletext.getId() );
+            System.out.println("this  is the coupletext id = " + coupletext.getId() );
             Optional<AnnotationClass> annotation = annotationRepo.findAdminsAnnotationAnnotationByCoupleOfText(coupletext.getId());
 //            System.out.println("this  is the annotation i= " + annotation.get().getChoosenLabel() );
 
@@ -161,7 +163,11 @@ public class AdminServiceImpl implements AdminService {
                         null,
                         coupletext.getTextA(),
                         coupletext.getTextB(),
-                        null
+                        null,
+                        dataset.getName(),
+                        dataset.getLabel().getName(),
+                        dataset.getLabel().getClasses()
+
                         // not annotated yet
                 );
                 coupleOfTextWithAnnotations.add(dto);
@@ -173,9 +179,13 @@ public class AdminServiceImpl implements AdminService {
                         annotation.get().getId(),
                         coupletext.getTextA(),
                         coupletext.getTextB(),
-                        annotation.get().getChoosenLabel()
+                        annotation.get().getChoosenLabel(),
+                        dataset.getName(),
+                        dataset.getLabel().getName(),
+                        dataset.getLabel().getClasses()
                 );
                 coupleOfTextWithAnnotations.add(dto);
+
             }
     }
         return coupleOfTextWithAnnotations ;
@@ -199,7 +209,7 @@ public class AdminServiceImpl implements AdminService {
 
             Long adminRowsInDataset = dataset.getSize() > 10 ? 10L : dataset.getSize()   ;
             Double advancement = (Double) (counter / (double) adminRowsInDataset * 100);
-
+            System.out.println("advancement :" + advancement);
             String status = advancement == 100.0 ? "Completed" :  advancement == 0.0 ? "Not Start" : "In Progress" ;
             String action = status.equals("Completed") ? "Review" : status.equals("Not Start") ? "Start" : "Continue" ;
 //            String availableLabelClasses = dataset.getLabel().getClasses();

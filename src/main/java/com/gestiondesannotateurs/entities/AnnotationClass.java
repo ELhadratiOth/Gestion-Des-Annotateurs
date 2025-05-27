@@ -1,5 +1,6 @@
 package com.gestiondesannotateurs.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "annotations")
@@ -26,7 +29,7 @@ public class AnnotationClass {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "annotator_id")
     private Person annotator;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY )
     @JoinColumn(name = "coupletext_id")
     private Coupletext coupletext;
 

@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.AnnotationDto;
+import com.gestiondesannotateurs.dtos.AnnotationDtoAdmin;
 import com.gestiondesannotateurs.dtos.AnnotationResponse;
 import com.gestiondesannotateurs.dtos.AnnotatorDto;
 import com.gestiondesannotateurs.entities.*;
@@ -38,6 +39,10 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     @Autowired
     private DatasetService datasetService;
+    @Autowired
+    private OthmanRepo othmanRepo;
+    @Autowired
+    private PersonRepo personRepo;
 
     @Override
     public AnnotationDto saveAnnotation(AnnotationDto dto) {
@@ -47,27 +52,10 @@ public class AnnotationServiceImpl implements AnnotationService {
         }
 
         // Check if the annotatorId corresponds to an Annotator
-        Optional<Annotator> annotator = annotatorRepo.findById(dto.getAnnotatorId());
-        if (annotator.isPresent()) {
-            // Coupletext lookup
-            Coupletext coupletext = coupletextRepo.findById(dto.getCoupletextId())
-                    .orElseThrow(() -> new CustomResponseException(404, "Coupletext Not Found"));
+        Optional<Person> person = personRepo.findById(dto.getAnnotatorId());
 
-            // Save annotation
-            AnnotationClass annotation = new AnnotationClass();
-            annotation.setAnnotator(annotator.get());
-            annotation.setCoupletext(coupletext);
-            annotation.setChoosenLabel(dto.getLabel());
-            annotationRepo.save(annotation);
-            Long datasetId = annotation.getCoupletext().getDataset().getId();
-            datasetService.updateDatasetAdvancement(datasetId);
-            return dto; // Consider returning a DTO with the saved annotation's ID
-        }
-
-        // If not an Annotator, check if it's an Admin
-        Optional<Admin> admin = adminRepo.findById(dto.getAnnotatorId());
-        if (admin.isEmpty()) {
-            throw new CustomResponseException(404, "User Not Found: Neither Annotator nor Admin");
+        if (person.isEmpty()) {
+            throw new CustomResponseException(404, "User Not Found: Neither Annotator nor Admin nor  super admin");
         }
 
         // Coupletext lookup
@@ -76,12 +64,15 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         // Save annotation
         AnnotationClass annotation = new AnnotationClass();
-        annotation.setAnnotator(admin.get());
-        annotation.setIsAdmin(true);
+        annotation.setAnnotator(person.get());
         annotation.setCoupletext(coupletext);
         annotation.setChoosenLabel(dto.getLabel());
         annotationRepo.save(annotation);
+        Long datasetId = annotation.getCoupletext().getDataset().getId();
+        datasetService.updateDatasetAdvancement(datasetId);
         return dto;
+
+
     }
 
     @Override
@@ -189,6 +180,45 @@ public class AnnotationServiceImpl implements AnnotationService {
     public long getAnnotationsInLast24Hours() {
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
         return annotationRepo.countAnnotationsInLast24Hours(twentyFourHoursAgo);
+    }
+
+    @Override
+    public AnnotationDtoAdmin saveAnnotationAdmin(AnnotationDtoAdmin dto) {
+        // Validate input
+        if (dto == null || dto.getAnnotatorId() == null || dto.getCoupletextId() == null) {
+            throw new CustomResponseException(400, "Invalid input: Annotator ID or Coupletext ID is missing");
+        }
+
+        // Check if the annotatorId corresponds to an Annotator
+        Optional<Person> person = personRepo.findById(dto.getAnnotatorId());
+
+        if (person.isEmpty()) {
+            throw new CustomResponseException(404, "User Not Found: Neither Annotator nor Admin nor  super admin");
+        }
+
+        // Coupletext lookup
+        Coupletext coupletext = coupletextRepo.findById(dto.getCoupletextId())
+                .orElseThrow(() -> new CustomResponseException(404, "Coupletext Not Found"));
+
+        Optional<AnnotationClass> annotExists = annotationRepo.findIfAlreadyAnnotatedByAdmin(coupletext.getId());
+        if( annotExists.isPresent() ){
+            annotExists.get().setChoosenLabel( dto.getLabel());
+            annotExists.get().setCreatedAt( LocalDateTime.now());
+        }
+        else{
+            // Save annotation
+            AnnotationClass annotation = new AnnotationClass();
+            annotation.setAnnotator(person.get());
+            annotation.setCoupletext(coupletext);
+            annotation.setChoosenLabel(dto.getLabel());
+            annotation.setIsAdmin(dto.getIsAdmin());
+            annotationRepo.save(annotation);
+            Long datasetId = annotation.getCoupletext().getDataset().getId();
+            datasetService.updateDatasetAdvancement(datasetId);
+        }
+
+
+        return dto;
     }
 
 }
