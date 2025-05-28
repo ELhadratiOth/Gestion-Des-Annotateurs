@@ -11,10 +11,7 @@ import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -89,12 +86,14 @@ public class AdminDetectSpammers {
         for(List<List<Integer>> integers : allAnnotationsToIntegers){
             kappaValues.add(kappaEvaluationService.calculateKappa(integers , categories)) ;
         }
-        // threshold = 0.3 max
 
-
+        Map<Long, Double> annotWithScor = new HashMap<>();
+        for(int i = 0 ; i < annotatorIds.size() ; i++){
+            annotWithScor.put(annotatorIds.get(i),kappaValues.get(i));
+        }
 
 //        return allAnnotationsToIntegers;
-        return null;
+        return annotWithScor;
 
     }
 
