@@ -32,4 +32,5 @@ public interface AnnotationRepo extends JpaRepository<AnnotationClass, Long> {
 
     @Query("SELECT a FROM AnnotationClass a WHERE a.coupletext.id = :coupleofTextId AND a.isAdmin = true ")
     Optional<AnnotationClass> findIfAlreadyAnnotatedByAdmin(@Param("coupleofTextId")  Long coupleofTextId);
+
 }

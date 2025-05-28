@@ -1,15 +1,13 @@
 package com.gestiondesannotateurs.services;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
 import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
+import com.gestiondesannotateurs.repositories.AnnotationRepo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
@@ -39,6 +37,8 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AnnotationRepo annotationRepo;
 
 
     @Override
@@ -186,6 +186,30 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
     }
 
+    @Override
+    public Map<String, Map.Entry<Long, Long>> getAnnotatorsStats() {
+        List<Annotator> annotators = annotatorRepository.findAll();
+        List<Map.Entry<Long, Long>> statsList = new ArrayList<>();
+        for (Annotator annotator : annotators) {
+            if (!annotator.isSpammer()) {
+                Long annotationCount = annotationRepo.findByAnnotatorId(annotator.getId()).stream().count();
+                statsList.add(new AbstractMap.SimpleEntry<>(annotator.getId(), annotationCount));
+            }
+        }
+
+        if (statsList.isEmpty()) {
+            return Map.of();
+        }
+        // Trier par nombre d’annotations
+        statsList.sort(Comparator.comparingLong(Map.Entry::getValue));
+
+        Map<String, Map.Entry<Long, Long>> result = new HashMap<>();
+        result.put("min", statsList.get(0));
+        result.put("median", statsList.get(statsList.size() / 2));
+        result.put("max", statsList.get(statsList.size() - 1));
+
+        return result;
+    }
 
 
 

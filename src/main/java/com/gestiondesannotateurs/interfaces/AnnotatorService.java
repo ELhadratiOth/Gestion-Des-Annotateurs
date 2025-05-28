@@ -7,8 +7,9 @@ import com.gestiondesannotateurs.entities.Annotator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
- @Service
+@Service
 public interface AnnotatorService {
      Annotator getLastAnnotatorById();
      Annotator getAnnotatorById(Long annotatorId);
@@ -24,4 +25,5 @@ public interface AnnotatorService {
     List<AnnotatorTaskDto> getAnnotatorsByDataset(Long datasetId);
     Annotator getAnnotatorByTask(Long taskId);
     List<Annotator> getMatchingAnnotators (String name);
+    Map<String, Map.Entry<Long, Long>> getAnnotatorsStats();
  }

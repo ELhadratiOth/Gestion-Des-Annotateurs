@@ -24,43 +24,13 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/spams")
 public class SpamController {
-
-
     @Autowired
-    private AdminDetectSpammers adminDetectSpammers;
-
-    @Autowired
-    private DetectSpamersByIncoherence detectSpamersByIncoherence;
-
-
+    private SpamService spamService;
     @GetMapping("/scan/{datasetId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<?> scan(@PathVariable Long datasetId){
-
-        //1 admin check
-        Map<Long, Double>  annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
-
-        Map<Long, Double> inconsistencies=detectSpamersByIncoherence.detectAllSpammersByInconsistency(datasetId);
-        Map<Long, Double> averagedScores = new HashMap<>();
-
-        // compute the averge spamscore
-        for (Map.Entry<Long, Double> entry : annotatorsAnnotation.entrySet()) {
-            Long annotatorId = entry.getKey();
-            Double score1 = entry.getValue();
-            Double score2 = inconsistencies.get(annotatorId);
-
-            if (score2 != null) { // S'assurer que l'annotateur existe aussi dans la 2e map
-                double average = (score1 + score2) / 2.0;
-                averagedScores.put(annotatorId, average);
-            } else {
-                throw new CustomResponseException(404, "Error one annotator not in the two map");
-
-            }
-
-        }
-        return GlobalSuccessHandler.success("spams score of annotators",averagedScores);
-
+        Map<Long, Double> annotatorWithspamsScores=spamService.detectSpammer(datasetId);
+        return GlobalSuccessHandler.success("Annotators with theirs sapms score",annotatorWithspamsScores);
     }
-
 
 }

@@ -113,4 +113,10 @@ public class AnnotatorController {
         return GlobalSuccessHandler.success("Spammers retrieved successfully", annotators);
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<?> getAnnotatorStats() {
+        Map<String, Map.Entry<Long, Long>> stats=annotatorService.getAnnotatorsStats();
+        return GlobalSuccessHandler.success("Annotator stats", stats);
+    }
+
 }
