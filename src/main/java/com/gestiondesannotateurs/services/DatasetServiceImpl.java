@@ -315,5 +315,19 @@ public class DatasetServiceImpl implements DatasetService {
                 .body(resource);
     }
 
+    @Override
+    public LastFinishedDataset lastCompletedTask() {
+        Optional<Dataset> dataset = datasetRepo.findLastAddedDataset();
+        if(dataset.isEmpty()){
+            return  null;
+        }
+        return new LastFinishedDataset(
+                dataset.get().getName(),
+                dataset.get().getCreatedAt(),
+                dataset.get().getSizeMB(),
+                dataset.get().getLabel().getName()
+        );
+    }
+
 
 }

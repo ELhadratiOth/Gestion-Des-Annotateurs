@@ -1,10 +1,7 @@
 package com.gestiondesannotateurs.interfaces;
 
 
-import com.gestiondesannotateurs.dtos.DatasetInfo;
-import com.gestiondesannotateurs.dtos.DatasetInfoTask;
-import com.gestiondesannotateurs.dtos.DatasetUpdata;
-import com.gestiondesannotateurs.dtos.DatasetUploadRequest;
+import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.core.io.Resource;
@@ -29,4 +26,6 @@ public interface DatasetService {
 
     Dataset findDatasetById(Long idDataset);
     ResponseEntity<Resource> downloadFileByDatasetId(Long datasetId) throws IOException;
+    LastFinishedDataset lastCompletedTask();
+
 }

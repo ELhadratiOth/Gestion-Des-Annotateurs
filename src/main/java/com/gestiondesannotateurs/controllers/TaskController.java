@@ -22,20 +22,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
 
 public class TaskController {
     @Autowired
     private TaskService taskService;
 
 
-
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> allTasks() {
         List<TaskToDo> tasks = taskService.getAll();
         return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping
     public ResponseEntity<GlobalResponse<String>> createTask(@RequestBody @Valid TaskCreate taskCreate) {
         System.out.println(taskCreate);
@@ -43,12 +43,15 @@ public class TaskController {
         taskService.createTask(taskCreate);
         return GlobalSuccessHandler.created("Successfully created task");
     }
-    
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
     @GetMapping("/annotator/{annotatorId}")
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByAnnotatorId(@PathVariable Long annotatorId) {
 		List<TaskToDo> tasks = taskService.getTasksByAnnotatorId(annotatorId);
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
 
 	@GetMapping("/dataset/{datasetId}")
 	public ResponseEntity<GlobalResponse<List<TaskToDoDto>>> getTasksByDatasetId(@PathVariable Long datasetId) {
@@ -56,6 +59,8 @@ public class TaskController {
 		return GlobalSuccessHandler.success("Successfully retrived tasks", tasks);
 	}
 
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
     @GetMapping("/{taskId}/next")
     public ResponseEntity<?> getNextCoupletextToAnnotate(@PathVariable Long taskId) {
         Coupletext next = taskService.getNextUnannotatedCoupletextForTask(taskId);
@@ -65,18 +70,20 @@ public class TaskController {
         return GlobalSuccessHandler.success("Next couple get sucessfully", next);
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @DeleteMapping("/dataset/{datasetId}")
     public ResponseEntity<?> deleteTasksByDatasetId(@PathVariable Long datasetId) {
          taskService.deleteTaskByDatasetId(datasetId);
          return GlobalSuccessHandler.deleted("Successfully deleted tasks only");
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping("/last-task-completed")
     public ResponseEntity<?> getLastTaskCompleted() {
         LastFinishedTask task = taskService.lastCompletedTask();
         return GlobalSuccessHandler.success("Last task completed successfully", task);
     }
+
 
 
 
