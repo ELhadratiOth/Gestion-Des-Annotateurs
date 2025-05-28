@@ -45,7 +45,6 @@ public class ModelServiceImpl implements ModelService {
             body.add("epochs", String.valueOf(request.getEpochs()));
             body.add("batch_size", String.valueOf(request.getBatchSize()));
             body.add("user", request.getUser());
-            body.add("dataset_id", String.valueOf(request.getDatasetId()));
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -58,7 +57,7 @@ public class ModelServiceImpl implements ModelService {
                     requestEntity,
                     String.class
             );
-            return "Train params  and datasets send sucessfully for training task" ;
+            return response.getBody() ;
         } catch (Exception e) {
             return "❌ Failed to upload the dataset. Please verify the file format and try again.";
         }
@@ -101,7 +100,7 @@ public class ModelServiceImpl implements ModelService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                return "✅ Testing started and  end successfully.";
+                return "✅ Testing started and  end successfully."+response.getBody();
             } else {
                 return "⚠️ Unexpected response while starting testing.";
             }

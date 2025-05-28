@@ -28,13 +28,13 @@ public class ModelController {
             @RequestParam("learning_rate") double learningRate,
             @RequestParam("epochs") int epochs,
             @RequestParam("batch_size") int batchSize,
-            @RequestParam("user") String user,
-            @RequestParam("dataset_id") int datasetId
+            @RequestParam("user") String user
+//            @RequestParam("dataset_id") int datasetId
     ) {
         try {
-            TrainRequest request = new TrainRequest(file, task, learningRate, epochs, batchSize, user, datasetId);
+            TrainRequest request = new TrainRequest(file, task, learningRate, epochs, batchSize, user);
             String response = modelService.uploadFullDataset(request);
-            return GlobalSuccessHandler.success(response);
+            return GlobalSuccessHandler.success("Training params and dataset upload succesfully",response);
         } catch (IOException e) {
             return GlobalSuccessHandler.success("Internal server error during dataset upload");
         }
