@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-
 @Service
 public class CoupleOfTextServiceImpl implements CoupleOfTextService {
 
@@ -28,7 +26,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     private CoupleOfTextRepo coupleOfTextRepo;
 
     @Autowired
-    private ProcessFile processFile ;
+    private ProcessFile processFile;
 
     @Autowired
     private AnnotationRepo annotationRepo;
@@ -37,82 +35,99 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     private KappaEvaluationService kappaEvaluationService;
 
     @Override
-    public Long createRows(Dataset dataset , MultipartFile file) throws CsvValidationException, IOException {
-//        System.out.println("bugg hh");
-
-
-        if(file == null || file.isEmpty() ){
-            throw  new CustomResponseException(401 , "File is null or empty");
+    public Long createRows(Dataset dataset, MultipartFile file) throws CsvValidationException, IOException {
+        if(file == null || file.isEmpty()){
+            throw new CustomResponseException(401, "File is null or empty");
         }
 
-//        System.out.println("bugg hhh");
-
-        List<Coupletext> storageDatas =  processFile.processFile(file , dataset);
-
+        List<Coupletext> storageDatas = processFile.processFile(file, dataset);
         coupleOfTextRepo.saveAll(storageDatas);
 
-        return Long.valueOf((long) storageDatas.size()) ;
-
+        return Long.valueOf(storageDatas.size());
     }
+
     @Override
     public List<CoupletextDto> findDtoByDataset(Dataset dataset, Pageable pageable) {
+        // Compute true labels before fetching
+        computeTrueLabelsForDataset(dataset);
+
         Page<Coupletext> page = coupleOfTextRepo.findByDataset(dataset, pageable);
         if (page.isEmpty()) {
             throw new CustomResponseException(404, "Aucun couple de texte trouvé");
         }
+
         return page.getContent()
                 .stream()
-                .map(c -> new CoupletextDto(c.getId(), c.getTextA(), c.getTextB()))
+                .map(c -> new CoupletextDto(
+                        c.getId(),
+                        c.getTextA(),
+                        c.getTextB(),
+                        c.getTrueLabel() != null ? c.getTrueLabel().toUpperCase() : "NOT_YET"
+                ))
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<CoupletextDto> getCouplesByTaskPaged(Long taskId, Pageable pageable) {
-        Page<Coupletext> page = coupleOfTextRepo.findByTasks_Id(taskId,pageable);
+        Page<Coupletext> page = coupleOfTextRepo.findByTasks_Id(taskId, pageable);
         if (page.isEmpty()) {
             throw new CustomResponseException(404, "Aucun couple de texte trouvé");
         }
+
+        // Compute true labels for all couples in this task
+        page.getContent().forEach(c -> {
+            if (c.getDataset() != null) {
+                computeTrueLabelsForDataset(c.getDataset());
+            }
+        });
+
         return page.getContent()
                 .stream()
-                .map(c -> new CoupletextDto(c.getId(), c.getTextA(), c.getTextB()))
+                .map(c -> new CoupletextDto(
+                        c.getId(),
+                        c.getTextA(),
+                        c.getTextB(),
+                        c.getTrueLabel() != null ? c.getTrueLabel().toUpperCase() : "NOT_YET"
+                ))
                 .collect(Collectors.toList());
     }
 
-    public void computeTrueLabelsForDataset(Dataset dataset){
-
+    @Override
+    public void computeTrueLabelsForDataset(Dataset dataset) {
         List<Coupletext> couples = coupleOfTextRepo.findByDataset(dataset);
 
         for (Coupletext couple : couples) {
             List<AnnotationClass> allAnnotations = annotationRepo.findByCoupletextId(couple.getId());
 
-            // Filtre  : no spammeur, no admin
+            // Filter valid annotations (no spammer, no admin)
             List<AnnotationClass> validAnnotations = allAnnotations.stream()
-                    .filter(a -> !a.getIsAdmin()) // exclude admin annotations
+                    .filter(a -> !a.getIsAdmin())
                     .filter(a -> {
                         Person annotateur = a.getAnnotator();
                         if (annotateur instanceof Annotator) {
-                            return !((Annotator) annotateur).isSpammer(); //exclude spamers annotations
-                        } else {
-                            return false;
+                            return !((Annotator) annotateur).isSpammer();
                         }
+                        return false;
                     })
                     .collect(Collectors.toList());
 
-            // get all annotator assigned to the couple
+            // Get assigned annotators
             Set<Long> assignedAnnotatorIds = couple.getTasks().stream()
                     .map(task -> task.getAnnotator().getId())
                     .collect(Collectors.toSet());
 
-            // Get annotator who really annotated the couple
+            // Get annotators who actually annotated
             Set<Long> annotatorsWhoAnnotated = validAnnotations.stream()
                     .map(a -> a.getAnnotator().getId())
                     .collect(Collectors.toSet());
 
             if (!annotatorsWhoAnnotated.containsAll(assignedAnnotatorIds)) {
-                couple.setTrueLabel("Not Yet");
-
+                couple.setTrueLabel("NOT_YET");
+                coupleOfTextRepo.save(couple);
+                continue;
             }
 
-            // Mapper les labels en entiers
+            // Map labels to integers for kappa calculation
             Map<Integer, String> categoryLabels = new HashMap<>();
             List<Integer> numericLabels = new ArrayList<>();
             int index = 0;
@@ -126,18 +141,15 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                 numericLabels.add(numericLabel);
             }
 
-            // Appel à ta méthode de calcul du label dominant (par ex. via kappa)
+            // Calculate most frequent label with kappa
             String mostFrequentLabel = kappaEvaluationService.getMostFrequentCategoryWithKappa(
                     numericLabels,
                     categoryLabels
             );
 
-            couple.setTrueLabel(mostFrequentLabel);
-
-
+            couple.setTrueLabel(mostFrequentLabel != null ? mostFrequentLabel.toUpperCase() : "UNDEFINED");
+            coupleOfTextRepo.save(couple);
         }
-
-
     }
 
     private <K, V> K getKeyByValue(Map<K, V> map, V value) {
@@ -148,7 +160,4 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
         }
         return null;
     }
-
-
-
 }

@@ -19,11 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CoupleOfTextController {
     @Autowired
-    private  CoupleOfTextService coupleOfTextService;
+    private CoupleOfTextService coupleOfTextService;
 
     @GetMapping("/{datasetId}")
     @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
-
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getDatasetCoupleTexts(
             @PathVariable Long datasetId,
             @RequestParam(defaultValue = "0") int page,
@@ -48,7 +47,7 @@ public class CoupleOfTextController {
     public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getTaskCoupleTexts(
             @PathVariable Long taskId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "1") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
         List<CoupletextDto> results = coupleOfTextService.getCouplesByTaskPaged(
                 taskId,
@@ -60,7 +59,4 @@ public class CoupleOfTextController {
                 results
         );
     }
-
-
-
 }

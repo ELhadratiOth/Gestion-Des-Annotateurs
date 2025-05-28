@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-    public class CoupletextDto {
-        private Long id;
-        private String textA;
-        private String textB;
+public class CoupletextDto {
+    private Long id;
+    private String textA;
+    private String textB;
+    private String trueLabel;
 }
-
