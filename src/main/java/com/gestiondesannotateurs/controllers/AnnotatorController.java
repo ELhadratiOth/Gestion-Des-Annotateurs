@@ -1,7 +1,5 @@
 package com.gestiondesannotateurs.controllers;
-import com.gestiondesannotateurs.dtos.AnnotatorDto;
-import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
-import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
+import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
@@ -117,6 +115,23 @@ public class AnnotatorController {
     public ResponseEntity<?> getAnnotatorStats() {
         Map<String, Map.Entry<Long, Long>> stats=annotatorService.getAnnotatorsStats();
         return GlobalSuccessHandler.success("Annotator stats", stats);
+    }
+
+
+    @GetMapping("/coupleoftextannotated/{annotatorId}/{taskId}")
+    public ResponseEntity<GlobalResponse<List<CoupleOfTextWithAnnotation>>> getAnnotatorCoupleOfTextWithTheirAnnotationsByTaskId(@PathVariable Long annotatorId,@PathVariable Long taskId) {
+        List<CoupleOfTextWithAnnotation>  coupleOfTextWithAnnotations = annotatorService.getCoupletextsWithAnnotationByAnnotator(annotatorId,taskId);
+        return GlobalSuccessHandler.success(
+                "Successfully retrieved task coupletexts for task id = " + taskId,
+                coupleOfTextWithAnnotations
+        );
+    }
+    @GetMapping("/getAnnotatorTasks/{annotatorId}")
+    public ResponseEntity<?> getListOfTasksForAnnotator(@PathVariable Long annotatorId) {
+        return GlobalSuccessHandler.success(
+                "Successfully retrived list of tasks for Annotator " + annotatorId,
+                annotatorService.getListOfTasksForAnnotator(annotatorId)
+        );
     }
 
 }

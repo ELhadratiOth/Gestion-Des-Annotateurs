@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.dtos.CoupletextDto;
+import com.gestiondesannotateurs.dtos.PagedCoupletextDto;
 import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.interfaces.KappaEvaluationService;
@@ -47,8 +48,8 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     }
 
     @Override
-    public List<CoupletextDto> findDtoByDataset(Dataset dataset, Pageable pageable) {
-        // Compute true labels before fetching
+    public PagedCoupletextDto findDtoByDataset(Dataset dataset, Pageable pageable) {
+        // Calcul des vrais labels
         computeTrueLabelsForDataset(dataset);
 
         Page<Coupletext> page = coupleOfTextRepo.findByDataset(dataset, pageable);
@@ -56,7 +57,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
             throw new CustomResponseException(404, "Aucun couple de texte trouvé");
         }
 
-        return page.getContent()
+        List<CoupletextDto> coupleDtos = page.getContent()
                 .stream()
                 .map(c -> new CoupletextDto(
                         c.getId(),
@@ -65,7 +66,16 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                         c.getTrueLabel() != null ? c.getTrueLabel().toUpperCase() : "NOT_YET"
                 ))
                 .collect(Collectors.toList());
+
+        return new PagedCoupletextDto(
+                page.getTotalElements(),
+                page.getTotalPages(),
+                coupleDtos,
+                page.getNumber()
+
+        );
     }
+
 
     @Override
     public List<CoupletextDto> getCouplesByTaskPaged(Long taskId, Pageable pageable) {

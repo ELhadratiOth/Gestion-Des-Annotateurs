@@ -3,23 +3,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
-import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
-import com.gestiondesannotateurs.entities.Dataset;
-import com.gestiondesannotateurs.entities.TaskToDo;
-import com.gestiondesannotateurs.repositories.AnnotationRepo;
-import com.gestiondesannotateurs.repositories.DatasetRepo;
-import com.gestiondesannotateurs.repositories.TaskToDoRepo;
+import com.gestiondesannotateurs.dtos.*;
+import com.gestiondesannotateurs.entities.*;
+import com.gestiondesannotateurs.interfaces.TaskService;
+import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gestiondesannotateurs.dtos.AnnotatorDto;
-import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
-import com.gestiondesannotateurs.repositories.AnnotatorRepo;
 import com.gestiondesannotateurs.shared.Exceptions.AnnotatorNotFoundException;
 
 @Service
@@ -40,6 +34,8 @@ public class AnnotatorServiceImpl implements AnnotatorService {
     @Autowired
     private AnnotationRepo annotationRepo;
 
+    @Autowired
+    private CoupleOfTextRepo coupleOfTextRepo;
 
     @Override
     public Annotator getAnnotatorById(Long annotatorId) {
@@ -207,6 +203,120 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         result.put("min", statsList.get(0));
         result.put("median", statsList.get(statsList.size() / 2));
         result.put("max", statsList.get(statsList.size() - 1));
+
+        return result;
+    }
+
+    @Override
+    public List<AnnotatorTask> getListOfTasksForAnnotator(Long annotatorId) {
+        Annotator annotator = annotatorRepository.findById(annotatorId)
+                .orElseThrow(() -> new CustomResponseException(404, "Annotator not found"));
+
+        List<AnnotatorTask> tasks = new ArrayList<>();
+
+        List <TaskToDo> tasksAssociated =taskToDoRepo.findByAnnotatorId(annotator.getId());
+
+        for (TaskToDo taskToDo : tasksAssociated) {
+
+            // Récupérer les coupletexts affectés à cet annotateur pour ce dataset
+            List<Coupletext> coupletextsAssigned = taskToDo.getCoupletexts();
+            Long totalAssigned = (long) coupletextsAssigned.size()+5;
+
+            if (totalAssigned == 0) continue; // Aucun exemple affecté
+
+            // Calcul de l'avancement
+            double progress = taskToDo.getStatus();
+            String status = progress == 100.0 ? "Completed" :
+                    progress == 0.0 ? "Not Start" : "In Progress";
+            String action = status.equals("Completed") ? "Review" :
+                    status.equals("Not Start") ? "Start" : "Continue";
+
+            AnnotatorTask task = new AnnotatorTask(
+                    taskToDo.getId(),
+                    taskToDo.getDataset().getName(),
+                    taskToDo.getDataset().getDescription(),
+                    taskToDo.getDataset().getLabel().getName(),
+                    progress,
+                    status,
+                    action,
+                    totalAssigned
+            );
+
+            tasks.add(task);
+        }
+
+        return tasks;
+    }
+
+    @Override
+    public List<CoupleOfTextWithAnnotation> getCoupletextsWithAnnotationByAnnotator(Long annotatorId, Long taskId) {
+        Annotator annotator = annotatorRepository.findById(annotatorId)
+                .orElseThrow(() -> new CustomResponseException(404, "Annotator not found"));
+
+        TaskToDo task = taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "Task not found"));
+
+        if (!task.getAnnotator().getId().equals(annotatorId)) {
+            throw new CustomResponseException(403, "This task does not belong to the annotator");
+        }
+
+        Dataset dataset = task.getDataset();
+        List<Coupletext> allCouples = task.getCoupletexts();
+
+        // Catégorisation
+        List<Coupletext> sharedWithAdmin = new ArrayList<>();
+        List<Coupletext> duplicated = new ArrayList<>();
+        List<Coupletext> normals = new ArrayList<>();
+
+        for (Coupletext ct : allCouples) {
+            if (Boolean.TRUE.equals(ct.getIsAnnotatedByAdmin())) {
+                sharedWithAdmin.add(ct);
+            } else if (Boolean.TRUE.equals(ct.getIsDuplicated())) {
+                duplicated.add(ct);
+            } else {
+                normals.add(ct);
+            }
+        }
+
+        // Sélection des 5 duplicated et 10 normal
+        List<Coupletext> first5Duplicated = duplicated.stream().limit(5).toList();
+        List<Coupletext> first10Normals = normals.stream().limit(10).toList();
+        List<Coupletext> remainingNormals = normals.stream().skip(10).toList();
+
+        // Construction de la liste dans l'ordre voulu
+        List<Coupletext> orderedList = new ArrayList<>();
+        orderedList.addAll(sharedWithAdmin);                  // Étape 1
+        orderedList.addAll(first5Duplicated);                 // Étape 2
+        orderedList.addAll(first10Normals);                   // Étape 3
+        orderedList.addAll(first5Duplicated);                 // Étape 4 (réinsertion)
+        orderedList.addAll(remainingNormals);                 // Étape 5
+
+        // Construction des objets à retourner
+        List<CoupleOfTextWithAnnotation> result = new ArrayList<>();
+
+        for (Coupletext ct : orderedList) {
+            List <AnnotationClass> annotations = annotationRepo.findByAnnotatorIdAndCoupletextId(annotator.getId(), ct.getId());
+            AnnotationClass annotation = null;
+            if (!annotations.isEmpty()) {
+                // on prend la dernière annotation (la plus récente)
+                annotation = annotations.stream()
+                        .sorted(Comparator.comparing(AnnotationClass::getCreatedAt).reversed())
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            result.add(new CoupleOfTextWithAnnotation(
+                    ct.getId(),
+                    annotation != null ? annotation.getId() : null,
+                    ct.getTextA(),
+                    ct.getTextB(),
+                    annotation != null ? annotation.getChoosenLabel() : null,
+                    dataset.getName(),
+                    dataset.getLabel().getName(),
+                    dataset.getLabel().getClasses()
+            ));
+
+        }
 
         return result;
     }

@@ -27,5 +27,7 @@ public interface CoupleOfTextRepo extends JpaRepository<Coupletext,Long> {
 
 
     List<Coupletext> getAllByDatasetAndIsAnnotatedByAdmin(Dataset dataset , boolean isAnnotatedByAdmin);
+    List<Coupletext> findByDatasetAndTasks_Id(Dataset dataset, Long TaskId);
+
 
 }

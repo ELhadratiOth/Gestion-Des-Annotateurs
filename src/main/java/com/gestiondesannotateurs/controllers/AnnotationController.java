@@ -30,8 +30,7 @@ public class AnnotationController {
     private OthmanRepo othmanRepo;
 
 
-    @PostMapping("/{datasetId}/{taskId}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
+    @PostMapping("/tasks/{taskId}")
     public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, @PathVariable Long  taskId) {
         Annotator annotator=annotatorService.getAnnotatorByTask(taskId);
         Long annotatorId=annotator.getId();

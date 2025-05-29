@@ -68,6 +68,7 @@ public class AnnotationServiceImpl implements AnnotationService {
         annotation.setCoupletext(coupletext);
         annotation.setChoosenLabel(dto.getLabel());
         annotationRepo.save(annotation);
+        //After save the annotation update the related datatasets and task progress
         Long datasetId = annotation.getCoupletext().getDataset().getId();
         datasetService.updateDatasetAdvancement(datasetId);
         return dto;

@@ -1,8 +1,6 @@
 package com.gestiondesannotateurs.interfaces;
 
-import com.gestiondesannotateurs.dtos.AnnotatorDto;
-import com.gestiondesannotateurs.dtos.AnnotatorTaskDto;
-import com.gestiondesannotateurs.dtos.AnnotatorWithTaskId;
+import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.Annotator;
 import org.springframework.stereotype.Service;
 
@@ -26,4 +24,6 @@ public interface AnnotatorService {
     Annotator getAnnotatorByTask(Long taskId);
     List<Annotator> getMatchingAnnotators (String name);
     Map<String, Map.Entry<Long, Long>> getAnnotatorsStats();
+    List<AnnotatorTask> getListOfTasksForAnnotator(Long annotatorId);
+    List<CoupleOfTextWithAnnotation> getCoupletextsWithAnnotationByAnnotator(Long annotatorId, Long taskId);
  }

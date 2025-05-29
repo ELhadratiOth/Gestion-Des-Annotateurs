@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.controllers;
 
 import com.gestiondesannotateurs.dtos.CoupletextDto;
+import com.gestiondesannotateurs.dtos.PagedCoupletextDto;
 import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
@@ -22,8 +23,8 @@ public class CoupleOfTextController {
     private CoupleOfTextService coupleOfTextService;
 
     @GetMapping("/{datasetId}")
-    @PreAuthorize("hasAnyRole('SUPER-ADMIN', 'ADMIN')")
-    public ResponseEntity<GlobalResponse<List<CoupletextDto>>> getDatasetCoupleTexts(
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<?> getDatasetCoupleTexts(
             @PathVariable Long datasetId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -31,7 +32,7 @@ public class CoupleOfTextController {
         Dataset dataset = new Dataset();
         dataset.setId(datasetId);
 
-        List<CoupletextDto> results = coupleOfTextService.findDtoByDataset(
+        PagedCoupletextDto results = coupleOfTextService.findDtoByDataset(
                 dataset,
                 PageRequest.of(page, size)
         );
