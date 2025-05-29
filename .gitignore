@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /bin/
+data/h2_db_gestion.*

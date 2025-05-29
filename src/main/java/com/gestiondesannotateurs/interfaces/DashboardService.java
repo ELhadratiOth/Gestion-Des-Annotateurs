@@ -1,4 +1,6 @@
 package com.gestiondesannotateurs.interfaces;
 
-public class DashboardService {
+import com.gestiondesannotateurs.dtos.AnnotatorStatsDto;
+public interface DashboardService {
+    AnnotatorStatsDto getAnnotatorStats(Long annotatorId);
 }
