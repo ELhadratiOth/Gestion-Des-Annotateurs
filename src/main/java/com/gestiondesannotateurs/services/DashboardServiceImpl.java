@@ -31,7 +31,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<TaskToDo> tasks = taskToDoRepo.findByAnnotatorId(annotatorId);
         long tasksCompleted = tasks.stream()
-                .filter(task -> task.getStatus() != null && task.getStatus() >= 100)
+                .filter(task -> task.getStatus() != null && task.getStatus() >= 100.0)
                 .count();
 
         return new AnnotatorStatsDto(

@@ -11,14 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/dashboard")  // Changé de "/api/annotators" à "/api/dashboard"
+@RequestMapping("/api/dashboard")
 public class DashboardController {
 
     @Autowired
     private DashboardService dashboardService;
 
-    @GetMapping("/annotator-stats")  // Changé de "/stats" à "/annotator-stats"
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
+    @GetMapping("/annotator-stats")
+    @PreAuthorize("hasAnyRole('ANNOTATOR')")
     public ResponseEntity<GlobalResponse<AnnotatorStatsDto>> getAnnotatorStats(
             @RequestHeader("X-Annotator-ID") Long annotatorId) {
         try {

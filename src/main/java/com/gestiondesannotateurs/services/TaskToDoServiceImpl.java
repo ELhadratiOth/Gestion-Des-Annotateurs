@@ -322,17 +322,17 @@ public class TaskToDoServiceImpl implements TaskService {
 
 
     public double getProgressForTask(Long taskId, Long annotatorId) {
-        long total = coupleOfTextRepo.countByTasks_Id(taskId)+5;
+        long total = coupleOfTextRepo.countByTasks_Id(taskId);
         long done = annotationService.countAnnotationsForAnnotator(annotatorId);
         Optional<TaskToDo> taskToDo= taskToDoRepo.findById(taskId);
-        Double progress = (double) done / total;
+        Double progress = (double) done / total  * 100;
 
         if(taskToDo.isEmpty()){
             throw new CustomResponseException(404,"Task not found with this id");
         }
         taskToDo.get().setStatus(progress);
         taskToDoRepo.save(taskToDo.get());
-        return progress*100;
+        return progress ;
     }
 
     public void deleteTaskByDatasetId(Long datasetId) {
