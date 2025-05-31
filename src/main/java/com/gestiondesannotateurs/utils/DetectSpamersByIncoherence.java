@@ -47,7 +47,8 @@ public class DetectSpamersByIncoherence {
 
         List<AnnotationClass> annotations = annotationRepo.findByAnnotatorId(annotatorId);
         if (annotations.isEmpty()) {
-            logger.info("Annotator {} has no annotations. Skipping.", annotatorId);
+//            logger.info("Annotator {} has no annotations. Skipping.", annotatorId);
+            return 0.0;
         }
 
         // Regroup by coupletext ID and collect all labels
@@ -62,13 +63,13 @@ public class DetectSpamersByIncoherence {
                 .filter(labelSet -> labelSet.size() > 1) // incohérence = plusieurs labels différents
                 .count();
 
-        boolean isSpammer = inconsistentCount > INCOHERENCE_THRESHOLD;
-        annotator.setSpammer(isSpammer);
-        annotatorRepo.save(annotator);
-
-        logger.info("Annotator {} → Inconsistent pairs: {}, Spammer: {}",
-                annotatorId, inconsistentCount, isSpammer);
-        return inconsistentCount;
+//        boolean isSpammer = inconsistentCount > INCOHERENCE_THRESHOLD;
+//        annotator.setSpammer(isSpammer);
+//        annotatorRepo.save(annotator);
+//
+//        logger.info("Annotator {} → Inconsistent pairs: {}, Spammer: {}",
+//                annotatorId, inconsistentCount, isSpammer);
+        return (double) inconsistentCount /5;
     }
 
     // ✅ Execution automatique toutes les heures

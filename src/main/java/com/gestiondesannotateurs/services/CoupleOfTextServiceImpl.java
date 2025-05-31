@@ -54,7 +54,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
 
         Page<Coupletext> page = coupleOfTextRepo.findByDataset(dataset, pageable);
         if (page.isEmpty()) {
-            throw new CustomResponseException(404, "Aucun couple de texte trouvé");
+            throw new CustomResponseException(404, "No couple found");
         }
 
         List<CoupletextDto> coupleDtos = page.getContent()
@@ -63,7 +63,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                         c.getId(),
                         c.getTextA(),
                         c.getTextB(),
-                        c.getTrueLabel() != null ? c.getTrueLabel().toUpperCase() : "NOT_YET"
+                        c.getTrueLabel().toUpperCase()
                 ))
                 .collect(Collectors.toList());
 

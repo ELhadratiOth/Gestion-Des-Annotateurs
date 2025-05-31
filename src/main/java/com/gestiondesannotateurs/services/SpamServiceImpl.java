@@ -34,38 +34,42 @@ public class SpamServiceImpl implements SpamService {
 
         final Double TRESHOLD = 0.3;
 
-        Dataset dataset = datasetRepo.findById(datasetId).get();
-        if(dataset==null){
-            throw new CustomResponseException(404,"No dataset found with this id");
-        }
-        //1 admin check
-        Map<Long, Double>  annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
+        Dataset dataset = datasetRepo.findById(datasetId)
+                .orElseThrow(() -> new CustomResponseException(404, "No dataset found with this id"));
 
-        Map<Long, Double> inconsistencies=detectSpamersByIncoherence.detectAllSpammersByInconsistency(datasetId);
-        Map<Long, Double> averagedScores = new HashMap<>();
+        // 1. Scores : admin (high score  = good)
+        Map<Long, Double> annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
+        // 2. Scores : incoherences (high score  = bad)
+        Map<Long, Double> inconsistencies = detectSpamersByIncoherence.detectAllSpammersByInconsistency(datasetId);
 
-        // compute the averge spamscore
+        Map<Long, Double> finalSpammerScores = new HashMap<>();
+
         for (Map.Entry<Long, Double> entry : annotatorsAnnotation.entrySet()) {
             Long annotatorId = entry.getKey();
-            Double score1 = entry.getValue();
-            Double score2 = inconsistencies.get(annotatorId);
+            Double adminAgreementScore = entry.getValue();
+            Double incoherenceScore = inconsistencies.get(annotatorId);
 
-            if (score2 != null) { // S'assurer que l'annotateur existe aussi dans la 2e map
-                double average = (score1 + score2) / 2.0;
-                if (average<=TRESHOLD) {
-                    Annotator curAnn= annotatorRepo.findById(annotatorId).get();
+            if (incoherenceScore != null) {
+                // Normalisation
+                double adminDisagreeScore = 1.0 - adminAgreementScore;
+
+                // ponderation ti give more importance to desagrement with admin :
+                double finalScore = 0.7 * adminDisagreeScore + 0.3 * incoherenceScore;
+
+                if (finalScore >= TRESHOLD) {
+                    Annotator curAnn = annotatorRepo.findById(annotatorId)
+                            .orElseThrow(() -> new CustomResponseException(404, "Annotator not found"));
                     curAnn.setSpammer(true);
                     annotatorRepo.save(curAnn);
                 }
-                averagedScores.put(annotatorId, average);
+
+                finalSpammerScores.put(annotatorId, finalScore);
             } else {
-                throw new CustomResponseException(404, "Error one annotator not in the two map");
-
+                throw new CustomResponseException(404, "Annotator not found in both maps: " + annotatorId);
             }
-
         }
-        return inconsistencies;
 
+        return finalSpammerScores;
     }
 
 
