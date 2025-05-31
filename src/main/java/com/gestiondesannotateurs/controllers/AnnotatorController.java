@@ -1,10 +1,9 @@
 package com.gestiondesannotateurs.controllers;
-<<<<<<< Updated upstream
+
 import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
-=======
->>>>>>> Stashed changes
+
 
 import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
@@ -137,6 +136,4 @@ public class AnnotatorController {
         );
     }
 
-=======
->>>>>>> Stashed changes
 }

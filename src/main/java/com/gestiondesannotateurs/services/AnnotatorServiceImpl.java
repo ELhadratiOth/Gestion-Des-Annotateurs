@@ -220,13 +220,13 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
             // Récupérer les coupletexts affectés à cet annotateur pour ce dataset
             List<Coupletext> coupletextsAssigned = taskToDo.getCoupletexts();
-            Long totalAssigned = (long) coupletextsAssigned.size()+5;
+            Long totalAssigned = (long) coupletextsAssigned.size();
 
             if (totalAssigned == 0) continue; // Aucun exemple affecté
 
             // Calcul de l'avancement
             double progress = taskToDo.getStatus();
-            String status = progress == 100.0 ? "Completed" :
+            String status = progress >= 100.0 ? "Completed" :
                     progress == 0.0 ? "Not Start" : "In Progress";
             String action = status.equals("Completed") ? "Review" :
                     status.equals("Not Start") ? "Start" : "Continue";
