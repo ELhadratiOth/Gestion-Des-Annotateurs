@@ -7,12 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -46,9 +48,16 @@ public class GlobalErrorHandler {
                 .body(GlobalResponse.error(List.of("Database constraint violation")));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<GlobalResponse<?>> handleGenericException(Exception ex) {
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<GlobalResponse<?>> handleGenericException(Exception ex) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(GlobalResponse.error(List.of("Internal server error")));
+//    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<GlobalResponse<?>> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(GlobalResponse.error(List.of("Internal server error")));
+                .body(GlobalResponse.error(List.of("Access denied: You are not authorized to access this resource")));
     }
 }

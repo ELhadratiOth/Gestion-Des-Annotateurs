@@ -8,21 +8,28 @@ import com.gestiondesannotateurs.interfaces.DatasetService;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
+import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
+import com.gestiondesannotateurs.shared.GlobalResponse;
 import com.gestiondesannotateurs.utils.ProcessFile;
+import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,13 +67,12 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
-
-
-
+    @Autowired
+    private AdminServiceImpl adminServiceImpl;
 
 
     @Override
-    public Dataset createDataset(DatasetUploadRequest dataset) throws CsvValidationException, IOException {
+    public Dataset createDataset(DatasetUploadRequest dataset) {
         try {
             Label label = labelRepo.findById(dataset.labelId())
                     .orElseThrow(() -> new IllegalArgumentException("Label with ID " + dataset.labelId() + " not found"));
@@ -77,7 +83,6 @@ public class DatasetServiceImpl implements DatasetService {
             datasetEntity.setDescription(dataset.description());
             datasetEntity.setLabel(label);
             datasetEntity.setSizeMB(dataset.sizeMB());
-            datasetEntity.setFilePath(uploadDir+dataset.file().getOriginalFilename());
             Dataset createdDataset = datasetRepo.save(datasetEntity);
 //System.out.println("bugg2");
             Long rowNumber = coupleOfTextService.createRows(createdDataset, dataset.file());
@@ -280,40 +285,57 @@ public class DatasetServiceImpl implements DatasetService {
                 .orElseThrow(() -> new CustomResponseException(404, "Dataset with ID " + idDataset + " not found"));
     }
 
-    public ResponseEntity<Resource> downloadFileByDatasetId(Long datasetId) throws IOException {
+    public ResponseEntity downloadFileByDatasetId(Long datasetId)  {
+
+        // Verify dataset exists
         Dataset dataset = findDatasetById(datasetId);
 
-        if (dataset.getFilePath() == null || dataset.getFilePath().isEmpty()) {
-            throw new CustomResponseException(404, "No file associated with this dataset");
+        // verif  the  advancement
+
+        if(dataset.getAdvancement() != 100.0){
+            return   new ResponseEntity<>("Dataset with ID " + datasetId + " not finished yet" , HttpStatus.NOT_FOUND);
         }
 
-        Path filePath = Paths.get(dataset.getFilePath());
-        if (!Files.exists(filePath)) {
-            throw new CustomResponseException(404, "File not found on server");
+        // Fetch admin-annotated CoupleOfTextWithAnnotation data
+        List<Coupletext> coupleOfTextWithAnnotations = coupletextRepo.findAllByDataset(dataset) ;
+        if (coupleOfTextWithAnnotations.isEmpty()) {
+            throw new CustomResponseException(404, "no couple pf  text existing " + datasetId);
+        }
+        // Generate CSV
+        StringWriter stringWriter = new StringWriter();
+        try (CSVWriter csvWriter = new CSVWriter(stringWriter)) {
+            String[] header = { "textA", "textB", "annotation"};
+            csvWriter.writeNext(header);
+
+            for (Coupletext record : coupleOfTextWithAnnotations) {
+                String[] row = {
+
+                        record.getTextA() != null ? record.getTextA() : "",
+                        record.getTextB() != null ? record.getTextB(): "",
+                        record.getTrueLabel() != null ? record.getTrueLabel() : ""
+                };
+                csvWriter.writeNext(row);
+            }
+        } catch (Exception e) {
+            throw new CustomResponseException(500, "Failed to generate CSV: " + e.getMessage());
         }
 
-        Resource resource = new FileSystemResource(filePath.toFile());
-
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        String originalFileName = new File(dataset.getFilePath()).getName();
-        String downloadFileName = "dataset_" + datasetId + ProcessFile.getFileExtension(originalFileName);
-
+        // Prepare file content
+        byte[] csvBytes = stringWriter.toString().getBytes();
+        ByteArrayResource resource = new ByteArrayResource(csvBytes);
+        // Set HTTP headers
         HttpHeaders headers = new HttpHeaders();
+        String downloadFileName = "dataset_" + datasetId + ".csv";
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + downloadFileName);
         headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
         headers.add(HttpHeaders.PRAGMA, "no-cache");
         headers.add(HttpHeaders.EXPIRES, "0");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(resource.getFile().length())
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(resource);
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
+
+
 
     @Override
     public LastFinishedDataset lastCompletedTask() {

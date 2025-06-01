@@ -44,5 +44,4 @@ public class TaskToDo {
     private Double status = 0.0;
 
 
-
 }

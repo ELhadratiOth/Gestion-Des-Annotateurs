@@ -99,11 +99,12 @@ public class DatasetController {
         return GlobalSuccessHandler.success("List of all the datasets that are not 100% annotated " , datasets);
     }
 
-    @GetMapping("/download/{datasetId}")
-//    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN','ROLE_ANNOTATOR')")
-    public ResponseEntity<?> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
+    @GetMapping(value = "/download/{datasetId}", produces = "text/csv")
+    // @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_ANNOTATOR')")
+    public ResponseEntity<Resource> downloadFileByDatasetId(@PathVariable Long datasetId) throws IOException {
         return datasetService.downloadFileByDatasetId(datasetId);
     }
+
 
     @GetMapping("/last-dataset-completed")
     public ResponseEntity<?> getLastDatasetCompleted() {

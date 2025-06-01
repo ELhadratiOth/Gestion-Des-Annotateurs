@@ -28,7 +28,6 @@ public class Dataset {
     private String description;
     private Long size;
     private Double advancement = 0.0;
-    private String filePath;
     private Double sizeMB;
     private Boolean isAssigned = false;
     private LocalDateTime affectationDate;

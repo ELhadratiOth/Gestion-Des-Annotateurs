@@ -11,6 +11,7 @@ import com.gestiondesannotateurs.interfaces.AnnotatorService;
 import com.gestiondesannotateurs.interfaces.TaskService;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.shared.GlobalResponse;
+import com.gestiondesannotateurs.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private SecurityUtils securityUtils;
 
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
@@ -44,7 +48,8 @@ public class TaskController {
         return GlobalSuccessHandler.created("Successfully created task");
     }
 
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN','ANNOTATOR')")
+//    @PreAuthorize("hasAnyRole('ANNOTATOR')" , )
+    @PreAuthorize("@securityUtils.isOwner(#annotatorId)")
     @GetMapping("/annotator/{annotatorId}")
     public ResponseEntity<GlobalResponse<List<TaskToDo>>> getTasksByAnnotatorId(@PathVariable Long annotatorId) {
 		List<TaskToDo> tasks = taskService.getTasksByAnnotatorId(annotatorId);
