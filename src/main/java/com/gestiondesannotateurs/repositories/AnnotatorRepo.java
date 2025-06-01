@@ -20,4 +20,6 @@ public interface AnnotatorRepo extends JpaRepository<Annotator,Long> {
     Optional<Annotator> getAnnotatorByTask(@Param("taskId") Long taskId);
 
     Annotator findTopByOrderByIdDesc();
+    List<Annotator> findByIsSpammerTrue();  // Ajoutez cette ligne
+
 }

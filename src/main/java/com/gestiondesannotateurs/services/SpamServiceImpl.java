@@ -6,13 +6,13 @@ import com.gestiondesannotateurs.interfaces.SpamService;
 import com.gestiondesannotateurs.repositories.AnnotatorRepo;
 import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
-import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import com.gestiondesannotateurs.utils.AdminDetectSpammers;
 import com.gestiondesannotateurs.utils.DetectSpamersByIncoherence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -75,6 +75,11 @@ public class SpamServiceImpl implements SpamService {
         }
 
         return finalSpammerScores;
+    }
+
+    @Override
+    public List<Annotator> getAllSpammers() {
+        return annotatorRepo.findByIsSpammerTrue();
     }
 
 

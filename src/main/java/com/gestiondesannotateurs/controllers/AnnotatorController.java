@@ -1,9 +1,7 @@
 package com.gestiondesannotateurs.controllers;
-
 import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.entities.Annotator;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
-
 
 import com.gestiondesannotateurs.dtos.*;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
