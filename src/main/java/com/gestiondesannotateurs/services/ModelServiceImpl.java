@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Service
 public class ModelServiceImpl implements ModelService {
@@ -40,6 +41,7 @@ public class ModelServiceImpl implements ModelService {
             };
 
             body.add("file", fileAsResource);
+            body.add("project_name", request.getProjectName());
             body.add("task", request.getTask());
             body.add("learning_rate", String.valueOf(request.getLearningRate()));
             body.add("epochs", String.valueOf(request.getEpochs()));
@@ -63,7 +65,7 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    public String launchTraining(int datasetId) {
+    public String launchTraining(int datasetId,String projectName) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -71,7 +73,7 @@ public class ModelServiceImpl implements ModelService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    "http://localhost:8000/model/train/" + datasetId,
+                    "http://localhost:8000/model/train/" +projectName+"/"+ datasetId,
                     entity,
                     String.class
             );
@@ -86,15 +88,17 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    public String launchTesting(int datasetId) {
+    public String launchTesting(int datasetId,String projectName) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON)); // Ajouter cette ligne
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
+
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    "http://localhost:8000/model/test/" + datasetId,
+                    "http://localhost:8000/model/test/" +projectName+"/"+ datasetId,
                     entity,
                     String.class
             );
@@ -108,10 +112,10 @@ public class ModelServiceImpl implements ModelService {
             return "❌ Failed to start testing. Please see the history and try again later.";
         }
     }
-    public String getTrainingHistory(int datasetId) {
+    public String getTrainingHistory(int datasetId,String projectName) {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
-                    "http://localhost:8000/model/train/history/" + datasetId,
+                    "http://localhost:8000/model/train/history/" + projectName+"/"+datasetId,
                     String.class
             );
 
@@ -125,10 +129,10 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    public String getTestingHistory(int datasetId) {
+    public String getTestingHistory(int datasetId,String projectName) {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
-                    "http://localhost:8000/model/test/history/" + datasetId,
+                    "http://localhost:8000/model/test/history/" + projectName+"/"+ datasetId,
                     String.class
             );
 
@@ -139,6 +143,23 @@ public class ModelServiceImpl implements ModelService {
             }
         } catch (Exception e) {
             return "❌ Failed to get testing history. Please check the dataset ID.";
+        }
+    }
+
+    public String getHistory() {
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(
+                    "http://localhost:8000/model/projects/history",
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return "📈 Training History:\n" + response.getBody();
+            } else {
+                return "⚠️ Unable to retrieve  history.";
+            }
+        } catch (Exception e) {
+            return "❌ Failed to get  history. Please check the dataset ID.";
         }
     }
 
