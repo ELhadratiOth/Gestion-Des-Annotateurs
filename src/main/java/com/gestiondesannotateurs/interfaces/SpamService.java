@@ -1,10 +1,14 @@
 package com.gestiondesannotateurs.interfaces;
 
-import com.gestiondesannotateurs.entities.Annotator;
+import com.gestiondesannotateurs.dtos.blackListDto;
+
 import java.util.List;
 import java.util.Map;
 
 public interface SpamService {
     Map<Long, Double> detectSpammer(Long datasetId);
-    List<Annotator> getAllSpammers();
+
+    blackListDto getSpammerById(Long annotatorId);
+
+    List<blackListDto> getAllSpammers();
 }
