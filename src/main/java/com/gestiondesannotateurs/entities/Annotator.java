@@ -12,8 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.scheduling.config.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,8 @@ import java.util.List;
 @DiscriminatorValue("ANNOTATOR")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Annotator extends Person {
-
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "annotator", fetch = FetchType.LAZY)
@@ -34,4 +36,7 @@ public class Annotator extends Person {
 
     private boolean isSpammer = false;
 
+    @CreationTimestamp
+    @Column(name = "creation_date", updatable = false)
+    private LocalDateTime creationDate;
 }

@@ -27,4 +27,5 @@ public interface TaskToDoRepo extends JpaRepository<TaskToDo,Long> {
 
     @Query("SELECT COUNT(t) FROM TaskToDo t WHERE t.status <> 100.0  ")
     Long  CountNonFinishedTasks();
-}
+
+    List<TaskToDo> findByAnnotatorIdAndStatusLessThan(Long annotatorId, double status);}

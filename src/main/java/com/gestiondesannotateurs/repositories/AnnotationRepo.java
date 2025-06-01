@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,4 +69,6 @@ public interface AnnotationRepo extends JpaRepository<AnnotationClass, Long> {
     long countAnnotationsByAnnotatorSince(@Param("annotatorId") Long annotatorId,
                                           @Param("startTime") LocalDateTime startTime);
 
+
+    Collection<Object> findTop5ByAnnotatorIdOrderByCreatedAtDesc(Long annotatorId);
 }
