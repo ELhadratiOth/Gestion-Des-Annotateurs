@@ -202,4 +202,45 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
                 categoryLabels.get(mostFrequentCategory),
                 kappa).replace(",", ".");
     }
+
+
+    public double calculatePE(List<List<Integer>> annotations, int numberOfCategories) {
+        List<Integer> annotator1 = annotations.stream()
+                .map(item -> item.get(0))
+                .collect(Collectors.toList());
+        List<Integer> annotator2 = annotations.stream()
+                .map(item -> item.get(1))
+                .collect(Collectors.toList());
+
+        int n = annotator1.size();
+        int[][] matrix = new int[numberOfCategories][numberOfCategories];
+
+        for (int i = 0; i < n; i++) {
+            matrix[annotator1.get(i)][annotator2.get(i)]++;
+        }
+
+//        double po = 0.0;
+//        for (int i = 0; i < numberOfCategories; i++) {
+//            po += matrix[i][i];
+//        }
+//        po /= n;
+
+        double pe = 0.0;
+        int[] rowSums = new int[numberOfCategories];
+        int[] colSums = new int[numberOfCategories];
+
+        for (int i = 0; i < numberOfCategories; i++) {
+            for (int j = 0; j < numberOfCategories; j++) {
+                rowSums[i] += matrix[i][j];
+                colSums[j] += matrix[i][j];
+            }
+        }
+
+        for (int i = 0; i < numberOfCategories; i++) {
+            pe += (rowSums[i] * colSums[i]);
+        }
+        pe /= (n * n);
+
+        return pe;
+    }
 }

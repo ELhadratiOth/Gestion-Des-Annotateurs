@@ -156,19 +156,21 @@ public class AnnotationServiceImpl implements AnnotationService {
     public AnnotationDto findByAnnotationIdSharedWithAdmin(Long annotatorId, Long coupleOfTextId) {
         // Check if annotator exists
         Optional<Annotator> annotator = annotatorRepo.findById(annotatorId);
-//        System.out.println(annotator.get().getId() + "!!!! " + annotatorId);
+        System.out.println(annotator.get().getId() + "!!!! " + annotatorId);
         if (annotator.isEmpty()) {
             throw new CustomResponseException(404,"Annotator with ID " + annotatorId + " does not exist");
         }
 
         // Query annotation by annotatorId
-        Optional<AnnotationClass> annotationClasse = annotationRepo.findByAnnotatorIdSharedWithAdmin(annotatorId,coupleOfTextId );
-//        System.out.println(annotationClasse.get().getCoupletext().getId() + "!!!! " + coupleOfTextId);
+        List<AnnotationClass> annotationClasse = annotationRepo.findByAnnotatorIdSharedWithAdmin(annotatorId,coupleOfTextId );
         if (annotationClasse.isEmpty()) {
-            throw new CustomResponseException(404,"Annotator " + annotator.get().getFirstName() + " has not yet annotate the couple of text shared with admin");
+//            throw new CustomResponseException(404,"Annotator " + annotator.get().getFirstName() + " has not yet annotate the couple of text shared with admin");
+            return null;
         }
+        System.out.println(annotationClasse.get(0).getCoupletext().getId() + " ===== " + coupleOfTextId);
 
-        AnnotationClass annotation = annotationClasse.get();
+
+        AnnotationClass annotation = annotationClasse.get(0);
         AnnotationDto annotationDto = new AnnotationDto();
         annotationDto.setAnnotatorId(annotatorId);
         annotationDto.setLabel(annotation.getChoosenLabel());

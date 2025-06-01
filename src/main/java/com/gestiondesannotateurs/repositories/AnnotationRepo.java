@@ -25,7 +25,7 @@ public interface AnnotationRepo extends JpaRepository<AnnotationClass, Long> {
     Optional<AnnotationClass> findAdminsAnnotationAnnotationByCoupleOfText(@Param("coupleofTextId") Long coupleofTextId);
 
     @Query("SELECT a FROM AnnotationClass a WHERE a.annotator.id = :annotatorId AND a.coupletext.id = :coupleOfTextId")
-    Optional<AnnotationClass> findByAnnotatorIdSharedWithAdmin(Long annotatorId , Long coupleOfTextId);
+    List<AnnotationClass> findByAnnotatorIdSharedWithAdmin(Long annotatorId , Long coupleOfTextId);
 
 
     @Query("SELECT COUNT(a) FROM AnnotationClass a WHERE a.createdAt >= :startTime")

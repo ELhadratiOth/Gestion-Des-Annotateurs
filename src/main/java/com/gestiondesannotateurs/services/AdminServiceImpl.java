@@ -188,6 +188,7 @@ public class AdminServiceImpl implements AdminService {
 
             }
     }
+        System.out.println(coupleOfTextWithAnnotations.size());
         return coupleOfTextWithAnnotations ;
     }
 
