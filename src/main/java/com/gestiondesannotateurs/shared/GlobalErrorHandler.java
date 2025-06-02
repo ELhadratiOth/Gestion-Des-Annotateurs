@@ -54,10 +54,12 @@ public class GlobalErrorHandler {
 //                .body(GlobalResponse.error(List.of("Internal server error")));
 //    }
 
+
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<GlobalResponse<?>> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(GlobalResponse.error(List.of("Access denied: You are not authorized to access this resource")));
     }
+
+
 }

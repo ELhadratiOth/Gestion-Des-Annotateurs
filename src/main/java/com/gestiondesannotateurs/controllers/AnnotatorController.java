@@ -80,14 +80,14 @@ public class AnnotatorController {
         Annotator annotator = annotatorService.getAnnotatorById(id);
         return GlobalSuccessHandler.success("Annotator deactivated", annotator);
     }
-
-    @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
-    public ResponseEntity<GlobalResponse<Annotator>> activateAnnotator(@PathVariable Long id) {
-        annotatorService.activateAnnotator(id);
-        Annotator annotator = annotatorService.getAnnotatorById(id);
-        return GlobalSuccessHandler.success("Annotator activated", annotator);
-    }
+//
+//    @PatchMapping("/{id}/activate")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+//    public ResponseEntity<GlobalResponse<Annotator>> activateAnnotator(@PathVariable Long id) {
+//        annotatorService.activateAnnotator(id);
+//        Annotator annotator = annotatorService.getAnnotatorById(id);
+//        return GlobalSuccessHandler.success("Annotator activated", annotator);
+//    }
 
     @GetMapping("/spammers/{datasetId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")

@@ -5,10 +5,14 @@ import com.gestiondesannotateurs.dtos.AnnotationDtoAdmin;
 import com.gestiondesannotateurs.dtos.AnnotationRequest;
 import com.gestiondesannotateurs.dtos.AnnotationResponse;
 import com.gestiondesannotateurs.entities.Annotator;
+import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.Othman;
 import com.gestiondesannotateurs.interfaces.AnnotationService;
 import com.gestiondesannotateurs.interfaces.AnnotatorService;
+import com.gestiondesannotateurs.interfaces.CoupleOfTextService;
+import com.gestiondesannotateurs.repositories.DatasetRepo;
 import com.gestiondesannotateurs.repositories.OthmanRepo;
+import com.gestiondesannotateurs.repositories.TaskToDoRepo;
 import com.gestiondesannotateurs.shared.Exceptions.GlobalSuccessHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +32,13 @@ public class AnnotationController {
     private AnnotatorService annotatorService;
     @Autowired
     private OthmanRepo othmanRepo;
-
+    @Autowired
+    private TaskToDoRepo taskRepo;
+    @Autowired
+    private CoupleOfTextService coupleOfTextService;
 
     @PostMapping("/tasks/{taskId}")
+    @PreAuthorize("@securityUtils.isOwnerOfAtask(#taskId)")
     public ResponseEntity<?> annotate(@Valid @RequestBody AnnotationRequest request, @PathVariable Long  taskId) {
         Annotator annotator=annotatorService.getAnnotatorByTask(taskId);
         Long annotatorId=annotator.getId();
@@ -39,6 +47,8 @@ public class AnnotationController {
         ann.setAnnotatorId(annotatorId);
         ann.setLabel(request.getLabel());
         annotationService.saveAnnotation(ann);
+        Dataset dataset=taskRepo.findById(taskId).get().getDataset();
+        coupleOfTextService.computeTrueLabelsForDataset(dataset);
         return GlobalSuccessHandler.success("Annotation Created Sucessfully",ann);
     }
 

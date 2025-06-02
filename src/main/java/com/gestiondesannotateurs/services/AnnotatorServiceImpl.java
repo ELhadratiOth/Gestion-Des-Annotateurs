@@ -111,6 +111,10 @@ public class AnnotatorServiceImpl implements AnnotatorService {
         if (!annotatorRepository.existsById(annotatorId)) {
             throw new AnnotatorNotFoundException(annotatorId);
         }
+        boolean hasUncompletedTasks = taskToDoRepo.hasNonTerminatedTasks(annotatorId);
+        if(hasUncompletedTasks){
+            throw new CustomResponseException(400,"You cannot deactivate it , he already attached to a task ");
+        }
         annotatorRepository.deleteById(annotatorId);
     }
     
@@ -127,6 +131,10 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 				.orElseThrow(() -> new RuntimeException("Annotateur introuvable"));
 
         if(annotator.isActive()){
+            boolean hasUncompletedTasks = taskToDoRepo.hasNonTerminatedTasks(id);
+            if(hasUncompletedTasks){
+                throw new CustomResponseException(400,"You cannot deactivate it , he already attached to a task ");
+            }
             annotator.setActive(false);
         }
         else{

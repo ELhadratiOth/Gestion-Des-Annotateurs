@@ -50,8 +50,6 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
     @Override
     public PagedCoupletextDto findDtoByDataset(Dataset dataset, Pageable pageable) {
         // Calcul des vrais labels
-        computeTrueLabelsForDataset(dataset);
-
         Page<Coupletext> page = coupleOfTextRepo.findByDataset(dataset, pageable);
         if (page.isEmpty()) {
             throw new CustomResponseException(404, "No couple found");
@@ -63,7 +61,7 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                         c.getId(),
                         c.getTextA(),
                         c.getTextB(),
-                        c.getTrueLabel().toUpperCase()
+                        c.getTrueLabel()
                 ))
                 .collect(Collectors.toList());
 
@@ -156,8 +154,10 @@ public class CoupleOfTextServiceImpl implements CoupleOfTextService {
                     numericLabels,
                     categoryLabels
             );
+            System.out.println("the most label"+mostFrequentLabel);
 
             couple.setTrueLabel(mostFrequentLabel != null ? mostFrequentLabel.toUpperCase() : "UNDEFINED");
+
             coupleOfTextRepo.save(couple);
         }
     }

@@ -4,6 +4,7 @@ import com.gestiondesannotateurs.entities.Dataset;
 import com.gestiondesannotateurs.entities.TaskToDo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,4 +28,9 @@ public interface TaskToDoRepo extends JpaRepository<TaskToDo,Long> {
 
     @Query("SELECT COUNT(t) FROM TaskToDo t WHERE t.status <> 100.0  ")
     Long  CountNonFinishedTasks();
+
+
+    @Query("SELECT EXISTS ( SELECT 1 FROM TaskToDo t WHERE t.annotator.id = :annotatorId AND t.status <> 100.0)")
+        boolean hasNonTerminatedTasks(@Param("annotatorId") Long annotatorId);
+
 }

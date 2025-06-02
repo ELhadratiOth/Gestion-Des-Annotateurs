@@ -1,6 +1,7 @@
 package com.gestiondesannotateurs.services;
 
 import com.gestiondesannotateurs.interfaces.KappaEvaluationService;
+import com.gestiondesannotateurs.shared.Exceptions.CustomResponseException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,19 +23,19 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
 
     private void validateInput(List<List<Integer>> annotations, int numberOfCategories) {
         if (annotations == null || annotations.isEmpty() || annotations.get(0).size() < 2) {
-            throw new IllegalArgumentException("At least 2 annotators and 1 item required");
+            throw new CustomResponseException( 400, "At least 2 annotators and 1 item required");
         }
         if (numberOfCategories < 2) {
-            throw new IllegalArgumentException("At least 2 categories required");
+            throw new CustomResponseException(400,"At least 2 categories required");
         }
 
         annotations.forEach(item -> {
             if (item.size() != annotations.get(0).size()) {
-                throw new IllegalArgumentException("All items must have same number of annotations");
+                throw new CustomResponseException(400,"All items must have same number of annotations");
             }
             item.forEach(label -> {
                 if (label >= numberOfCategories || label < 0) {
-                    throw new IllegalArgumentException(
+                    throw new CustomResponseException(400,
                             String.format("Label %d is invalid for numberOfCategories=%d",
                                     label, numberOfCategories));
                 }
@@ -127,20 +128,22 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
     private void validateSingleItemAnnotations(List<Integer> annotations,
                                                Map<Integer, String> categoryLabels) {
         if (annotations == null || categoryLabels == null) {
-            throw new IllegalArgumentException("Annotations and labels cannot be null");
+                        throw new CustomResponseException(400,"Annotations and labels cannot be null");
+
         }
 
         if (annotations.size() < 2) {
-            throw new IllegalArgumentException("At least 2 annotations are required");
+            throw new CustomResponseException(400,"At least 2 annotations are required");
+
         }
 
         if (categoryLabels.size() < 2) {
-            throw new IllegalArgumentException("At least 2 categories must be defined");
+            throw new CustomResponseException(400,"At least 2 categories must be defined");
         }
 
         for (Integer annotation : annotations) {
             if (annotation == null || !categoryLabels.containsKey(annotation)) {
-                throw new IllegalArgumentException(
+                throw new CustomResponseException( 400,
                         "Invalid annotation: " + annotation +
                                 ". Valid categories: " + categoryLabels.keySet()
                 );
@@ -195,12 +198,10 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
         int mostFrequentCategory = frequencyMap.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
-                .orElseThrow(() -> new IllegalStateException("Could not determine category"));
+                .orElseThrow(() -> new CustomResponseException( 400 ,"Could not determine category"));
 
-        // Formatage avec point comme séparateur décimal
-        return String.format("%s (Kappa: %.2f)",
-                categoryLabels.get(mostFrequentCategory),
-                kappa).replace(",", ".");
+        return  categoryLabels.get(mostFrequentCategory);
+
     }
 
 

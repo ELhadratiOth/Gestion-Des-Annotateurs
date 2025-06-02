@@ -26,7 +26,8 @@ public class PersonController {
     private PersonService personService;
 
     @GetMapping("/{personId}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','ANNOTATOR')")
+    @PreAuthorize("@securityUtils.isOwner(#personId)")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','ANNOTATOR')")
     public ResponseEntity<GlobalResponse<Person>> getPersonDetails(@PathVariable Long personId) {
         return GlobalSuccessHandler.success(personService.getPerson(personId));
 
@@ -35,7 +36,8 @@ public class PersonController {
 
 
     @PutMapping("/{personId}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','ANNOTATOR')")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','ANNOTATOR')")
+    @PreAuthorize("@securityUtils.isOwner(#personId)")
     public ResponseEntity<GlobalResponse<Person>> updatePersonDetails(
             @PathVariable Long personId,
             @Valid @RequestBody PersonnDto personnDto) {

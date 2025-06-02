@@ -85,6 +85,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping("/last-task-completed")
     public ResponseEntity<?> getLastTaskCompleted() {
+        System.out.println("hhhhhhhhhh");
         LastFinishedTask task = taskService.lastCompletedTask();
         return GlobalSuccessHandler.success("Last task completed successfully", task);
     }

@@ -195,20 +195,28 @@ public class TaskToDoServiceImpl implements TaskService {
 
     @Override
     public LastFinishedTask lastCompletedTask() {
+        Long nbrOfPendingTasks = taskToDoRepo.CountNonFinishedTasks() ;
+        System.out.println("task:"+ nbrOfPendingTasks);
+
         Optional<TaskToDo> taskGet = taskToDoRepo.findLastFinishedTask();
         if(taskGet.isEmpty()){
-            return null;
+            return new LastFinishedTask(
+                    null,
+                    null,
+                    null,
+                    nbrOfPendingTasks
+
+            );
         }
         TaskToDo task = taskGet.get();
         System.out.println("task:"+ task.getAnnotator().getUsername());
-        Long nbrOfPendingTasks = taskToDoRepo.CountNonFinishedTasks() ;
-        System.out.println("task:"+ nbrOfPendingTasks);
+
 
         return new LastFinishedTask(
                         task.getDataset().getName(),
                         task.getAnnotator().getFirstName() + " " + task.getAnnotator().getLastName(),
                         task.getFinishedAt().toString(),
-                nbrOfPendingTasks
+                         nbrOfPendingTasks
 
         );
 
@@ -341,6 +349,8 @@ public class TaskToDoServiceImpl implements TaskService {
             throw new CustomResponseException(404,"Dataset doesnt exist with this id");
         }
         taskToDoRepo.deleteAllByDatasetId(datasetId);
+        dataset.get().setIsAssigned(false);
+        datasetRepo.save(dataset.get());
         List<Coupletext> coupletexts = coupleOfTextRepo.findByDataset(dataset.get());
         for (Coupletext coupletext : coupletexts) {
             coupletext.setTasks(null);
