@@ -59,11 +59,11 @@ public class AnnotationController {
         return GlobalSuccessHandler.success("Annotations found ",res);
     }
 
-    @GetMapping("/{datasetId}/{annotatorId}")
-    public ResponseEntity<?> getAnnotationForAnnotator(@PathVariable Long  annotatorId){
-        List<AnnotationResponse> res=annotationService.findByAnnotatorId(annotatorId);
-        return GlobalSuccessHandler.success("Annotations found",res);
-    }
+//    @GetMapping("/{datasetId}/{annotatorId}")
+//    public ResponseEntity<?> getAnnotationForAnnotator(@PathVariable Long  annotatorId){
+//        List<AnnotationResponse> res=annotationService.findByAnnotatorId(annotatorId);
+//        return GlobalSuccessHandler.success("Annotations found",res);
+//    }
 
     @GetMapping("/count-last-24h")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
