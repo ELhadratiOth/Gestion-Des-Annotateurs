@@ -220,11 +220,6 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
             matrix[annotator1.get(i)][annotator2.get(i)]++;
         }
 
-//        double po = 0.0;
-//        for (int i = 0; i < numberOfCategories; i++) {
-//            po += matrix[i][i];
-//        }
-//        po /= n;
 
         double pe = 0.0;
         int[] rowSums = new int[numberOfCategories];
