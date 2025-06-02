@@ -33,11 +33,14 @@ public class ModelController {
     ) {
         try {
             TrainRequest request = new TrainRequest(file, task, projectName,learningRate, epochs, batchSize, user);
+            System.out.println("mofo hello");
             String response = modelService.uploadFullDataset(request);
             return GlobalSuccessHandler.success("Training params and dataset upload succesfully",response);
         } catch (IOException e) {
             return GlobalSuccessHandler.success("Internal server error during dataset upload");
         }
+
+
     }
 
     @PostMapping("/train/{projectName}/{datasetId}")

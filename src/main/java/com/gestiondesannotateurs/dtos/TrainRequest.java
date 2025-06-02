@@ -16,7 +16,7 @@ public class TrainRequest {
     private String task;
     @NotBlank(message = "Please specify your project name")
     private String projectName;
-    private double learningRate;
+    private double learningRate ;
     private int epochs;
     private int batchSize;
     private String user;
