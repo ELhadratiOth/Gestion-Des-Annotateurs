@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -43,6 +45,9 @@ public class AnnotationServiceImpl implements AnnotationService {
     private OthmanRepo othmanRepo;
     @Autowired
     private PersonRepo personRepo;
+
+    @Autowired
+    private TaskToDoRepo taskToDoRepo;
 
     @Override
     public AnnotationDto saveAnnotation(AnnotationDto dto) {
@@ -77,28 +82,46 @@ public class AnnotationServiceImpl implements AnnotationService {
     }
 
     @Override
-    public List <AnnotationResponse> findByAnnotatorId(Long annotatorId){
-        Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
-                .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId)));
+    public List<AnnotationResponse> findByAnnotatorIdAndTaskId(Long annotatorId, Long taskId) {
+        // 1. Vérifier que l’annotateur existe
+        Annotator annotator = annotatorRepo.findById(annotatorId)
+                .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId));
 
-        List <AnnotationClass> annotationClasses = annotationRepo.findByAnnotatorId(annotatorId);
-        if(annotationClasses.isEmpty()){
-            new CustomResponseException(404,"Annotator don't have annotations");
+        // 2. Vérifier que la tâche existe
+        TaskToDo task = taskToDoRepo.findById(taskId)
+                .orElseThrow(() -> new CustomResponseException(404, "Task not found"));
+
+        // 3. Récupérer les IDs des Coupletexts associés à la tâche
+        Set<Long> coupleIdsInTask = task.getCoupletexts().stream()
+                .map(Coupletext::getId)
+                .collect(Collectors.toSet());
+
+        // 4. Récupérer toutes les annotations faites par cet annotateur
+        List<AnnotationClass> annotationClasses = annotationRepo.findByAnnotatorId(annotatorId);
+
+        if (annotationClasses.isEmpty()) {
+            throw new CustomResponseException(404, "Annotator doesn't have annotations");
         }
-        List <AnnotationResponse> result=new ArrayList<>();
-        for(AnnotationClass annotationClasse:annotationClasses){
-            AnnotationResponse currAnnot= new AnnotationResponse();
-            currAnnot.setAnnotatorId(annotatorId);
-            currAnnot.setLabel(annotationClasse.getChoosenLabel());
-            currAnnot.setCoupletextId(annotationClasse.getCoupletext().getId());
-            currAnnot.setTextA(annotationClasse.getCoupletext().getTextA());
-            currAnnot.setTextB(annotationClasse.getCoupletext().getTextB());
-            result.add(currAnnot);
+
+        // 5. Filtrer uniquement les annotations dont le coupletext est lié à cette tâche
+        List<AnnotationResponse> result = new ArrayList<>();
+        for (AnnotationClass annotation : annotationClasses) {
+            Coupletext couple = annotation.getCoupletext();
+            if (couple != null && coupleIdsInTask.contains(couple.getId())) {
+                AnnotationResponse currAnnot = new AnnotationResponse();
+                currAnnot.setAnnotatorId(annotatorId);
+                currAnnot.setLabel(annotation.getChoosenLabel());
+                currAnnot.setCoupletextId(couple.getId());
+                currAnnot.setTextA(couple.getTextA());
+                currAnnot.setTextB(couple.getTextB());
+                result.add(currAnnot);
+            }
         }
 
         return result;
-
     }
+
+
     @Override
     public List<AnnotationResponse> findByAnnotatorIdAndCoupletextId(Long annotatorId,Long coupleOfTextId){
         Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
@@ -146,10 +169,10 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     }
     @Override
-    public long countAnnotationsForAnnotator(Long annotatorId) {
+    public long countAnnotationsForAnnotatorByTask(Long annotatorId,Long taskId) {
         Optional<Annotator> annotator= Optional.ofNullable(annotatorRepo.findById(annotatorId)
                 .orElseThrow(() -> new AnnotatorNotFoundException(annotatorId)));
-        return findByAnnotatorId(annotatorId).toArray().length;
+        return findByAnnotatorIdAndTaskId(annotatorId,taskId).toArray().length;
     }
 
     @Override

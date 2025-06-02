@@ -25,45 +25,56 @@ public class ModelController {
     public ResponseEntity<?> uploadFullDataset(
             @RequestParam("file") MultipartFile file,
             @RequestParam("task") String task,
+            @RequestParam("project_name") String projectName,
             @RequestParam("learning_rate") double learningRate,
             @RequestParam("epochs") int epochs,
             @RequestParam("batch_size") int batchSize,
             @RequestParam("user") String user
-//            @RequestParam("dataset_id") int datasetId
     ) {
         try {
-            TrainRequest request = new TrainRequest(file, task, learningRate, epochs, batchSize, user);
+            TrainRequest request = new TrainRequest(file, task, projectName,learningRate, epochs, batchSize, user);
+            System.out.println("mofo hello");
             String response = modelService.uploadFullDataset(request);
             return GlobalSuccessHandler.success("Training params and dataset upload succesfully",response);
         } catch (IOException e) {
             return GlobalSuccessHandler.success("Internal server error during dataset upload");
         }
+
+
     }
 
-    @PostMapping("/train/{datasetId}")
-    public ResponseEntity<?> launchTraining(@PathVariable int datasetId) {
-        String response = modelService.launchTraining(datasetId);
+    @PostMapping("/train/{projectName}/{datasetId}")
+    public ResponseEntity<?> launchTraining(@PathVariable int datasetId,@PathVariable String projectName) {
+        String response = modelService.launchTraining(datasetId,projectName);
         return GlobalSuccessHandler.success(response);
     }
 
-    @PostMapping("/test/{datasetId}")
-    public ResponseEntity<?> launchTesting(@PathVariable int datasetId) {
-        String response = modelService.launchTesting(datasetId);
+    @PostMapping("/test/{projectName}/{datasetId}")
+    public ResponseEntity<?> launchTesting(@PathVariable int datasetId,@PathVariable String projectName) {
+        String response = modelService.launchTesting(datasetId,projectName);
         return GlobalSuccessHandler.success(response);
     }
 
-    @GetMapping("/train/history/{datasetId}")
-    public ResponseEntity<?> getTrainingHistory(@PathVariable int datasetId) {
-        String response = modelService.getTrainingHistory(datasetId);
+    @GetMapping("/train/history/{projectName}/{datasetId}")
+    public ResponseEntity<?> getTrainingHistory(@PathVariable int datasetId,@PathVariable String projectName) {
+        String response = modelService.getTrainingHistory(datasetId,projectName);
         return GlobalSuccessHandler.success(response);
     }
 
-    @GetMapping("/test/history/{datasetId}")
-    public ResponseEntity<?> getTestingHistory(@PathVariable int datasetId) {
+    @GetMapping("/test/history/{projectName}/{datasetId}")
+    public ResponseEntity<?> getTestingHistory(@PathVariable int datasetId,@PathVariable String projectName) {
         this.datasetId = datasetId;
-        String response = modelService.getTestingHistory(datasetId);
+        String response = modelService.getTestingHistory(datasetId,projectName);
         return GlobalSuccessHandler.success(response);
     }
+
+    @GetMapping("/projects/history")
+    public ResponseEntity<?> getHistory() {
+        this.datasetId = datasetId;
+        String response = modelService.getHistory();
+        return GlobalSuccessHandler.success(response);
+    }
+
 
     @PostMapping("/logs/receive")
     public void receiveLog(@RequestBody String log) {
