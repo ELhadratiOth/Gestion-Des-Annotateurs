@@ -13,9 +13,9 @@ public class AnnotatorStatsDto {
     private String lastName;
     private int tasksCompleted;
     private int totalTasks;
-    private double accuracyRate;
+    private long daysSinceCreation;
     private int dailyStreak;
-    private int todayGoal;
+    private String todayGoal;
     private boolean isSpammer;
     private List<String> recentAnnotations;
     private List<String> activeProjects;
