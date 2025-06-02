@@ -86,7 +86,6 @@ public class SpamServiceImpl implements SpamService {
 
     @Override
     public List<blackListDto> getAllSpammers() {
-        LocalDateTime now = LocalDateTime.now();
         return annotatorRepo.findByIsSpammerTrue().stream()
                 .map(annotator -> new blackListDto(
                         annotator.getId(),
@@ -95,7 +94,7 @@ public class SpamServiceImpl implements SpamService {
                         annotator.getEmail(),
                         annotator.isActive(),
                         annotator.isSpammer(),
-                        now
+                        annotator.getCreationDate()
                 ))
                 .collect(Collectors.toList());
     }
