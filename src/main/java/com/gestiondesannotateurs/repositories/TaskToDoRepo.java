@@ -33,7 +33,7 @@ public interface TaskToDoRepo extends JpaRepository<TaskToDo,Long> {
     @Query("SELECT EXISTS ( SELECT 1 FROM TaskToDo t WHERE t.annotator.id = :annotatorId AND t.status <> 100.0)")
     boolean hasNonTerminatedTasks(@Param("annotatorId") Long annotatorId);
 
-    List<TaskToDo> findByAnnotatorIdAndStatusLessThan(Long annotatorId, double status);}
+    List<TaskToDo> findByAnnotatorIdAndStatusLessThan(Long annotatorId, double status);
 
 
 

@@ -5,6 +5,7 @@ import com.gestiondesannotateurs.entities.*;
 import com.gestiondesannotateurs.interfaces.DashboardService;
 import com.gestiondesannotateurs.repositories.*;
 import com.gestiondesannotateurs.shared.Exceptions.*;
+import com.gestiondesannotateurs.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,7 +112,7 @@ public class DashboardServiceImpl implements DashboardService {
     private List<String> getRecentAnnotations(Long annotatorId) {
         return annotationRepo.findTop5RecentAnnotationsByAnnotator(annotatorId)
                 .stream()
-                .map(a -> a.getCoupletext().getId() + " - " + a.getChoosenLabel())
+                .map(a -> StringUtils.safeSubstring(a.getCoupletext().getTextA() ,10) +"/"+StringUtils.safeSubstring(a.getCoupletext().getTextB(),10)  + " - " + a.getChoosenLabel())
                 .collect(Collectors.toList());
     }
 

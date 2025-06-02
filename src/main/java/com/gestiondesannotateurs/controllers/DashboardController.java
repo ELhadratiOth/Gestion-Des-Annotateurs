@@ -17,10 +17,10 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    @GetMapping("/annotator-stats")
+    @GetMapping("/annotator-stats/{annotatorId}")
     @PreAuthorize("hasAnyRole('ANNOTATOR')")
     public ResponseEntity<GlobalResponse<AnnotatorStatsDto>> getAnnotatorStats(
-            @RequestHeader("X-Annotator-ID") Long annotatorId) {
+            @PathVariable Long annotatorId) {
         try {
             AnnotatorStatsDto stats = dashboardService.getAnnotatorStats(annotatorId);
             return ResponseEntity.ok(GlobalResponse.success(stats));
