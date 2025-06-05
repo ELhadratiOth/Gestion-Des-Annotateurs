@@ -228,12 +228,35 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
             // Récupérer les coupletexts affectés à cet annotateur pour ce dataset
             List<Coupletext> coupletextsAssigned = taskToDo.getCoupletexts();
-            Long totalAssigned = (long) coupletextsAssigned.size();
+            int duplicatedCount = 0;
+            for (Coupletext couple : coupletextsAssigned) {
+                if (couple.getIsDuplicated()) {
+                    duplicatedCount++;
+                }
+            }
+
+            Set<Long> coupletextIdsInTask = coupletextsAssigned.stream()
+                    .map(Coupletext::getId)
+                    .collect(Collectors.toSet());
+
+            List <AnnotationClass>  userAnnotations=annotationRepo.findByAnnotatorId(annotatorId);
+
+            int annotationsBelongsToTask=0;
+            for(AnnotationClass annotationClass : userAnnotations){
+                Coupletext couple=annotationClass.getCoupletext();
+                if (couple != null && coupletextIdsInTask.contains(couple.getId())) {
+                    annotationsBelongsToTask++;
+                }
+            }
+
+
+            Long totalAssigned = (long) coupletextsAssigned.size() + duplicatedCount;
 
             if (totalAssigned == 0) continue; // Aucun exemple affecté
 
             // Calcul de l'avancement
-            double progress = taskToDo.getStatus();
+            double progress1 = (double) annotationsBelongsToTask /totalAssigned ;
+            double progress=progress1*100;
             String status = progress >= 100.0 ? "Completed" :
                     progress == 0.0 ? "Not Start" : "In Progress";
             String action = status.equals("Completed") ? "Review" :
@@ -255,6 +278,8 @@ public class AnnotatorServiceImpl implements AnnotatorService {
 
         return tasks;
     }
+
+
 
     @Override
     public List<CoupleOfTextWithAnnotation> getCoupletextsWithAnnotationByAnnotator(Long annotatorId, Long taskId) {

@@ -32,36 +32,36 @@ public class SpamServiceImpl implements SpamService {
         Dataset dataset = datasetRepo.findById(datasetId)
                 .orElseThrow(() -> new CustomResponseException(404, "No dataset found with this id"));
 
-        Map<Long, Double> annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
+//        Map<Long, Double> annotatorsAnnotation = adminDetectSpammers.detect(datasetId);
         Map<Long, Double> inconsistencies = detectSpamersByIncoherence.detectAllSpammersByInconsistency(datasetId);
         Map<Long, Double> finalSpammerScores = new HashMap<>();
 
-        for (Map.Entry<Long, Double> entry : annotatorsAnnotation.entrySet()) {
-            Long annotatorId = entry.getKey();
-            Double adminAgreementScore = entry.getValue();
-            Double incoherenceScore = inconsistencies.get(annotatorId);
-
-            if (incoherenceScore != null) {
-                if(adminAgreementScore != 0){
-                    adminAgreementScore = 1.0 - adminAgreementScore;
-                }
-
-                double finalScore = 0.7 * adminAgreementScore + 0.3 * incoherenceScore;
-
-                if (finalScore >= TRESHOLD) {
-                    Annotator curAnn = annotatorRepo.findById(annotatorId)
-                            .orElseThrow(() -> new CustomResponseException(404, "Annotator not found"));
-                    curAnn.setSpammer(true);
-                    annotatorRepo.save(curAnn);
-                }
-
-                finalScore = Math.round(finalScore * 100.0) / 100.0;
-                finalSpammerScores.put(annotatorId, finalScore);
-            } else {
-                throw new CustomResponseException(404, "Annotator not found in both maps: " + annotatorId);
-            }
-        }
-        return finalSpammerScores;
+//        for (Map.Entry<Long, Double> entry : annotatorsAnnotation.entrySet()) {
+//            Long annotatorId = entry.getKey();
+//            Double adminAgreementScore = entry.getValue();
+//            Double incoherenceScore = inconsistencies.get(annotatorId);
+//
+//            if (incoherenceScore != null) {
+//                if(adminAgreementScore != 0){
+//                    adminAgreementScore = 1.0 - adminAgreementScore;
+//                }
+//
+//                double finalScore = 0.7 * adminAgreementScore + 0.3 * incoherenceScore;
+//
+//                if (finalScore >= TRESHOLD) {
+//                    Annotator curAnn = annotatorRepo.findById(annotatorId)
+//                            .orElseThrow(() -> new CustomResponseException(404, "Annotator not found"));
+//                    curAnn.setSpammer(true);
+//                    annotatorRepo.save(curAnn);
+//                }
+//
+//                finalScore = Math.round(finalScore * 100.0) / 100.0;
+//                finalSpammerScores.put(annotatorId, finalScore);
+//            } else {
+//                throw new CustomResponseException(404, "Annotator not found in both maps: " + annotatorId);
+//            }
+//        }
+        return inconsistencies;
     }
     @Override
     public blackListDto getSpammerById(Long annotatorId) {

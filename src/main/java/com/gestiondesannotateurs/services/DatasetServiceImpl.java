@@ -206,16 +206,13 @@ public class DatasetServiceImpl implements DatasetService {
         if(dataset.isEmpty()){
             throw new CustomResponseException(404,"Dataset doesnt exist with this id");
         }
-        List<TaskToDo> datasetTasks = taskToDoRepo.findByDataset(dataset.get());
-        double totalAdavement =0;
-        for(TaskToDo taskToDo : datasetTasks){
-            Long annotatorAssociatedToTask=taskToDo.getAnnotator().getId();
-            totalAdavement+=taskService.getProgressForTask(taskToDo.getId(),annotatorAssociatedToTask);
 
-        }
+         Long totalAdavement = coupletextRepo.countByDatasetIdAndTrueLabelNot(datasetId,"NOT_YET");
+        double ratio = (double) totalAdavement / dataset.get().getSize();
+        System.out.println("My ratio :");
 
-        return totalAdavement/datasetTasks.toArray().length;
-
+        System.out.println(ratio);
+        return Math.round(ratio * 100.0 * 100.0) / 100.0;
     }
     @Override
     public void updateDatasetAdvancement(Long datasetId) {

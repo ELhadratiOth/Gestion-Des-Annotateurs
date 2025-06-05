@@ -80,15 +80,18 @@ public class AdminDetectSpammers {
 
         System.out.println(allAnnotations);
         int  counter = 0 ;
-        for(Long annotatorNotfinished : isFinishAnnotation ){
-
-            int pos = annotatorIds.indexOf(annotatorNotfinished);
-            for( List<String> annotsList : allAnnotations){
-                annotsList.remove(pos - counter);
-            }
-            counter--;
-            System.out.println("the  position is  descreased by :" + counter);
-        }
+//        for(Long annotatorNotfinished : isFinishAnnotation ){
+//
+//            int pos = annotatorIds.indexOf(annotatorNotfinished);
+//            System.out.println("ladmin id : "+ annotatorNotfinished);
+//            System.out.println("ladmin index : "+ pos);
+//
+//            for( List<String> annotsList : allAnnotations){
+//                annotsList.remove(pos - counter);
+//            }
+//            counter--;
+//            System.out.println("the  position is  descreased by :" + counter);
+//        }
 
 
         var allAnnotationsT=  AnnotationTransformer.transformAnnotations(allAnnotations);

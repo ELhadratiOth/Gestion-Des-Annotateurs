@@ -28,12 +28,12 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<GlobalResponse<PersonDTO>> signup(
+    public ResponseEntity<GlobalResponse<String>> signup(
             @RequestBody SignupRequest signupRequest
     ) {
         System.out.println("username :" + signupRequest);
         PersonDTO person = authService.signup(signupRequest);
-        return GlobalSuccessHandler.success( "Signed Up",person);  //Signed Up
+        return GlobalSuccessHandler.simpleMessage( "Signed Up");  //Signed Up
 
     }
 

@@ -133,12 +133,12 @@ public class KappaEvaluationServiceImpl implements KappaEvaluationService {
         }
 
         if (annotations.size() < 2) {
-            throw new CustomResponseException(400,"At least 2 annotations are required");
+             new CustomResponseException(400,"At least 2 annotations are required");
 
         }
 
         if (categoryLabels.size() < 2) {
-            throw new CustomResponseException(400,"At least 2 categories must be defined.");
+             new CustomResponseException(400,"At least 2 categories must be defined.");
         }
 
         for (Integer annotation : annotations) {

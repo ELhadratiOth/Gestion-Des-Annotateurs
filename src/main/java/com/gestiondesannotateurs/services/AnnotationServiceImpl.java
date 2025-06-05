@@ -100,7 +100,7 @@ public class AnnotationServiceImpl implements AnnotationService {
         List<AnnotationClass> annotationClasses = annotationRepo.findByAnnotatorId(annotatorId);
 
         if (annotationClasses.isEmpty()) {
-            throw new CustomResponseException(404, "Annotator doesn't have annotations");
+             new CustomResponseException(404, "Annotator doesn't have annotations");
         }
 
         // 5. Filtrer uniquement les annotations dont le coupletext est lié à cette tâche
@@ -239,8 +239,7 @@ public class AnnotationServiceImpl implements AnnotationService {
             annotation.setChoosenLabel(dto.getLabel());
             annotation.setIsAdmin(dto.getIsAdmin());
             annotationRepo.save(annotation);
-            Long datasetId = annotation.getCoupletext().getDataset().getId();
-            datasetService.updateDatasetAdvancement(datasetId);
+//            Long datasetId = annotation.getCoupletext().getDataset().getId();
         }
 
 

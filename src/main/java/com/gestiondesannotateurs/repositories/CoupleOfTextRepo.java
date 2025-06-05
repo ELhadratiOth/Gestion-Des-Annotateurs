@@ -31,4 +31,6 @@ public interface CoupleOfTextRepo extends JpaRepository<Coupletext,Long> {
     List<Coupletext> findAllByDataset(Dataset dataset);
 
 
+    Long countByDatasetIdAndTrueLabelNot(Long datasetId, String label);
+
 }
